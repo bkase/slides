@@ -468,6 +468,12 @@ print(u.lazy.map{ x in x + 1 }["xxx"])
 
 !!!
 
+## Burritos
+
+The unary tortilla wraps our collection into a burrito
+
+!!!
+
 ## Collection Variants
 
 The index type determines expected runtime for count (RandomAccessIndex has O(1), ForwardDirection or Bidirection has O(N))
@@ -476,18 +482,176 @@ If you implement the RandomAccessCollection protocol, for example you need to pr
 
 !!!
 
-## What can we do to collections
+#### What can we do to collections
 
 Everything we can do with sequences
 
 !!!
 
-## What can we do to collections
+#### What can we do to collections
 
 And index
 And stuff that depends on finiteness
 
 !!!
 
-## LAZY
+## Lazy stuff
 
+!!!
+
+## LazySequence
+
+`protocol LazySequenceProtocol: Sequence`
+
+!!!
+
+## LazyCollection
+
+`protocol LazyCollectionProtocol: LazySequence, Collection`
+
+!!!
+
+## Lazy
+
+Recall: When you inherit from protocols you can override return types of methods
+
+!!!
+
+## Map
+
+```swift
+// eager sequence/collection
+[1,2,3].map{ $0 + 1 } // [2, 3, 4]
+```
+
+!!!
+
+## Map
+
+```swift
+// lazy sequence
+EagerEvens().lazy.map{ $0 + 1 } // LazyMapSequence<Int, Int>
+// nothing is computed yet!
+```
+
+!!!
+
+## Map
+
+```swift
+// lazy collection
+[1,2,3].lazy.map{ $0 + 1 } // LazyMapRandomAccessCollection<Int, Int>
+// nothing is computed yet!
+```
+
+!!!
+
+## LazyMapSequence?
+
+A sequence wrapped sequence, just like Unary
+
+!!!
+
+## LazyMapSequence
+
+```swift
+struct LazyMapSequence<S: Sequence>: LazySequenceProtocol {
+  func makeIterator() -> LazyMapIterator</*...*/> { /*...*/ }
+}
+```
+
+!!!
+
+## LazyMapSequence
+
+```swift
+struct LazyMapIterator<Base: Iterator, Element>: IteratorProtocol, Sequence {
+  var _base: Base
+  let _transform: (Base.Element) -> Element
+
+  mutating func next() -> Element? {
+    return _base.next().map(_transform)
+  }
+}
+```
+
+!!!
+
+## Burritos
+
+Each operator applied on the lazy sequences and collections wrap the sequence
+
+!!!
+
+## Burritos
+
+```swift
+let a = [1,2,3].lazy.map{ $0 + 1 }.filter{ $0 != 3 }
+// a: LazyFilterBidirectionalCollection<LazyMapRandomAccessCollection<Array<Int>, Int>>
+```
+
+!!!
+
+## Burritos
+
+When the burritos have too many tortillas, types become a nightmare
+
+!!!
+
+## Tortilla Inference
+
+If you can get by doing _all_ the transformations locally, the types will just be inferred.
+
+!!!
+
+## Tortilla Inference
+
+```swift
+func foo() -> Int {
+  let a = [1,2,3].lazy.map{ $0 + 1 }.filter{ $0 != 3 }
+  return a[2]
+}
+```
+
+!!!
+
+## Tortilla Erasure
+
+Type erasure in Swift help you deal with the nightmare if you need to return it.
+
+!!!
+
+## Tortilla Erasure
+
+```swift
+// a: LazyFilterBidirectionalCollection<LazyMapRandomAccessCollection<Array<Int>, Int>>
+let b = AnyCollection(a)
+// b: AnyCollection<Int>
+```
+
+!!!
+
+## Tortilla Erasure
+
+Type erasure works by moving the generic craziness to the constructor. Keep in mind you and your compiler _lose_ information about your type.
+
+!!!
+
+## Tortilla Erasure
+
+```swift
+// one of the inits for AnySequence
+init<S : Sequence where S.Iterator.Element == Element, S.SubSequence : Sequence, S.SubSequence.Iterator.Element == Element, S.SubSequence.SubSequence == S.SubSequence>(_ base: S)
+```
+
+!!!
+
+## Tortilla Erasure
+
+Swift provides `AnySequence` and one `AnyCollection` variant per Index variant.
+
+`AnyBidirectionalCollection`, `AnyRandomAccessCollection`, etc.
+
+!!!
+
+## New tortillas
