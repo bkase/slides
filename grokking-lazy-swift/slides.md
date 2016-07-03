@@ -1,15 +1,12 @@
-## Grokking Lazy Sequences and Collections
-Brandon Kase
+<!-- .slide: data-background="#2aa198" -->
+<!-- .slide: data-state="terminal" -->
+# Grokking Lazy Sequences and Collections
+
+By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
 !!!
 
-Warning: I find this stuff _super_ fascinating, but probably most will find it boring.
-
-I've found that putting in a billion slides, and going super fast through them makes things more interesting.
-
-!!!
-
-Shout-out to the IBM Swift sandbox
+#### IBM Swift Sandbox
 
 Seriously. Really awesome.
 
@@ -28,9 +25,11 @@ Super easy to experiment with Swift3isms
 
 !!!
 
-Prepare yourself
+## Ready?
 
-for information <!-- .element: class="fragment" data-fragment-index="1" -->
+Prepare yourself <!-- .element: class="fragment" data-fragment-index="1" -->
+
+for information <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
@@ -64,6 +63,14 @@ Why would you _want_ lazy?
 
 1. A bunch of UIViews
 2. Tapping on one of many views does a lot of computation <!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
+## Lazy
+
+> "infinite" cards
+
+(insert shorts screenshot here)
 
 !!!
 
@@ -126,8 +133,8 @@ What's an iterator?
 
 ```swift
 protocol IteratorProtocol {
-  associatedtype Element
-  mutating func next() -> Element?
+ associatedtype Element
+ mutating func next() -> Element?
 }
 ```
 
@@ -137,8 +144,10 @@ Note: move forward by calling next() until nil
 
 ## IteratorProtocol
 
-* just a `mutating next()`
-* one-pass only (how can you go backwards?)
+* Just a `mutating next()`
+* One-pass only
+
+Note: How can you go back?
 
 !!!
 
@@ -210,9 +219,11 @@ extension Sequence where
 
 ### Aside: Protocol default implementations
 
+Note: I said I would assume you knew this, but; this is nuanced and cool
+
 !!!
 
-## Default Implementations
+### Default Implementations
 
 ```swift
 protocol A { }
@@ -225,7 +236,7 @@ extension A {
 
 !!!
 
-## Default Implementations
+### Default Implementations
 
 ```swift
 struct ConcA: A {}
@@ -234,7 +245,7 @@ print(ConcA().hi()) // "A"
 
 !!!
 
-## Default Implementations
+### Default Implementations
 
 ```swift
 protocol B { }
@@ -247,33 +258,56 @@ extension B {
 
 !!!
 
-## Default Implementations
+### Default Implementations
 
 ```swift
 struct Mystery: A, B { }
+print(Mystery().hi()) // compile error!
+```
+
+!!!
+
+### Default Implementations
+
+```swift
+// now B subsumes A
+protocol B: A { }
+extension B {
+  func hi() -> Int {
+    return 0
+  }
+}
+```
+
+!!!
+
+### Default Implementations
+
+```swift
+struct Mystery: B { }
 print(Mystery().hi()) // 0
 // NOT a compile error!
 ```
 
 !!!
 
-## Default Implementations
+### Default Implementations
 
 You can override not just the behavior of extension methods
 
-But also the return type!!!
+But also the return type!!
 
 !!!
 
-WHAT
+## WHAT
 
-so cool
+so cool <!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
 ## Sequence
 
-The sequence/collection protocol infrastructure goes crazy with this stuff.
+The sequence/collection infrastructure goes crazy with this stuff.
 
 !!!
 
@@ -295,9 +329,9 @@ for x in someSequence {
 
 ## Sequence
 
-`map`, `filter`, `reduce`
-`prefix`, `dropFirst`
-much, much more
+* `map`, `filter`, `reduce`
+* `prefix`, `dropFirst`
+* much, much more
 
 !!!
 
@@ -311,8 +345,8 @@ much, much more
 
 ## Sequence
 
-Thus, you cannot index into a sequence!
-And you need to be careful about consumption of elements.
+* Can't index!
+* Be careful regarding consuming elements
 
 !!!
 
@@ -654,4 +688,102 @@ Swift provides `AnySequence` and one `AnyCollection` variant per Index variant.
 
 !!!
 
-## New tortillas
+## New Tortillas
+
+!!!
+
+## New Tortillas
+
+Let's make an `everyOther` transformation
+
+!!!
+
+## New Tortillas
+
+```swift
+// Given a sequence, return a sequence that only iterates over every other element
+let a = [1,2,3,4]
+let b = a.lazy.everyOther()
+for x in b {
+  print(x) // 2,4
+}
+```
+
+!!!
+
+## New Tortillas
+
+```swift
+// the tortilla sequence
+struct LazyEveryOtherSequence<S: Sequence>: LazySequenceProtocol {
+  var base: S
+  func makeIterator() -> LazyEveryOtherIterator<S.Iterator> {
+    return LazyEveryOtherIterator(base: base.makeIterator())
+  }
+}
+```
+
+!!!
+
+## New Tortillas
+
+```swift
+// the tortilla iterator
+struct LazyEveryOtherIterator<I: IteratorProtocol>: IteratorProtocol {
+  var base: I
+  mutating func next() -> I.Element? {
+    return base.next()?.next()
+  }
+}
+```
+
+!!!
+
+## New Tortillas
+
+```swift
+extension LazySequenceProtocol {
+  func everyOther() -> LazyEveryOtherSequence<Self> {
+    return LazyEveryOtherSequence(base: self)
+  }
+}
+```
+
+!!!
+
+## New Tortillas
+
+```swift
+// Given a sequence, return a sequence that only iterates over every other element
+let a = (0...10)
+let b = a.lazy.everyOther().everyOther()
+for x in b {
+  print(x) // 4,8
+}
+```
+
+!!!
+
+### Back to reality
+
+!!!
+
+### Back to reality
+
+> "infinite" cards
+
+(insert shorts screenshot here)
+
+!!!
+
+### Back to reality
+
+This is useful. Try it!
+
+!!!
+
+<!-- .slide: data-background="#2aa198" -->
+<!-- .slide: data-state="terminal" -->
+
+# Grok it?
+
