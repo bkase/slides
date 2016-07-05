@@ -6,14 +6,6 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 !!!
 
-#### IBM Swift Sandbox
-
-Seriously. Really awesome.
-
-Super easy to experiment with Swift3isms
-
-!!!
-
 # Grok
 
 !!!
@@ -42,6 +34,12 @@ What does it mean to be lazy?
 ## Lazy
 
 Computed at the last possible moment, when the information is _forced_ out
+
+!!!
+
+## Eager
+
+Eager?
 
 !!!
 
@@ -96,7 +94,15 @@ class A {
 
 !!!
 
-# Eager Things
+# Eager Groups of Things
+
+!!!
+
+# Eager Groups of Things
+
+Eager means _operations_ on the groups of things are eager
+
+The groups of things themselves can be strict or lazy
 
 !!!
 
@@ -128,7 +134,6 @@ What's an iterator?
 
 !!!
 
-
 ## IteratorProtocol
 
 ```swift
@@ -154,7 +159,7 @@ Note: How can you go back?
 ## Self Iterating Sequence
 
 ```swift
-struct EagerEvens: Sequence, IteratorProtocol {
+struct Evens: Sequence, IteratorProtocol {
   var state: Int = 0
 
   mutating func next() -> Int? {
@@ -171,7 +176,7 @@ struct EagerEvens: Sequence, IteratorProtocol {
 
 ```swift
 // now we can use it
-let zeroThroughEight = EagerEvens().prefix(5)
+let zeroThroughEight = Evens().prefix(5)
 print(zeroThroughEight)
 // [0, 2, 4, 6, 8]
 ```
@@ -180,7 +185,7 @@ print(zeroThroughEight)
 
 ## Self Iterating Sequence
 
-* The associated type (Element) was inferred
+* The associated type (`Element`) was inferred
 * Where is the `makeIterator()`?
 
 Take a look again <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -190,7 +195,7 @@ Take a look again <!-- .element: class="fragment" data-fragment-index="1" -->
 ## Self Iterating Sequence
 
 ```swift
-struct EagerEvens: Sequence, IteratorProtocol {
+struct Evens: Sequence, IteratorProtocol {
   var state: Int = 0
 
   mutating func next() -> Int? {
@@ -213,6 +218,288 @@ extension Sequence where
     return self
   }
 }
+```
+
+Note: Here is is
+
+!!!
+
+## Sequence
+
+The sequence/collection infrastructure goes crazy with this stuff.
+
+Read through the Swift source if you get a chance, it's cool
+
+!!!
+
+## Sequence
+
+So what can we do with a sequence?
+
+!!!
+
+## Sequence
+
+```swift
+for x in someSequence {
+  print(x)
+}
+```
+
+!!!
+
+## Sequence
+
+* `map`, `filter`, `reduce`
+* `prefix`, `dropFirst`
+* much, much more
+
+!!!
+
+## Sequence
+
+* no contract of one-pass or multipass (no indexing!)
+* no contract on finite-ness
+* must be able to produce an iterator (could be self)
+
+!!!
+
+## Collection
+
+`protocol Collection: Sequence, Indexable`
+
+!!!
+
+## Collection
+
+It's a sequence, but
+
+We have addressable elements.
+We can index!
+
+!!!
+
+## Collection Rules
+
+* has addressable positions (index)
+* must support multipass iteration
+* exists a one-to-one mapping of elements to indices
+  * No infinite structures!
+* expect O(1) subscript access
+
+!!!
+
+## Simple Collection
+
+Let's make a unary collection
+
+!!!
+
+## Unary
+
+```swift
+let u: Unary</*...*/>
+u[""] // 1st element
+u["x"] // 2st element
+u["xx"] // 3st element
+u["xxx"] // 4st element
+```
+
+!!!
+
+## Unary
+
+Given any input collection addressable via Ints, 
+
+Create a collection addressable via unary numbers!
+
+!!!
+
+## Unary
+
+More powerful than overriding the subscript operator!
+
+!!!
+
+## Unary
+
+```swift
+print(u.lazy.map{ x in x + 1 }["xxx"])
+```
+
+!!!
+
+## Unary
+
+Let's build it
+
+!!!
+
+## Unary
+
+```swift
+struct Unary<C: Collection>: Collection 
+    where C.Index == Int, 
+          C.IndexDistance == Int {
+```
+
+!!!
+
+## Unary
+
+```swift
+{
+  var startIndex: String { /*...*/ }
+  var endIndex: String { /*...*/ }
+  func index(after i: String) -> String { /*...*/ }
+  subscript(i: String) -> C.Iterator.Element { /*...*/ }
+}
+```
+
+!!!
+
+## Unary
+
+```swift
+    private let xs: C
+    
+    init(_ xs: C) {
+        self.xs = xs
+    }
+```
+
+!!!
+
+## Unary
+
+```swift
+    var startIndex: String {
+        return ""
+    }
+```
+
+!!!
+
+## Unary
+
+```swift
+    /// O(n) endIndex
+    var endIndex: String {
+        return String((0...xs.count).map{ _ in "x"})
+    }
+```
+
+!!!
+
+## Unary
+
+```swift
+func index(after i: String) -> String {
+  return i + "x"
+}
+```
+
+!!!
+
+## Unary
+
+```swift
+subscript(i: String) -> C.Iterator.Element {
+  return xs[i.characters.count]
+}
+```
+
+!!!
+
+## Unary
+
+```swift
+let u: Unary<Array<Int>> = Unary([1, 2, 3, 4, 5, 6])
+print(u.lazy.map{ x in x + 1 }["xxx"])
+```
+
+!!!
+
+## Burritos
+
+!!!
+
+## Burritos
+
+Look at `Unary<Array<Int>>`
+
+Let's call the `Unary` part the tortilla
+
+Wrapping the collection burrito
+
+!!!
+
+## Collection Variants
+
+How can you move to the next index?
+
+* Collection (ForwardDirection)
+* BidirectionalCollection
+* RandomAccessCollection
+
+Note: Have to mention it, but let's not spend too much time on it. Collection is just increment in O(1); Bidirection is go forward or backward in O(1); RandomAcessCollection can get the index difference in O(1)
+
+!!!
+
+#### What can we do to collections
+
+Everything we can do with sequences
+
+!!!
+
+#### What can we do to collections
+
+And index
+And stuff that depends on finiteness
+
+!!!
+
+## Lazy stuff
+
+!!!
+
+## LazySequence
+
+`protocol LazySequenceProtocol: Sequence`
+
+!!!
+
+## LazyCollection
+
+`protocol LazyCollectionProtocol: LazySequence, Collection`
+
+!!!
+
+## Lazy
+
+Operations on lazy collections/sequences have different return types
+
+!!!
+
+## Map
+
+```swift
+// eager sequence/collection
+[1,2,3].map{ $0 + 1 } // [2, 3, 4]
+```
+
+!!!
+
+## Map
+
+```swift
+// lazy sequence
+Evens().lazy.map{ $0 + 1 } // LazyMapSequence<Int, Int>
+// nothing is computed yet!
+
+// lazy collection
+[1,2,3].lazy.map{ $0 + 1 } // LazyMapRandomAccessCollection<Int, Int>
+// nothing is computed yet!
 ```
 
 !!!
@@ -305,281 +592,6 @@ so cool <!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
-## Sequence
-
-The sequence/collection infrastructure goes crazy with this stuff.
-
-!!!
-
-## Sequence
-
-So what can we do with a sequence?
-
-!!!
-
-## Sequence
-
-```swift
-for x in someSequence {
-  print(x)
-}
-```
-
-!!!
-
-## Sequence
-
-* `map`, `filter`, `reduce`
-* `prefix`, `dropFirst`
-* much, much more
-
-!!!
-
-## Sequence
-
-* no contract of one-pass or multipass
-* no contract on finite-ness
-* must be able to produce an iterator (could be self)
-
-!!!
-
-## Sequence
-
-* Can't index!
-* Be careful regarding consuming elements
-
-!!!
-
-## Sequence
-
-```swift
-// for struct=EagerEvens
-let evens = EagerEvens()
-for e in evens.prefix(5) {
-  print(even) // 0, 2, 4, 6, 8
-}
-for e in evens.prefix(5) {
-  print(even) // 0, 2, 4, 6, 8
-}
-```
-
-!!!
-
-## Sequence
-
-```swift
-// if class EagerEvens
-let evens = EagerEvens()
-for e in evens.prefix(5) {
-  print(even) // 0, 2, 4, 6, 8
-}
-for e in evens.prefix(5) {
-  print(even) // 10, 12, 14, 16, 18
-}
-```
-
-!!!
-
-## Collection
-
-`protocol Collection: Sequence, Indexable { /*...*/ }`
-
-!!!
-
-## Collection
-
-It's a sequence, but
-
-We have addressable elements.
-We can index!
-
-!!!
-
-## Collection Rules
-
-* has addressable positions (index)
-* must support multipass iteration
-* must have a finite range of indices corresponding exactly to each element -- no infinite structures
-* expect O(1) subscript access
-
-!!!
-
-## Simple Collection
-
-Given any input collection addressable via Ints, 
-Create a collection addressable via unary numbers!
-
-!!!
-
-## Simple Collection
-
-We didn't say our addressable positions had to be addressed by an Int!
-
-!!!
-
-## Unary
-
-```swift
-struct Unary<C: Collection>: Collection 
-    where C.Index == Int, 
-          C.IndexDistance == Int {
-```
-
-!!!
-
-## Unary
-
-```swift
-{
-  var startIndex: String { /*...*/ }
-  var endIndex: String { /*...*/ }
-  func index(after i: String) -> String { /*...*/ }
-  subscript(i: String) -> C.Iterator.Element { /*...*/ }
-}
-```
-
-!!!
-
-## Unary
-
-```swift
-    private let xs: C
-    
-    init(_ xs: C) {
-        self.xs = xs
-    }
-```
-
-!!!
-
-## Unary
-
-```swift
-    var startIndex: String {
-        return ""
-    }
-```
-
-!!!
-
-## Unary
-
-```swift
-    /// O(n) endIndex
-    var endIndex: String {
-        return String((0...xs.count).map{ _ in "x"})
-    }
-```
-
-!!!
-
-## Unary
-
-```swift
-func index(after i: String) -> String {
-  return i + "x"
-}
-```
-
-!!!
-
-## Unary
-
-```swift
-subscript(i: String) -> C.Iterator.Element {
-  return xs[i.characters.count]
-}
-```
-
-!!!
-
-## Unary
-
-```swift
-let u: Unary<Array<Int>> = Unary([1, 2, 3, 4, 5, 6])
-print(u.lazy.map{ x in x + 1 }["xxx"])
-```
-
-!!!
-
-## Burritos
-
-The unary tortilla wraps our collection into a burrito
-
-!!!
-
-## Collection Variants
-
-The index type determines expected runtime for count (RandomAccessIndex has O(1), ForwardDirection or Bidirection has O(N))
-
-If you implement the RandomAccessCollection protocol, for example you need to provide more methods (and more implied runtimes)
-
-!!!
-
-#### What can we do to collections
-
-Everything we can do with sequences
-
-!!!
-
-#### What can we do to collections
-
-And index
-And stuff that depends on finiteness
-
-!!!
-
-## Lazy stuff
-
-!!!
-
-## LazySequence
-
-`protocol LazySequenceProtocol: Sequence`
-
-!!!
-
-## LazyCollection
-
-`protocol LazyCollectionProtocol: LazySequence, Collection`
-
-!!!
-
-## Lazy
-
-Recall: When you inherit from protocols you can override return types of methods
-
-!!!
-
-## Map
-
-```swift
-// eager sequence/collection
-[1,2,3].map{ $0 + 1 } // [2, 3, 4]
-```
-
-!!!
-
-## Map
-
-```swift
-// lazy sequence
-EagerEvens().lazy.map{ $0 + 1 } // LazyMapSequence<Int, Int>
-// nothing is computed yet!
-```
-
-!!!
-
-## Map
-
-```swift
-// lazy collection
-[1,2,3].lazy.map{ $0 + 1 } // LazyMapRandomAccessCollection<Int, Int>
-// nothing is computed yet!
-```
-
-!!!
-
 ## LazyMapSequence?
 
 A sequence wrapped sequence, just like Unary
@@ -621,7 +633,11 @@ Each operator applied on the lazy sequences and collections wrap the sequence
 
 ```swift
 let a = [1,2,3].lazy.map{ $0 + 1 }.filter{ $0 != 3 }
-// a: LazyFilterBidirectionalCollection<LazyMapRandomAccessCollection<Array<Int>, Int>>
+// a: LazyFilterBidirectionalCollection<
+//        LazyMapRandomAccessCollection<
+//          Array<Int>, Int
+//        >
+//    >
 ```
 
 !!!
@@ -658,7 +674,9 @@ Type erasure in Swift help you deal with the nightmare if you need to return it.
 ## Tortilla Erasure
 
 ```swift
-// a: LazyFilterBidirectionalCollection<LazyMapRandomAccessCollection<Array<Int>, Int>>
+// a: LazyFilterBidirectionalCollection<
+//      LazyMapRandomAccessCollection<
+//        Array<Int>, Int>>
 let b = AnyCollection(a)
 // b: AnyCollection<Int>
 ```
@@ -675,16 +693,21 @@ Type erasure works by moving the generic craziness to the constructor. Keep in m
 
 ```swift
 // one of the inits for AnySequence
-init<S : Sequence where S.Iterator.Element == Element, S.SubSequence : Sequence, S.SubSequence.Iterator.Element == Element, S.SubSequence.SubSequence == S.SubSequence>(_ base: S)
+init<S : Sequence where S.Iterator.Element == Element,
+     S.SubSequence : Sequence,
+     S.SubSequence.Iterator.Element == Element,
+     S.SubSequence.SubSequence == S.SubSequence>(_ base: S)
 ```
 
 !!!
 
 ## Tortilla Erasure
 
-Swift provides `AnySequence` and one `AnyCollection` variant per Index variant.
+Swift provides 
 
-`AnyBidirectionalCollection`, `AnyRandomAccessCollection`, etc.
+* `AnySequence`
+* `AnyCollection`
+* `AnyBidirectionalCollection`, `AnyRandomAccessCollection`
 
 !!!
 
@@ -701,7 +724,8 @@ Let's make an `everyOther` transformation
 ## New Tortillas
 
 ```swift
-// Given a sequence, return a sequence that only iterates over every other element
+// Given a sequence, return a sequence
+// that only iterates over every other element
 let a = [1,2,3,4]
 let b = a.lazy.everyOther()
 for x in b {
@@ -715,7 +739,8 @@ for x in b {
 
 ```swift
 // the tortilla sequence
-struct LazyEveryOtherSequence<S: Sequence>: LazySequenceProtocol {
+struct LazyEveryOtherSequence
+    <S: Sequence>: LazySequenceProtocol {
   var base: S
   func makeIterator() -> LazyEveryOtherIterator<S.Iterator> {
     return LazyEveryOtherIterator(base: base.makeIterator())
@@ -729,7 +754,8 @@ struct LazyEveryOtherSequence<S: Sequence>: LazySequenceProtocol {
 
 ```swift
 // the tortilla iterator
-struct LazyEveryOtherIterator<I: IteratorProtocol>: IteratorProtocol {
+struct LazyEveryOtherIterator
+    <I: IteratorProtocol>: IteratorProtocol {
   var base: I
   mutating func next() -> I.Element? {
     return base.next()?.next()
@@ -754,7 +780,8 @@ extension LazySequenceProtocol {
 ## New Tortillas
 
 ```swift
-// Given a sequence, return a sequence that only iterates over every other element
+// Given a sequence, return a sequence that 
+// only iterates over every 4th element
 let a = (0...10)
 let b = a.lazy.everyOther().everyOther()
 for x in b {
@@ -786,4 +813,8 @@ This is useful. Try it!
 <!-- .slide: data-state="terminal" -->
 
 # Grok it?
+
+By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
+
+P.S. IBM Swift Sandbox is legit
 

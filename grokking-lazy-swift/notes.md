@@ -1,8 +1,8 @@
 
-* Why can't I just override the subscript operator
-* Give full example of access
+. * Why can't I just override the subscript operator
+. * Give full example of access
 
-```swift
+. ```swift
 let u: Unary</*...*/>
 u[""] // 1st element
 u["x"] // 2st element
@@ -10,15 +10,15 @@ u["xx"] // 3st element
 u["xxx"] // 4st element
 ```
 
-* Move the aside to where it makes sense
-* Evens is sort-of inherently lazy, so show a linked list
-* Any sequence that is merely an iterator should be lazy
-* Figure out the burritos
+. * Move the aside to where it makes sense
+. * Evens is sort-of inherently lazy, so show a linked list
+. * Any sequence that is merely an iterator should be lazy
+. * Figure out the burritos
 * Go into erasure more
 * Why would you want to use the more specific erases
      Maybe take it out
-* Runtime of the indexing is the real different
-* LazySequence vs Sequence is about the operators being lazy or not
+. * Runtime of the indexing is the real different
+. * LazySequence vs Sequence is about the operators being lazy or not
 
 
 ## Lazy Transforms
