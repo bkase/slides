@@ -1,3 +1,79 @@
+generic version is:
+
+Start with the photo problem
+
+You have a lot of photos
+and computing the photo is expensive (reading the metadata)
+so you only want to compute the photos you'll use
+
+You have a lot of X things
+and computing X is expensive
+so you only want to compute the Xs you'll use
+
+So we need to hold the things, and to delay the computation of the work within it.
+
+Let's talk about how we have lots of things in swift
+
+Arrays? But that's not abstract enough.
+
+In Swift we can use Sequences and Collections.
+
+Go into sequences
+
+Then go into collections
+
+And then we go back to the photos example
+How do we delay the computation of the expensive things?
+
+That's called Laziness
+
+LazySequence, LazyCollection
+Burritos...
+
+How do we transform photo metadata into photos
+
+This is how transform lazy collection/sequence (this is what we do to the photos)
+
+(show the code for LazyMapSequence)
+
+How does map exist on sequences and collections and compile?
+
+We solved transformation by wrapping things in a struct, but now that we used tortillas OUR
+
+New Problem: Function signatures become unmaintainable
+Solution: Use type erasure
+
+Let's take every other photo
+
+
+
+
+
+
+* ORDER of slides
+* put simpler iterator example first
+* go more into the burrito
+* remove the burrito slides
+* go through the code line by line-ish
+* use the UIView thing the whole time
+* pictures
+* problem: extension function doesn't work, shorts photos.   solution: use the machinery for lazy stuff
+* make the benefits CLEAR
+* heirarchy of headers more (clear asides)
+* kill the indexes slide
+* kill unary (even though I love it)
+* add the other method to A
+* more the difference between collection and sequence
+* add complicated thing to the end of the slide (anticipate things)
+* The REAL reason: you want to use map and filter and don't want to load the data that backs your views (since the metadata access is expensive)
+
+
+
+
+
+
+
+
 
 . * Why can't I just override the subscript operator
 . * Give full example of access

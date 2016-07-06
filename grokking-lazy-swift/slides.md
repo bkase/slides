@@ -611,7 +611,8 @@ struct LazyMapSequence<S: Sequence>: LazySequenceProtocol {
 ## LazyMapSequence
 
 ```swift
-struct LazyMapIterator<Base: Iterator, Element>: IteratorProtocol, Sequence {
+struct LazyMapIterator<Base: Iterator, Element>:
+      IteratorProtocol, Sequence {
   var _base: Base
   let _transform: (Base.Element) -> Element
 
