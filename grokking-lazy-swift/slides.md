@@ -6,6 +6,682 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 !!!
 
+# Photos
+
+(screenshot)
+
+!!!
+
+# Problems
+
+* There are a lot of photos
+* Loading a photo's data is expensive
+
+!!!
+
+# Problems
+
+* There are a lot of things
+* Loading a thing is expensive
+
+Note: More generally...
+
+!!!
+
+## Holding Things
+
+!!!
+
+## Holding Things
+
+* Arrays?
+
+!!!
+
+## Holding Things
+
+```swift
+let a = Array(PHAsset.fetchAllAssets/*...*/())
+// slowwwwww
+```
+
+Note: Not abstract enough
+
+!!!
+
+## Holding Things
+
+We need a `Collection`
+
+!!!
+
+### Groups of Things
+
+* `Collection`s are `Indexable` `Sequence`s <!-- .element: class="fragment" data-fragment-index="1" -->
+* `Sequences` are `Iterator` makers <!-- .element: class="fragment" data-fragment-index="2" -->
+* `Iterator`s can produce `Element`s <!-- .element: class="fragment" data-fragment-index="3" -->
+
+!!!
+
+## IteratorProtocol
+
+```swift
+protocol IteratorProtocol {
+ associatedtype Element
+ mutating func next() -> Element?
+}
+```
+
+Note: move forward by calling next() until nil
+
+!!!
+
+## IteratorProtocol
+
+```swift
+struct Evens: IteratorProtocol {
+  var state: Int = 0
+
+  mutating func next() -> Int? {
+    let curr = state
+    state += 2
+    return .some(curr)
+  }
+}
+```
+
+!!!
+
+## IteratorProtocol
+
+```swift
+let s = Evens()
+for _ in 1...5 {
+  print(s.next()!) // 0, 2, 4, 6, 8
+} 
+```
+
+Note: This kinda sucks having to call next()
+
+!!!
+
+## Sequence
+
+(image here)
+
+Recall: `Sequences` are `Iterator` makers
+
+!!!
+
+## IteratorProtocol
+
+```swift
+struct Evens: IteratorProtocol, Sequence
+```
+
+Note: Solution: we make it a Sequence
+
+!!!
+
+## Sequence
+
+```swift
+for x in Evens().prefix(5) {
+  print(x) // 0, 2, 4, 6, 8
+}
+```
+
+!!!
+
+## Sequence
+
+```swift
+extension Sequence where 
+    Iterator == Self,
+    Self: IteratorProtocol {
+  func makeIterator() -> Iterator {
+    return self
+  }
+}
+```
+
+Note: makeIterator() is inferred
+
+!!!
+
+## Sequence
+
+So what else can we do with a sequence?
+
+!!!
+
+## Sequence
+
+```swift
+for x in someSequence {
+  print(x)
+}
+```
+
+!!!
+
+## Sequence
+
+* `map`, `filter`, `reduce`
+* `prefix`, `dropFirst`
+* much, much more
+
+!!!
+
+## Sequence
+
+* no contract of one-pass or multipass (no indexing!)
+* no contract on finite-ness
+* must be able to produce an iterator (could be self)
+
+!!!
+
+## Collection
+
+(image here)
+
+Recall: `Collection`s are `Indexable` `Sequence`s
+
+!!!
+
+## Collection
+
+```swift
+protocol Collection: Sequence, Indexable
+```
+
+!!!
+
+## Collection
+
+(images of photos in a collection)
+
+Note: iOS SDK has an API method for getting photo metadata of many photos
+
+!!!
+
+## Collection
+
+```swift
+struct PhotosMetadata: Collection {
+  /*...*/
+  var startIndex: Int { /*...*/ }
+  var endIndex: Int { /*...*/ }
+  func index(after i: Int) -> Int { /*...*/ }
+  subscript(i: Int) -> PHAsset { /*...*/ }
+}
+```
+
+!!!
+
+## Collection
+
+```swift
+  private let base: PHFetchResult
+
+  init(_ base: PHFetchResult) {
+    self.base = base
+  }
+```
+
+!!!
+
+## Collection
+
+```swift
+  var startIndex: Int {
+    return 0
+  }
+```
+
+!!!
+
+## Collection
+
+```swift
+  var endIndex: Int {
+    return base.count
+  }
+```
+
+!!!
+
+## Collection
+
+```swift
+  func index(after i: Int) -> Int {
+    return i + 1
+  }
+```
+
+!!!
+
+## Collection
+
+```swift
+  subscript(i: Int) -> PHAsset {
+    return base[i] as! PHAsset
+  }
+```
+
+!!!
+
+## Collection
+
+* Why did we have to implement all that?
+
+!!!
+
+## Collection
+
+* Alternate index types allow for LinkedLists
+* Alternate index types let you index with Unary numbers
+* ... see appendix
+
+!!!
+
+## Photos
+
+```swift
+let a = PhotosMetadata(PHAsset.fetchAllAssets/*...*/())
+// not slow!
+```
+
+!!!
+
+## Photos
+
+Now we want to turn our `PHAsset`s into `Photo`s
+
+!!!
+
+## Photos
+
+```swift
+struct Photo {
+  let url: NSURL
+  /*...*/
+}
+```
+
+!!!
+
+## Photos
+
+```swift
+let metadata: PhotosMetadata
+let photos = metadata.map{ Photo(url: $0.url) }
+// slowwww
+```
+
+!!!
+
+## Photos
+
+* Delay metadata load
+
+!!!
+
+## Photos
+
+* Delay operations on collections or sequences
+
+!!!
+
+## Lazy Groups of Things
+
+Computed when the information is _forced_ out
+
+!!!
+
+## LazySequence
+
+`protocol LazySequenceProtocol: Sequence`
+
+!!!
+
+## LazyCollection
+
+`protocol LazyCollectionProtocol: LazySequence, Collection`
+
+!!!
+
+### Normal Map
+
+```swift
+// eager sequence/collection
+[1,2,3].map{ $0 + 1 } // [2, 3, 4]
+```
+
+!!!
+
+### LazySequence Map
+
+```swift
+Evens().lazy.map{ $0 + 1 }
+    // LazyMapSequence<Int, Int>
+// nothing is computed yet!
+```
+
+!!!
+
+### LazyCollection Map
+
+```swift
+[1,2,3].lazy.map{ $0 + 1 } 
+    // LazyMapRandomAccessCollection<Int, Int>
+// nothing is computed yet!
+```
+
+!!!
+
+#### How can an overriden method return different types?
+
+!!!
+
+### Protocol default implementations
+
+Note: I said I would assume you knew this, but; this is nuanced and cool
+
+!!!
+
+### Default Implementations
+
+```swift
+protocol A { }
+extension A {
+  func woo() -> Self { return self }
+  func hi() -> String {
+    return "A"
+  }
+}
+```
+
+!!!
+
+### Default Implementations
+
+```swift
+struct ConcA: A {}
+print(ConcA().woo().hi()) // "A"
+```
+
+!!!
+
+### Default Implementations
+
+```swift
+protocol B { }
+extension B {
+  func hi() -> Int {
+    return 0
+  }
+}
+```
+
+!!!
+
+### Default Implementations
+
+```swift
+struct Mystery: A, B { }
+print(Mystery().woo().hi()) // compile error!
+```
+
+!!!
+
+### Default Implementations
+
+```swift
+// now B subsumes A
+protocol B: A { }
+extension B {
+  func hi() -> Int {
+    return 0
+  }
+}
+```
+
+!!!
+
+### Default Implementations
+
+```swift
+struct Mystery: B { }
+print(Mystery().woo().hi()) // 0
+// NOT a compile error!
+```
+
+!!!
+
+// insert lazy map deep-dive
+// insert examine types here, burritos
+
+!!!
+
+## Photos
+
+```swift
+let metadata: PhotosMetadata
+let photos = metadata.map{ Photo(url: $0.url) }
+// not slow!
+```
+
+!!!
+
+## Photos
+
+```swift
+func prepareData(d: PhotosMetadata) -> ? {
+  return d
+    .filter{ $0.isPhoto() } // skip videos
+    .map{ Photo(url: $0.url) } // make photos
+    .map{ PhotoView(photo: $0) } // make view
+}
+```
+ 
+Note: What is the return type?
+
+!!!
+
+## Photos
+
+```swift
+LazyFilterBidirectionalCollection<
+  LazyMapRandomAccessCollection<
+    LazyMapRandomAccessCollection<
+      PHAsset, Int
+    >, Int
+  >
+>
+```
+
+Note: Ahhhhhh
+
+!!!
+
+## Tortilla Inference
+
+(picture)
+
+!!!
+
+## Type Inference
+
+```swift
+let m = d.map/*...*/
+return m.first
+```
+
+Note: Can we avoid the need to ever write the type
+
+!!!
+
+## Tortilla Erasure
+
+(picture)
+
+!!!
+
+## Type Erasure
+
+```swift
+let m = AnyCollection(
+  d.filter{}.map{}/*...*/
+)
+// m: AnyCollection<PHAsset>
+```
+
+Note: Trade type information for maintainable code
+
+!!!
+
+## Type Erasure
+
+* AnySequence
+* AnyCollection
+* ... see appendix for more
+
+!!!
+
+## Photos
+
+Product wants `everyOther` photo
+
+(picture)
+
+!!!
+
+## New Tortillas
+
+```swift
+let a = [1,2,3,4]
+let b = a.lazy.everyOther()
+for x in b {
+  print(x) // 2,4
+}
+```
+
+!!!
+
+## New Tortillas
+
+```swift
+// the tortilla sequence
+struct LazyEveryOtherSequence
+    <S: Sequence>: LazySequenceProtocol {
+  var base: S
+  func makeIterator() -> LazyEveryOtherIterator<S.Iterator> {
+    return LazyEveryOtherIterator(base: base.makeIterator())
+  }
+}
+```
+
+!!!
+
+## New Tortillas
+
+```swift
+struct LazyEveryOtherIterator
+    <I: IteratorProtocol>: IteratorProtocol {
+  var base: I
+  mutating func next() -> I.Element? {
+    return base.next()?.next()
+  }
+}
+```
+
+!!!
+
+## New Tortillas
+
+```swift
+extension LazySequenceProtocol {
+  func everyOther() -> LazyEveryOtherSequence<Self> {
+    return LazyEveryOtherSequence(base: self)
+  }
+}
+```
+
+!!!
+
+## Photos
+
+```swift
+let skipped = photos.everyOther()
+```
+
+!!!
+
+## Photos
+
+Product wants every 4th photo
+
+!!!
+
+## Photos
+
+```swift
+let skipped = photos.everyOther().everyOther()
+```
+
+Note: Precisely why you WANT to use the Swift machinery when you can
+
+!!!
+
+## Photos
+
+* Collections hold our photo metadata and photos
+
+!!!
+
+## Photos
+
+* LazyCollection's map transforms our data
+
+!!!
+
+## Photos
+
+* AnyCollection helps us maintains our type signatures
+
+!!!
+
+## Photos
+
+* We can create new operators that compose
+
+!!!
+
+## Photos
+
+Our app works!
+
+(picture)
+
+!!!
+
+<!-- .slide: data-background="#2aa198" -->
+<!-- .slide: data-state="terminal" -->
+
+# Grok it?
+
+By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
+
+P.S. IBM Swift Sandbox is legit
+
+
+
+
+
+
+!!!
+
 # Grok
 
 !!!
@@ -504,7 +1180,7 @@ Evens().lazy.map{ $0 + 1 } // LazyMapSequence<Int, Int>
 
 !!!
 
-### Aside: Protocol default implementations
+### Protocol default implementations
 
 Note: I said I would assume you knew this, but; this is nuanced and cool
 
