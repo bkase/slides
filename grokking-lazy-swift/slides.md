@@ -8,7 +8,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 # Photos
 
-(screenshot)
+<img src="./img/cards1.jpg" height=500 />
 
 !!!
 
@@ -29,6 +29,8 @@ Note: More generally...
 !!!
 
 ## Holding Things
+
+<img src="./img/holding-things.jpg" height=500 />
 
 !!!
 
@@ -107,7 +109,7 @@ Note: This kinda sucks having to call next()
 
 ## Sequence
 
-(image here)
+<img src="./img/recall.jpg" height=500 />
 
 Recall: `Sequences` are `Iterator` makers
 
@@ -151,7 +153,7 @@ Note: makeIterator() is inferred
 
 ## Sequence
 
-So what else can we do with a sequence?
+<img src="./img/what-else.jpg" height=500 />
 
 !!!
 
@@ -183,7 +185,7 @@ for x in someSequence {
 
 ## Collection
 
-(image here)
+<img src="./img/recall.jpg" height=500 />
 
 Recall: `Collection`s are `Indexable` `Sequence`s
 
@@ -199,7 +201,7 @@ protocol Collection: Sequence, Indexable
 
 ## Collection
 
-(images of photos in a collection)
+<img src="./img/photo-stack.jpg" height=500 />
 
 Note: iOS SDK has an API method for getting photo metadata of many photos
 
@@ -277,14 +279,6 @@ struct PhotosMetadata: Collection {
 
 !!!
 
-## Collection
-
-* Alternate index types allow for LinkedLists
-* Alternate index types let you index with Unary numbers
-* ... see appendix
-
-!!!
-
 ## Photos
 
 ```swift
@@ -325,6 +319,8 @@ let photos = metadata.map{ Photo(url: $0.url) }
 
 * Delay metadata load
 
+Note: In other words...
+
 !!!
 
 ## Photos
@@ -334,6 +330,8 @@ let photos = metadata.map{ Photo(url: $0.url) }
 !!!
 
 ## Lazy Groups of Things
+
+<img src="./img/lazy.gif" height=500 />
 
 Computed when the information is _forced_ out
 
@@ -385,6 +383,8 @@ Evens().lazy.map{ $0 + 1 }
 !!!
 
 ### Protocol default implementations
+
+<img src="./img/gears.png" height=500 />
 
 Note: I said I would assume you knew this, but; this is nuanced and cool
 
@@ -459,8 +459,90 @@ print(Mystery().woo().hi()) // 0
 
 !!!
 
-// insert lazy map deep-dive
-// insert examine types here, burritos
+## Maps
+
+```swift
+Evens().lazy.map{ $0 + 1 }
+    // LazyMapSequence<Int, Int>
+// nothing is computed yet!
+```
+
+!!!
+
+## LazyMapSequence?
+
+```swift
+struct LazyMapSequence<S: Sequence>: LazySequenceProtocol
+```
+
+Note: Sequence wrapped sequence
+
+!!!
+
+## LazyMapSequence
+
+```swift
+struct LazyMapSequence<S: Sequence>: LazySequenceProtocol {
+  func makeIterator() -> LazyMapIterator</*...*/> { /*...*/ }
+}
+```
+
+!!!
+
+## LazyMapIterator
+
+```swift
+struct LazyMapIterator<Base: Iterator, Element>:
+      IteratorProtocol, Sequence {
+```
+
+!!!
+
+## LazyMapIterator
+
+```swift
+  var _base: Base
+  let _transform: (Base.Element) -> Element
+```
+
+!!!
+
+## LazyMapIterator
+
+```swift
+  mutating func next() -> Element? {
+    return _base.next().map(_transform)
+  }
+```
+
+!!!
+
+## LazyMapSequence
+
+```swift
+struct LazyMapSequence<S: Sequence>: LazySequenceProtocol
+```
+
+<img src="./img/burrito.png" height=300 />
+
+!!!
+
+## Burritos
+
+```swift
+let a = [1,2,3].lazy.map{ $0 + 1 }.filter{ $0 != 3 }
+// a: LazyFilterBidirectionalCollection<
+//        LazyMapRandomAccessCollection<
+//          Array<Int>, Int
+//        >
+//    >
+```
+
+!!!
+
+## Burritos
+
+<img src="./img/flour-tortilla.jpg" height=500 />
 
 !!!
 
@@ -507,7 +589,7 @@ Note: Ahhhhhh
 
 ## Tortilla Inference
 
-(picture)
+<img src="./img/magic-tortilla.jpg" height=500 />
 
 !!!
 
@@ -524,7 +606,7 @@ Note: Can we avoid the need to ever write the type
 
 ## Tortilla Erasure
 
-(picture)
+<img src="./img/tortilla-erasure.jpg" height=500 />
 
 !!!
 
@@ -553,7 +635,7 @@ Note: Trade type information for maintainable code
 
 Product wants `everyOther` photo
 
-(picture)
+<img src="./img/every-other.jpg" height=500 />
 
 !!!
 
@@ -591,7 +673,11 @@ struct LazyEveryOtherIterator
     <I: IteratorProtocol>: IteratorProtocol {
   var base: I
   mutating func next() -> I.Element? {
-    return base.next()?.next()
+    if let _ = base.next() {
+      return base.next()
+    } else {
+      return nil
+    }
   }
 }
 ```
@@ -620,7 +706,9 @@ let skipped = photos.everyOther()
 
 ## Photos
 
-Product wants every 4th photo
+Product wants every _4th_ photo
+
+<img src="./img/every-other.jpg" height=500 />
 
 !!!
 
@@ -634,35 +722,35 @@ Note: Precisely why you WANT to use the Swift machinery when you can
 
 !!!
 
-## Photos
+## Recap
 
 * Collections hold our photo metadata and photos
 
 !!!
 
-## Photos
+## Recap
 
 * LazyCollection's map transforms our data
 
 !!!
 
-## Photos
+## Recap
 
 * AnyCollection helps us maintains our type signatures
 
 !!!
 
-## Photos
+## Recap
 
 * We can create new operators that compose
 
 !!!
 
-## Photos
+## Recap
 
 Our app works!
 
-(picture)
+<img src="./img/cards2.jpg" height=500 />
 
 !!!
 
@@ -675,7 +763,13 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 P.S. IBM Swift Sandbox is legit
 
+!!!
 
+## Collection
+
+* Alternate index types allow for LinkedLists
+* Alternate index types let you index with Unary numbers
+* ... see appendix
 
 
 
@@ -1390,6 +1484,8 @@ Swift provides
 
 ## New Tortillas
 
+
+
 !!!
 
 ## New Tortillas
@@ -1435,7 +1531,11 @@ struct LazyEveryOtherIterator
     <I: IteratorProtocol>: IteratorProtocol {
   var base: I
   mutating func next() -> I.Element? {
-    return base.next()?.next()
+    if let _ = base.next() {
+      return base.next()
+    } else {
+      return nil
+    }
   }
 }
 ```
