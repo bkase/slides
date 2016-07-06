@@ -8,6 +8,12 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 # Photos
 
+<img src="./img/photo-stack.jpg" height=500 />
+
+!!!
+
+# Photos
+
 <img src="./img/cards1.jpg" height=500 />
 
 !!!
@@ -17,14 +23,14 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 * There are a lot of photos
 * Loading a photo's data is expensive
 
+Note: More generally...
+
 !!!
 
 # Problems
 
 * There are a lot of things
 * Loading a thing is expensive
-
-Note: More generally...
 
 !!!
 
@@ -59,9 +65,9 @@ We need a `Collection`
 
 ### Groups of Things
 
-* `Collection`s are `Indexable` `Sequence`s <!-- .element: class="fragment" data-fragment-index="1" -->
-* `Sequences` are `Iterator` makers <!-- .element: class="fragment" data-fragment-index="2" -->
-* `Iterator`s can produce `Element`s <!-- .element: class="fragment" data-fragment-index="3" -->
+* A `Collection` is an `Indexable` `Sequence`
+* A `Sequence` is an `Iterator` maker
+* An `Iterator` can produce one or more `Element`s
 
 !!!
 
@@ -75,6 +81,14 @@ protocol IteratorProtocol {
 ```
 
 Note: move forward by calling next() until nil
+
+!!!
+
+## IteratorProtocol
+
+Let's say we want to iterate over the even numbers
+
+<img src="./img/2468.jpg" height=400 />
 
 !!!
 
@@ -103,7 +117,7 @@ for _ in 1...5 {
 } 
 ```
 
-Note: This kinda sucks having to call next()
+Note: This kinda sucks having to call next() with !
 
 !!!
 
@@ -111,7 +125,7 @@ Note: This kinda sucks having to call next()
 
 <img src="./img/recall.jpg" height=500 />
 
-Recall: `Sequences` are `Iterator` makers
+Recall: A `Sequence` is an `Iterator` maker
 
 !!!
 
@@ -132,6 +146,12 @@ for x in Evens().prefix(5) {
   print(x) // 0, 2, 4, 6, 8
 }
 ```
+
+!!!
+
+## Sequence
+
+<img src="./img/questions.jpg" height=300 />
 
 !!!
 
@@ -177,9 +197,9 @@ for x in someSequence {
 
 ## Sequence
 
-* no contract of one-pass or multipass (no indexing!)
-* no contract on finite-ness
 * must be able to produce an iterator (could be self)
+* could be one-pass or multipass (no indexing!)
+* could be finite or infinite
 
 !!!
 
@@ -187,7 +207,7 @@ for x in someSequence {
 
 <img src="./img/recall.jpg" height=500 />
 
-Recall: `Collection`s are `Indexable` `Sequence`s
+Recall: A `Collection` is an `Indexable` `Sequence`
 
 !!!
 
@@ -217,6 +237,34 @@ struct PhotosMetadata: Collection {
   func index(after i: Int) -> Int { /*...*/ }
   subscript(i: Int) -> PHAsset { /*...*/ }
 }
+```
+
+`Why do we need to deal with the index crap?` <!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
+## Collection Rules
+
+* has addressable positions (index)
+* must support multipass iteration
+* exists a one-to-one mapping of elements to indices
+  * No infinite structures!
+* expect O(1) subscript access
+
+!!!
+
+## Collection
+
+* Non-integer indices are useful:
+
+<img src="./img/linked-list.png" height=300 />
+
+!!!
+
+## Collection
+
+```swift
+struct PhotosMetadata: Collection {
 ```
 
 !!!
@@ -273,12 +321,6 @@ struct PhotosMetadata: Collection {
 
 !!!
 
-## Collection
-
-* Why did we have to implement all that?
-
-!!!
-
 ## Photos
 
 ```swift
@@ -294,12 +336,19 @@ Now we want to turn our `PHAsset`s into `Photo`s
 
 !!!
 
+## Collection
+
+* We can only transform if it's a collection!
+
+!!!
+
+
 ## Photos
 
 ```swift
 struct Photo {
-  let url: NSURL
-  /*...*/
+ let url: NSURL
+ /*...*/
 }
 ```
 
@@ -333,7 +382,7 @@ Note: In other words...
 
 <img src="./img/lazy.gif" height=500 />
 
-Computed when the information is _forced_ out
+Transformations computed when the information is _forced_ out
 
 !!!
 
@@ -378,6 +427,12 @@ Evens().lazy.map{ $0 + 1 }
 
 !!!
 
+### Wait a second
+
+`protocol LazyCollectionProtocol: LazySequence, Collection`
+
+!!!
+
 #### How can an overriden method return different types?
 
 !!!
@@ -385,8 +440,6 @@ Evens().lazy.map{ $0 + 1 }
 ### Protocol default implementations
 
 <img src="./img/gears.png" height=500 />
-
-Note: I said I would assume you knew this, but; this is nuanced and cool
 
 !!!
 
@@ -496,23 +549,21 @@ struct LazyMapIterator<Base: Iterator, Element>:
       IteratorProtocol, Sequence {
 ```
 
-!!!
-
-## LazyMapIterator
-
 ```swift
   var _base: Base
   let _transform: (Base.Element) -> Element
 ```
-
-!!!
-
-## LazyMapIterator
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
   mutating func next() -> Element? {
     return _base.next().map(_transform)
   }
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+}
 ```
 
 !!!
@@ -550,7 +601,7 @@ let a = [1,2,3].lazy.map{ $0 + 1 }.filter{ $0 != 3 }
 
 ```swift
 let metadata: PhotosMetadata
-let photos = metadata.map{ Photo(url: $0.url) }
+let photos = metadata.lazy.map{ Photo(url: $0.url) }
 // not slow!
 ```
 
@@ -560,7 +611,7 @@ let photos = metadata.map{ Photo(url: $0.url) }
 
 ```swift
 func prepareData(d: PhotosMetadata) -> ? {
-  return d
+  return d.lazy
     .filter{ $0.isPhoto() } // skip videos
     .map{ Photo(url: $0.url) } // make photos
     .map{ PhotoView(photo: $0) } // make view
@@ -577,8 +628,8 @@ Note: What is the return type?
 LazyFilterBidirectionalCollection<
   LazyMapRandomAccessCollection<
     LazyMapRandomAccessCollection<
-      PHAsset, Int
-    >, Int
+      PHAsset, Photo
+    >, PhotoView
   >
 >
 ```
@@ -596,11 +647,9 @@ Note: Ahhhhhh
 ## Type Inference
 
 ```swift
-let m = d.map/*...*/
+let m = d.lazy.map/*...*/
 return m.first
 ```
-
-Note: Can we avoid the need to ever write the type
 
 !!!
 
@@ -614,9 +663,9 @@ Note: Can we avoid the need to ever write the type
 
 ```swift
 let m = AnyCollection(
-  d.filter{}.map{}/*...*/
+  d.lazy.filter{}.map{}/*...*/
 )
-// m: AnyCollection<PHAsset>
+// m: AnyCollection<PhotoView>
 ```
 
 Note: Trade type information for maintainable code
@@ -643,8 +692,7 @@ Product wants `everyOther` photo
 
 ```swift
 let a = [1,2,3,4]
-let b = a.lazy.everyOther()
-for x in b {
+for x in a.lazy.everyOther() {
   print(x) // 2,4
 }
 ```
@@ -724,29 +772,14 @@ Note: Precisely why you WANT to use the Swift machinery when you can
 
 ## Recap
 
-* Collections hold our photo metadata and photos
+* <!-- .element: class="fragment" data-fragment-index="1" --> Collections hold our photo metadata and photos <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> LazyCollection's map transforms our data <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> AnyCollection helps us maintains our type signatures <!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" --> We can create new operators that compose <!-- .element: class="fragment" data-fragment-index="4" --> 
 
 !!!
 
-## Recap
-
-* LazyCollection's map transforms our data
-
-!!!
-
-## Recap
-
-* AnyCollection helps us maintains our type signatures
-
-!!!
-
-## Recap
-
-* We can create new operators that compose
-
-!!!
-
-## Recap
+## Finally
 
 Our app works!
 
@@ -763,53 +796,11 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 P.S. IBM Swift Sandbox is legit
 
-!!!
-
-## Collection
-
-* Alternate index types allow for LinkedLists
-* Alternate index types let you index with Unary numbers
-* ... see appendix
-
-
-
+P.P.S Check out Unary indexed collections in appendix
 
 !!!
 
-# Grok
-
-!!!
-
-## Assumptions
-
-1. Comfortable with protocols
-2. Uncomfortable with Swift3 standard library details
-
-!!!
-
-## Ready?
-
-Prepare yourself <!-- .element: class="fragment" data-fragment-index="1" -->
-
-for information <!-- .element: class="fragment" data-fragment-index="2" -->
-
-!!!
-
-## Lazy
-
-What does it mean to be lazy?
-
-!!!
-
-## Lazy
-
-Computed at the last possible moment, when the information is _forced_ out
-
-!!!
-
-## Eager
-
-Eager?
+## Appendix
 
 !!!
 
@@ -818,27 +809,6 @@ Eager?
 Eager (or strict) is the opposite of lazy
 
 Computed _always_
-
-!!!
-
-## Lazy
-
-Why would you _want_ lazy?
-
-!!!
-
-## Lazy
-
-1. A bunch of UIViews
-2. Tapping on one of many views does a lot of computation <!-- .element: class="fragment" data-fragment-index="1" -->
-
-!!!
-
-## Lazy
-
-> "infinite" cards
-
-(insert shorts screenshot here)
 
 !!!
 
@@ -876,192 +846,7 @@ The groups of things themselves can be strict or lazy
 
 !!!
 
-# Sequence
-
-!!!
-
-## Sequence
-
-Something you can iterate over
-
-!!!
-
-## Sequence
-
-Specifically, you need a `makeIterator() -> Iterator`
-
-!!!
-
-## Sequence
-
-The simplest sequence is it's own iterator
-
-!!!
-
-## IteratorProtocol
-
-What's an iterator?
-
-!!!
-
-## IteratorProtocol
-
-```swift
-protocol IteratorProtocol {
- associatedtype Element
- mutating func next() -> Element?
-}
-```
-
-Note: move forward by calling next() until nil
-
-!!!
-
-## IteratorProtocol
-
-* Just a `mutating next()`
-* One-pass only
-
-Note: How can you go back?
-
-!!!
-
-## Self Iterating Sequence
-
-```swift
-struct Evens: Sequence, IteratorProtocol {
-  var state: Int = 0
-
-  mutating func next() -> Int? {
-    let curr = state
-    state += 2
-    return .some(curr)
-  }
-}
-```
-
-!!!
-
-## Self Iteratoring Sequence
-
-```swift
-// now we can use it
-let zeroThroughEight = Evens().prefix(5)
-print(zeroThroughEight)
-// [0, 2, 4, 6, 8]
-```
-
-!!!
-
-## Self Iterating Sequence
-
-* The associated type (`Element`) was inferred
-* Where is the `makeIterator()`?
-
-Take a look again <!-- .element: class="fragment" data-fragment-index="1" -->
-
-!!!
-
-## Self Iterating Sequence
-
-```swift
-struct Evens: Sequence, IteratorProtocol {
-  var state: Int = 0
-
-  mutating func next() -> Int? {
-    let curr = state
-    state += 2
-    return .some(curr)
-  }
-}
-```
-
-!!!
-
-## Self Iterating Sequence
-
-```swift
-extension Sequence where 
-    Iterator == Self,
-    Self: IteratorProtocol {
-  func makeIterator() -> Iterator {
-    return self
-  }
-}
-```
-
-Note: Here is is
-
-!!!
-
-## Sequence
-
-The sequence/collection infrastructure goes crazy with this stuff.
-
-Read through the Swift source if you get a chance, it's cool
-
-!!!
-
-## Sequence
-
-So what can we do with a sequence?
-
-!!!
-
-## Sequence
-
-```swift
-for x in someSequence {
-  print(x)
-}
-```
-
-!!!
-
-## Sequence
-
-* `map`, `filter`, `reduce`
-* `prefix`, `dropFirst`
-* much, much more
-
-!!!
-
-## Sequence
-
-* no contract of one-pass or multipass (no indexing!)
-* no contract on finite-ness
-* must be able to produce an iterator (could be self)
-
-!!!
-
-## Collection
-
-`protocol Collection: Sequence, Indexable`
-
-!!!
-
-## Collection
-
-It's a sequence, but
-
-We have addressable elements.
-We can index!
-
-!!!
-
-## Collection Rules
-
-* has addressable positions (index)
-* must support multipass iteration
-* exists a one-to-one mapping of elements to indices
-  * No infinite structures!
-* expect O(1) subscript access
-
-!!!
-
-## Simple Collection
-
-Let's make a unary collection
+## Unary
 
 !!!
 
@@ -1190,277 +975,30 @@ print(u.lazy.map{ x in x + 1 }["xxx"])
 
 !!!
 
-## Burritos
-
-!!!
-
-## Burritos
-
-Look at `Unary<Array<Int>>`
-
-Let's call the `Unary` part the tortilla
-
-Wrapping the collection burrito
-
-!!!
-
-## Collection Variants
+## Collection-Index variants
 
 How can you move to the next index?
 
 * Collection (ForwardDirection)
+  * Go forward in O(1)
 * BidirectionalCollection
+  * Go forward or backward in O(1)
 * RandomAccessCollection
-
-Note: Have to mention it, but let's not spend too much time on it. Collection is just increment in O(1); Bidirection is go forward or backward in O(1); RandomAcessCollection can get the index difference in O(1)
-
-!!!
-
-#### What can we do to collections
-
-Everything we can do with sequences
+  * Get the difference between two indices in O(1)
 
 !!!
 
-#### What can we do to collections
-
-And index
-And stuff that depends on finiteness
+## Type Erasure
 
 !!!
 
-## Lazy stuff
+## Type Erasure
+
+Type erasure works by moving the type info to the constructor
 
 !!!
 
-## LazySequence
-
-`protocol LazySequenceProtocol: Sequence`
-
-!!!
-
-## LazyCollection
-
-`protocol LazyCollectionProtocol: LazySequence, Collection`
-
-!!!
-
-## Lazy
-
-Operations on lazy collections/sequences have different return types
-
-!!!
-
-## Map
-
-```swift
-// eager sequence/collection
-[1,2,3].map{ $0 + 1 } // [2, 3, 4]
-```
-
-!!!
-
-## Map
-
-```swift
-// lazy sequence
-Evens().lazy.map{ $0 + 1 } // LazyMapSequence<Int, Int>
-// nothing is computed yet!
-
-// lazy collection
-[1,2,3].lazy.map{ $0 + 1 } // LazyMapRandomAccessCollection<Int, Int>
-// nothing is computed yet!
-```
-
-!!!
-
-### Protocol default implementations
-
-Note: I said I would assume you knew this, but; this is nuanced and cool
-
-!!!
-
-### Default Implementations
-
-```swift
-protocol A { }
-extension A {
-  func hi() -> String {
-    return "A"
-  }
-}
-```
-
-!!!
-
-### Default Implementations
-
-```swift
-struct ConcA: A {}
-print(ConcA().hi()) // "A"
-```
-
-!!!
-
-### Default Implementations
-
-```swift
-protocol B { }
-extension B {
-  func hi() -> Int {
-    return 0
-  }
-}
-```
-
-!!!
-
-### Default Implementations
-
-```swift
-struct Mystery: A, B { }
-print(Mystery().hi()) // compile error!
-```
-
-!!!
-
-### Default Implementations
-
-```swift
-// now B subsumes A
-protocol B: A { }
-extension B {
-  func hi() -> Int {
-    return 0
-  }
-}
-```
-
-!!!
-
-### Default Implementations
-
-```swift
-struct Mystery: B { }
-print(Mystery().hi()) // 0
-// NOT a compile error!
-```
-
-!!!
-
-### Default Implementations
-
-You can override not just the behavior of extension methods
-
-But also the return type!!
-
-!!!
-
-## WHAT
-
-so cool <!-- .element: class="fragment" data-fragment-index="1" -->
-
-!!!
-
-## LazyMapSequence?
-
-A sequence wrapped sequence, just like Unary
-
-!!!
-
-## LazyMapSequence
-
-```swift
-struct LazyMapSequence<S: Sequence>: LazySequenceProtocol {
-  func makeIterator() -> LazyMapIterator</*...*/> { /*...*/ }
-}
-```
-
-!!!
-
-## LazyMapSequence
-
-```swift
-struct LazyMapIterator<Base: Iterator, Element>:
-      IteratorProtocol, Sequence {
-  var _base: Base
-  let _transform: (Base.Element) -> Element
-
-  mutating func next() -> Element? {
-    return _base.next().map(_transform)
-  }
-}
-```
-
-!!!
-
-## Burritos
-
-Each operator applied on the lazy sequences and collections wrap the sequence
-
-!!!
-
-## Burritos
-
-```swift
-let a = [1,2,3].lazy.map{ $0 + 1 }.filter{ $0 != 3 }
-// a: LazyFilterBidirectionalCollection<
-//        LazyMapRandomAccessCollection<
-//          Array<Int>, Int
-//        >
-//    >
-```
-
-!!!
-
-## Burritos
-
-When the burritos have too many tortillas, types become a nightmare
-
-!!!
-
-## Tortilla Inference
-
-If you can get by doing _all_ the transformations locally, the types will just be inferred.
-
-!!!
-
-## Tortilla Inference
-
-```swift
-func foo() -> Int {
-  let a = [1,2,3].lazy.map{ $0 + 1 }.filter{ $0 != 3 }
-  return a[2]
-}
-```
-
-!!!
-
-## Tortilla Erasure
-
-Type erasure in Swift help you deal with the nightmare if you need to return it.
-
-!!!
-
-## Tortilla Erasure
-
-```swift
-// a: LazyFilterBidirectionalCollection<
-//      LazyMapRandomAccessCollection<
-//        Array<Int>, Int>>
-let b = AnyCollection(a)
-// b: AnyCollection<Int>
-```
-
-!!!
-
-## Tortilla Erasure
-
-Type erasure works by moving the generic craziness to the constructor. Keep in mind you and your compiler _lose_ information about your type.
-
-!!!
-
-## Tortilla Erasure
+## Type Erasure
 
 ```swift
 // one of the inits for AnySequence
@@ -1469,129 +1007,4 @@ init<S : Sequence where S.Iterator.Element == Element,
      S.SubSequence.Iterator.Element == Element,
      S.SubSequence.SubSequence == S.SubSequence>(_ base: S)
 ```
-
-!!!
-
-## Tortilla Erasure
-
-Swift provides 
-
-* `AnySequence`
-* `AnyCollection`
-* `AnyBidirectionalCollection`, `AnyRandomAccessCollection`
-
-!!!
-
-## New Tortillas
-
-
-
-!!!
-
-## New Tortillas
-
-Let's make an `everyOther` transformation
-
-!!!
-
-## New Tortillas
-
-```swift
-// Given a sequence, return a sequence
-// that only iterates over every other element
-let a = [1,2,3,4]
-let b = a.lazy.everyOther()
-for x in b {
-  print(x) // 2,4
-}
-```
-
-!!!
-
-## New Tortillas
-
-```swift
-// the tortilla sequence
-struct LazyEveryOtherSequence
-    <S: Sequence>: LazySequenceProtocol {
-  var base: S
-  func makeIterator() -> LazyEveryOtherIterator<S.Iterator> {
-    return LazyEveryOtherIterator(base: base.makeIterator())
-  }
-}
-```
-
-!!!
-
-## New Tortillas
-
-```swift
-// the tortilla iterator
-struct LazyEveryOtherIterator
-    <I: IteratorProtocol>: IteratorProtocol {
-  var base: I
-  mutating func next() -> I.Element? {
-    if let _ = base.next() {
-      return base.next()
-    } else {
-      return nil
-    }
-  }
-}
-```
-
-!!!
-
-## New Tortillas
-
-```swift
-extension LazySequenceProtocol {
-  func everyOther() -> LazyEveryOtherSequence<Self> {
-    return LazyEveryOtherSequence(base: self)
-  }
-}
-```
-
-!!!
-
-## New Tortillas
-
-```swift
-// Given a sequence, return a sequence that 
-// only iterates over every 4th element
-let a = (0...10)
-let b = a.lazy.everyOther().everyOther()
-for x in b {
-  print(x) // 4,8
-}
-```
-
-!!!
-
-### Back to reality
-
-!!!
-
-### Back to reality
-
-> "infinite" cards
-
-(insert shorts screenshot here)
-
-!!!
-
-### Back to reality
-
-This is useful. Try it!
-
-!!!
-
-<!-- .slide: data-background="#2aa198" -->
-<!-- .slide: data-state="terminal" -->
-
-# Grok it?
-
-By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
-
-P.S. IBM Swift Sandbox is legit
 
