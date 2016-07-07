@@ -55,11 +55,27 @@ Note: More generally...
 ## Holding Things
 
 ```swift
-let a = Array(PHAsset.fetchAllAssets/*...*/())
-// slowwwwww
+let fetchresult = PHAsset.fetchAllAssets/*...*/()
 ```
 
-Note: Go over each element, one at a time and insert the elements
+```swift
+var arr = [PHAsset]()
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+fetchresult.enumerateAssetsUsingBlock { obj, /*...*/
+  arr.append(obj as! PHAsset)
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+// slowwwwww
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+Note: Go over each element, one at a time and insert the elements;; Solve the slowness...
 
 !!!
 
@@ -133,7 +149,7 @@ Note: This kinda sucks having to call next() with !
 
 ## Sequence
 
-<img src="./img/recall.jpg" height=500 />
+<img src="./img/recall.jpg" height=400 />
 
 > http://ichef.bbci.co.uk/news/660/media/images/80295000/jpg/_80295405_thinking522738989.jpg
 
@@ -269,7 +285,7 @@ Note: Point!
 
 * has addressable positions (index)
 * must support multipass iteration
-* exists a one-to-one mapping of elements to indices
+* exists a one-to-one mapping of indices to elements
   * No infinite structures!
 * expect O(1) subscript access
 
@@ -352,6 +368,8 @@ let a = PhotosMetadata(PHAsset.fetchAllAssets/*...*/())
 // not slow!
 ```
 
+Note: Since it's a collection, we can transform everything
+
 !!!
 
 ## Photos
@@ -359,13 +377,6 @@ let a = PhotosMetadata(PHAsset.fetchAllAssets/*...*/())
 Now we want to turn our `PHAsset`s into `Photo`s
 
 !!!
-
-## Collection
-
-* We can only transform if it's a collection!
-
-!!!
-
 
 ## Photos
 
@@ -420,7 +431,8 @@ Transformations computed when the information is _forced_ out
 
 ## LazyCollection
 
-`protocol LazyCollectionProtocol: LazySequence, Collection`
+`protocol LazyCollectionProtocol:
+        LazySequenceProtocol, Collection`
 
 !!!
 
@@ -455,7 +467,8 @@ Evens().lazy.map{ $0 + 1 }
 
 ### Wait a second
 
-`protocol LazyCollectionProtocol: LazySequence, Collection`
+`protocol LazyCollectionProtocol:
+    LazySequenceProtocol, Collection`
 
 !!!
 
@@ -704,7 +717,7 @@ let m = AnyCollection(
 // m: AnyCollection<PhotoView>
 ```
 
-Note: Trade type information for maintainable code
+Note: Trade type information for maintainable code; see appendix for more info
 
 !!!
 
@@ -713,6 +726,14 @@ Note: Trade type information for maintainable code
 * AnySequence
 * AnyCollection
 * ... see appendix for more
+
+!!!
+
+## Photos
+
+```swift
+func prepareData(d: PhotosMetadata) -> AnyCollection<PhotoView>
+```
 
 !!!
 
@@ -814,7 +835,7 @@ Note: Precisely why you WANT to use the Swift machinery when you can
 
 * <!-- .element: class="fragment" data-fragment-index="1" --> Collections hold our photo metadata and photos <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> LazyCollection's map transforms our data <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> AnyCollection helps us maintains our type signatures <!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> AnyCollection gives maintainable type signatures <!-- .element: class="fragment" data-fragment-index="3" -->
 * <!-- .element: class="fragment" data-fragment-index="4" --> We can create new operators that compose <!-- .element: class="fragment" data-fragment-index="4" --> 
 
 !!!
