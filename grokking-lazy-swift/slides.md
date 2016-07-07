@@ -10,6 +10,8 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 <img src="./img/photo-stack.jpg" height=500 />
 
+> http://friendlycomputersspokane.com/wp-content/uploads/2014/06/photo-stack.jpg
+
 !!!
 
 # Photos
@@ -37,6 +39,8 @@ Note: More generally...
 ## Holding Things
 
 <img src="./img/holding-things.jpg" height=500 />
+
+> http://odditymall.com/includes/content/wall-mounted-hands-for-holding-stuff-0.jpg
 
 !!!
 
@@ -90,6 +94,8 @@ Let's say we want to iterate over the even numbers
 
 <img src="./img/2468.jpg" height=400 />
 
+> https://i.ytimg.com/vi/A9NfHIIwNN4/maxresdefault.jpg
+
 !!!
 
 ## IteratorProtocol
@@ -125,6 +131,8 @@ Note: This kinda sucks having to call next() with !
 
 <img src="./img/recall.jpg" height=500 />
 
+> http://ichef.bbci.co.uk/news/660/media/images/80295000/jpg/_80295405_thinking522738989.jpg
+
 Recall: A `Sequence` is an `Iterator` maker
 
 !!!
@@ -153,6 +161,8 @@ for x in Evens().prefix(5) {
 
 <img src="./img/questions.jpg" height=300 />
 
+> http://customer-blog-images.s3.amazonaws.com/questions.jpg
+
 !!!
 
 ## Sequence
@@ -174,6 +184,8 @@ Note: makeIterator() is inferred
 ## Sequence
 
 <img src="./img/what-else.jpg" height=500 />
+
+> http://www.thedirtondusters.com/wp-content/uploads/2012/08/WHAT-ELSE-NO-TEXT.jpg
 
 !!!
 
@@ -207,6 +219,8 @@ for x in someSequence {
 
 <img src="./img/recall.jpg" height=500 />
 
+> http://ichef.bbci.co.uk/news/660/media/images/80295000/jpg/_80295405_thinking522738989.jpg
+
 Recall: A `Collection` is an `Indexable` `Sequence`
 
 !!!
@@ -222,6 +236,8 @@ protocol Collection: Sequence, Indexable
 ## Collection
 
 <img src="./img/photo-stack.jpg" height=500 />
+
+> http://friendlycomputersspokane.com/wp-content/uploads/2014/06/photo-stack.jpg
 
 Note: iOS SDK has an API method for getting photo metadata of many photos
 
@@ -258,6 +274,8 @@ struct PhotosMetadata: Collection {
 * Non-integer indices are useful:
 
 <img src="./img/linked-list.png" height=300 />
+
+> https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/CPT-LinkedLists-deletingnode.svg/380px-CPT-LinkedLists-deletingnode.svg.png
 
 !!!
 
@@ -382,6 +400,8 @@ Note: In other words...
 
 <img src="./img/lazy.gif" height=500 />
 
+> https://media.giphy.com/media/AyXMnDH4nA7jW/giphy.gif
+
 Transformations computed when the information is _forced_ out
 
 !!!
@@ -440,6 +460,8 @@ Evens().lazy.map{ $0 + 1 }
 ### Protocol default implementations
 
 <img src="./img/gears.png" height=500 />
+
+> https://pptcrafter.files.wordpress.com/2013/01/gears-0.png
 
 !!!
 
@@ -576,6 +598,8 @@ struct LazyMapSequence<S: Sequence>: LazySequenceProtocol
 
 <img src="./img/burrito.png" height=300 />
 
+> http://www.tacobueno.com/media/1381/beefbob.png?quality=65
+
 !!!
 
 ## Burritos
@@ -594,6 +618,8 @@ let a = [1,2,3].lazy.map{ $0 + 1 }.filter{ $0 != 3 }
 ## Burritos
 
 <img src="./img/flour-tortilla.jpg" height=500 />
+
+> http://images.wisegeek.com/flour-tortilla.jpg
 
 !!!
 
@@ -642,6 +668,8 @@ Note: Ahhhhhh
 
 <img src="./img/magic-tortilla.jpg" height=500 />
 
+> http://m.jumpstart.com/JumpstartNew/uploadedFiles/sne/small-screenshots/the-magic-tortilla.jpg
+
 !!!
 
 ## Type Inference
@@ -656,6 +684,8 @@ return m.first
 ## Tortilla Erasure
 
 <img src="./img/tortilla-erasure.jpg" height=500 />
+
+> https://2e0a24317f4a9294563f-26c3b154822345d9dde0204930c49e9c.ssl.cf1.rackcdn.com/9218426_the-tortilla-pencil-case-deliciously-wraps_11d463da_m.jpg?bg=DFC1B7
 
 !!!
 
@@ -685,6 +715,8 @@ Note: Trade type information for maintainable code
 Product wants `everyOther` photo
 
 <img src="./img/every-other.jpg" height=500 />
+
+> http://www.giftofcuriosity.com/wp-content/uploads/2016/04/Letter-hopscotch-4.jpg
 
 !!!
 
@@ -758,6 +790,8 @@ Product wants every _4th_ photo
 
 <img src="./img/every-other.jpg" height=500 />
 
+> http://www.giftofcuriosity.com/wp-content/uploads/2016/04/Letter-hopscotch-4.jpg
+
 !!!
 
 ## Photos
@@ -801,25 +835,6 @@ P.P.S Check out Unary indexed collections in appendix
 !!!
 
 ## Appendix
-
-!!!
-
-### Images acquired via google images
-
-* `http://ichef.bbci.co.uk/news/660/media/images/80295000/jpg/_80295405_thinking522738989.jpg`
-* `http://www.thedirtondusters.com/wp-content/uploads/2012/08/WHAT-ELSE-NO-TEXT.jpg`
-* `http://friendlycomputersspokane.com/wp-content/uploads/2014/06/photo-stack.jpg`
-* `https://media.giphy.com/media/AyXMnDH4nA7jW/giphy.gif`
-* `http://www.tacobueno.com/media/1381/beefbob.png?quality=65`
-* `http://images.wisegeek.com/flour-tortilla.jpg`
-* `http://m.jumpstart.com/JumpstartNew/uploadedFiles/sne/small-screenshots/the-magic-tortilla.jpg`
-* `https://2e0a24317f4a9294563f-26c3b154822345d9dde0204930c49e9c.ssl.cf1.rackcdn.com/9218426_the-tortilla-pencil-case-deliciously-wraps_11d463da_m.jpg?bg=DFC1B7`
-* `http://www.giftofcuriosity.com/wp-content/uploads/2016/04/Letter-hopscotch-4.jpg`
-* `http://odditymall.com/includes/content/wall-mounted-hands-for-holding-stuff-0.jpg`
-* `https://pptcrafter.files.wordpress.com/2013/01/gears-0.png`
-* `https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/CPT-LinkedLists-deletingnode.svg/380px-CPT-LinkedLists-deletingnode.svg.png`
-* `https://i.ytimg.com/vi/A9NfHIIwNN4/maxresdefault.jpg`
-* `http://customer-blog-images.s3.amazonaws.com/questions.jpg`
 
 !!!
 

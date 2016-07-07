@@ -281,7 +281,11 @@ body {
 
 .reveal blockquote {
   box-shadow: none;
-  line-height: 1.8; }
+  line-height: 0;
+  font-size: small;
+  margin-top: -20px;
+  margin-bottom: -20px;
+}
 
 .reveal p, .reveal ul, .reveal ol {
   line-height: 1.8; }
