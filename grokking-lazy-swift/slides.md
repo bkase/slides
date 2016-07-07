@@ -4,6 +4,8 @@
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
+Note: Hi I'm brandon kase. Shorts .. We've encountered a bunch of challenges around this..
+
 !!!
 
 # Photos
@@ -31,8 +33,8 @@ Note: More generally...
 
 # Problems
 
-* There are a lot of things
-* Loading a thing is expensive
+* There are a lot of _things_
+* Loading a _thing_ is expensive
 
 !!!
 
@@ -57,7 +59,7 @@ let a = Array(PHAsset.fetchAllAssets/*...*/())
 // slowwwwww
 ```
 
-Note: Not abstract enough
+Note: Go over each element, one at a time and insert the elements
 
 !!!
 
@@ -72,6 +74,8 @@ We need a `Collection`
 * A `Collection` is an `Indexable` `Sequence`
 * A `Sequence` is an `Iterator` maker
 * An `Iterator` can produce one or more `Element`s
+
+Note: Slowly!
 
 !!!
 
@@ -209,9 +213,9 @@ for x in someSequence {
 
 ## Sequence
 
-* must be able to produce an iterator (could be self)
-* could be one-pass or multipass (no indexing!)
-* could be finite or infinite
+* must be able to produce an _iterator_
+* could be _one-pass_ or _multipass_
+* could be _finite_ or _infinite_
 
 !!!
 
@@ -256,6 +260,8 @@ struct PhotosMetadata: Collection {
 ```
 
 `Why do we need to deal with the index crap?` <!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: Point!
 
 !!!
 
