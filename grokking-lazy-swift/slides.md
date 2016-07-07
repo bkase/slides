@@ -8,7 +8,7 @@ Note: Hi I'm brandon kase. Shorts .. We've encountered a bunch of challenges aro
 
 !!!
 
-# Photos
+## Photos
 
 <img src="./img/photo-stack.jpg" height=500 />
 
@@ -16,13 +16,13 @@ Note: Hi I'm brandon kase. Shorts .. We've encountered a bunch of challenges aro
 
 !!!
 
-# Photos
+## Photos
 
 <img src="./img/cards1.jpg" height=500 />
 
 !!!
 
-# Problems
+## Problems
 
 * There are a lot of photos
 * Loading a photo's data is expensive
@@ -31,7 +31,7 @@ Note: More generally...
 
 !!!
 
-# Problems
+## Problems
 
 * There are a lot of _things_
 * Loading a _thing_ is expensive
@@ -415,11 +415,12 @@ Note: In other words...
 
 ## Lazy Groups of Things
 
-<img src="./img/lazy.gif" height=500 />
+Transformations computed when the information is _forced_ out
+
+<img src="./img/lazy.gif" height=400 />
 
 > https://media.giphy.com/media/AyXMnDH4nA7jW/giphy.gif
 
-Transformations computed when the information is _forced_ out
 
 !!!
 
@@ -436,7 +437,7 @@ Transformations computed when the information is _forced_ out
 
 !!!
 
-### Normal Map
+## Normal Map
 
 ```swift
 // eager sequence/collection
@@ -445,7 +446,7 @@ Transformations computed when the information is _forced_ out
 
 !!!
 
-### LazySequence Map
+## LazySequence Map
 
 ```swift
 Evens().lazy.map{ $0 + 1 }
@@ -455,7 +456,7 @@ Evens().lazy.map{ $0 + 1 }
 
 !!!
 
-### LazyCollection Map
+## LazyCollection Map
 
 ```swift
 [1,2,3].lazy.map{ $0 + 1 } 
@@ -465,7 +466,7 @@ Evens().lazy.map{ $0 + 1 }
 
 !!!
 
-### Wait a second
+## Wait a second
 
 `protocol LazyCollectionProtocol:
     LazySequenceProtocol, Collection`
@@ -741,7 +742,7 @@ func prepareData(d: PhotosMetadata) -> AnyCollection<PhotoView>
 
 Product wants `everyOther` photo
 
-<img src="./img/every-other.jpg" height=500 />
+<img src="./img/every-other.jpg" height=400 />
 
 > http://www.giftofcuriosity.com/wp-content/uploads/2016/04/Letter-hopscotch-4.jpg
 
@@ -815,7 +816,7 @@ let skipped = photos.everyOther()
 
 Product wants every _4th_ photo
 
-<img src="./img/every-other.jpg" height=500 />
+<img src="./img/every-other.jpg" height=400 />
 
 > http://www.giftofcuriosity.com/wp-content/uploads/2016/04/Letter-hopscotch-4.jpg
 
@@ -848,6 +849,13 @@ Our app works!
 
 !!!
 
+## P.S.
+
+* IBM Swift Sandbox is legit
+* Check out Unary indexed collections in appendix
+
+!!!
+
 <!-- .slide: data-background="#2aa198" -->
 <!-- .slide: data-state="terminal" -->
 
@@ -855,9 +863,7 @@ Our app works!
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
-P.S. IBM Swift Sandbox is legit
-
-P.P.S Check out Unary indexed collections in appendix
+Slide Deck: [https://is.gd/mEvKbt](https://is.gd/mEvKbt)
 
 !!!
 
