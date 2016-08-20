@@ -248,8 +248,7 @@ let imageNetCache = netCache.mapValues(bytesToImage)
 We want to define the operators on protocols not the concrete instances
 So what do we return?
 
-In Swift you cannot return some type with unapplied existentials (like our `Cache` protocol)
-(TODO: is this correct)
+In Swift you cannot return some type with existentials (like our `Cache` protocol)
 
 We need some type with no existential `associatedtype`s.
 
@@ -285,8 +284,8 @@ struct LambdaCache<K, V>: Cache {
 In Swift, type erasure is converting protocol constraints to a concrete struct full of lambdas.
 Existential associated types become universally quantified generics.
 
-Type erasure is usually used in Swift to simplify type signatures, but we can also use it to build 
-You erase the type information that you had about the specific cache.
+Type erasure is usually used in Swift to simplify type signatures, but we can also use it to workaround this limitation in the language.
+You erase the type information that you had about the specific cache and add a small runtime penalty of an extra function call
 
 ```swift
 func simplify() -> LambdaCache<K, V> {
@@ -499,9 +498,293 @@ let safeCache = (netCache and diskCache).reuseInflight(dict)
 
 ### Cache Layering
 
+Consider A `on-top-of` B
 
+(diagram)
 
 !!!
+
+### Cache Layering
+
+(same diagram with a circle around it)
+
+!!!
+
+### Cache layering
+
+```swift
+extension Cache {
+  func onTopOf<K, V, B: Cache>(other: B) -> LambdaCache<K, V>
+      where Self.Key == B.Key, B.Key == K,
+            Self.Value == B.Value, B.Value == V {
+```
+
+```swift
+    return LambdaCache(
+      get: { k in 
+          self.get(k).catchError{ e in 
+            other.get(k).map{ v in
+              self.set(k, v)
+              return v
+            }
+          }
+      }
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+      set: { k, v in Future.zip(self.set(k, v), other.set(k, v)) }
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+!!!
+
+### Cache layering
+
+```swift
+let c = a.onTopOf(b)
+// c is a cache!
+```
+
+!!!
+
+### Cache layering
+
+```swift
+let safeCache = (netCache.onTopOf(diskCache)).reuseInflight(dict)
+// solved!
+```
+
+!!!
+
+### Associative -- Cache layering
+
+(diagram)
+
+Note: Proof left as excersise to reader
+
+!!!
+
+### Identity -- Cache layering
+
+(diagram)
+
+Note: Informal proof?
+
+!!!
+
+### Cache layering
+
+Associative binary operator + an identity element = Monoid
+
+!!!
+
+### Monoidal Caching
+
+```swift
+
+let imageCache = fold(
+  ramCache,
+  diskCache,
+  networkCache
+)
+```
+
+!!!
+
+### Monoidal Caching
+
+We're able to forget the provenance of the cache's construction
+
+(image)
+
+!!!
+
+### Monoidal Caching
+
+* In our application logic we only need to care about `imageCache` now!
+* Or `videoCache` <!-- .element: class="fragment" data-fragment-index="1" -->
+* Or `jsonModelCache` <!-- .element: class="fragment" data-fragment-index="2" -->
+
+!!!
+
+### Monoidal whatever
+
+The ability to hide the "history" of the construction anywhere enables the developer to put the information wherever it may make sense to a reader.
+
+!!!
+
+### Caching is now simple
+
+(image)
+
+!!!
+
+### Caching is now simple?
+
+(image)
+
+!!!
+
+### Caching core
+
+The application logic is great now!
+But the core is still imperative and messy.
+
+!!!
+
+## Real Problems
+
+!!!
+
+### Networking
+
+Network cache `get` failed to complete a future in one branch of an error case
+
+(image)
+
+!!!
+
+### Networking
+
+The networking cache keeps track of how many requests are inflight to not oversaturate the bandwidth for higher priority things
+
+!!!
+
+### Networking
+
+The network cache eventually becomes unresponsive and requests hang forever!
+
+!!!
+
+### Real problems
+
+A good abstraction doesn't save you from the concrete cruft underneath
+
+!!!
+
+## Real problems
+
+!!!
+
+### Library bugs
+
+Don't blidly trust code you have never seen, esp. with few consumers
+
+!!!
+
+### Aside: Swift's memmory model
+
+Swift uses atomic reference counting instead of garbage collection
+
+!!!
+
+### Aside: Swift's memmory model
+
+* A garbage collector can reclaim reference cycles
+* Reference counting cannot
+
+!!!
+
+### Aside: Swift's memmory model
+
+```swift
+class Node { var next: Node }
+```
+
+```swift
+let a = Node();
+a.next = Node();
+a.next.next = a;
+// cycle!
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
+### Aside: Swift's memmory model
+
+```swift
+class Node { weak var next: Node }
+```
+
+```swift
+let a = Node();
+let b = Node();
+a.next = b;
+a.next?.next = a;
+// a.next *could* be nil
+// no cycle!
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
+### Core future library
+
+```swift
+// Inside Promise.swift (the mutable builder of a future)
+```
+
+```swift
+/// The Future associated to this Promise
+public lazy var future: Future<T> = {
+  return Future(promise: self)
+}()
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: See the bug?
+
+!!!
+
+### Core future library
+
+```swift
+public lazy weak var future: Future<T> /*...*/
+```
+
+!!!
+
+### Leaks
+
+What did this leak mean?
+
+!!!
+
+### Leaks
+
+Every single future created would retain a strong reference to the data
+
+!!!
+
+### Leaks
+
+`Future<JpegImage>`
+
+(image)
+
+!!!
+
+### Illusion of correctness
+
+* A clean abstraction seems to imply an illusion that everything will work
+* But the abstraction abstracts over something! <!-- .element: class="fragment" data-fragment-index="1" -->
+* Composition hides the provenance of some thing, but sometimes that provenance is where you need to look! <!-- .element: class="fragment" data-fragment-index="2" -->
+
+!!!
+
+## Caching
+
+!!!
+
+### Overall win
+
+The app worked. The caching worked.
+
+
 
 (extra)
 
