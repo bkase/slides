@@ -8,28 +8,60 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 Story:
 
-Complexity of client-side caching ->
+Photos app ->
+Needs caching ->
+Ad hoc caching is messy ->
 Let's manage the complexity ->
-
-Composability ->
-Identity? (always fail) ->
-Monoids! -> // life is amazing with monoids
-Materialized? projections of a few true imperative caches ->
-Contravariant Functors and Profunctors ->
-    (as an exsercise try and prove the laws)
+Too specific ->
+Abstraction ->
+Cache protocol ->
+Implementations of protocol ->
+Networking needs to give images ->
+Transformations ->
+Return value for map? ->
+Lambda cache / Basic cache ->
+Map still needs another contra-transform ->
+Because it needs both it's a profunctor ->
+Too slow to convert, need async map ->
+Key transforms are contravariant functors ->
+(need transition)
+Reusing inflight requests ->
+How do we reuse across disk and network ->
+Cache layering ->
+It's monoid ->
+Monoid means composable ->
 Legos ->
-
 Transformations ons legos (for any legos) ->
 Simple(r) client-side caching ->
-
 Simpler?, you still need the imperative core! ->
-Bugs interfacing with native libs ->
-Bugs in the core of the library ->
+Bugs interfacing with native libs -> (networking) ->
+Bugs in the core of the library -> (futures) ->
+Better summary
 
 
 !!!
 
 ## Photos
+
+(image)
+
+Note: We want to have an app with photos in it
+
+!!!
+
+## Photos
+
+(image)
+
+Note: Bandwidth, data caps, battery, coverage, etc
+
+!!!
+
+## Caching
+
+(image)
+
+Note: Ad-hoc caching logic makes code messy fast
 
 !!!
 
@@ -224,13 +256,13 @@ class NetworkCache<K>: Cache where K: URLConvertible {
 
 !!!
 
-## Transforming Caches
+### Network cache
+
+We need a network cache that gives us images not bytes!
 
 !!!
 
-### Transforming Caches
-
-We need a network cache that gives us images not bytes!
+## Transforming Caches
 
 !!!
 
@@ -245,12 +277,11 @@ let imageNetCache = netCache.mapValues(bytesToImage)
 
 ### How do we return a cache?
 
-We want to define the operators on protocols not the concrete instances
-So what do we return?
+* We want to define the operators on protocols not the concrete instances
+* You cannot return some type with existentials (like our `Cache` protocol)
+* So what do we return?
 
-In Swift you cannot return some type with existentials (like our `Cache` protocol)
-
-We need some type with no existential `associatedtype`s.
+Note: We need some type with no existential `associatedtype`s.
 
 !!!
 
@@ -292,6 +323,14 @@ func simplify() -> LambdaCache<K, V> {
   return LambdaCache(getFn: self.get, setFn: self.set)
 }
 ```
+
+!!!
+
+### MapValues
+
+(image)
+
+Note: Let's try to build it
 
 !!!
 
@@ -347,6 +386,15 @@ extension Cache {
 
 !!!
 
+### Profunctor w.r.t. values
+
+* Because we need both transformations
+* Caches are _profunctors_ w.r.t. values
+
+Note: Plus some other things you need to prove it that I'm hand waving
+
+!!!
+
 ### Transforming caches
 
 ```swift
@@ -359,6 +407,8 @@ let imageNetCache = netCache.mapValues(bytesToImage, imageToBytes)
 // SLOW!
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: Ok cool, now we can get images… but it's slow
 
 !!!
 
@@ -380,8 +430,17 @@ let imageNetCache = netCache.asyncMapValues(bytesToImage, imageToBytes)
   func get(key: Key) -> Future<Value> { /* ... */ }
   func set(key: Key, value: Value) -> Future<Unit> { /* ... */ }
   // key is always in the contravariant input position
-  // we only need an reverse transform
+  // we only need an inverse transform
 ```
+
+!!!
+
+### Contravariant-functors w.r.t. keys
+
+* Because we only need the inverse transform
+* Caches are _contravariant functors_ w.r.t. values
+
+Note: Plus some other things you need to prove it that I'm hand waving
 
 !!!
 
@@ -402,6 +461,10 @@ Note that these transformed caches are _virtual_. They provide different _projec
 !!!
 
 ## Reusing inflight requests
+
+!!!
+
+### Reusing inflight requests
 
 ```swift
 extension Cache where K: Hashable {
@@ -616,6 +679,12 @@ The ability to hide the "history" of the construction anywhere enables the devel
 
 !!!
 
+### Composable Caches
+
+Monoid is math speak for composable
+
+!!!
+
 ### Caching is now simple
 
 (image)
@@ -784,6 +853,7 @@ Every single future created would retain a strong reference to the data
 
 The app worked. The caching worked.
 
+!!!
 
 
 (extra)
