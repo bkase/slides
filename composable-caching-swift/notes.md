@@ -18,22 +18,34 @@ Caching and prefetching are necessary for mobile apps. In this talk, I will expl
 
 Story:
 
-Complexity of client-side caching ->
+Photos app ->
+Needs caching ->
+Ad hoc caching is messy ->
 Let's manage the complexity ->
-
-Composability ->
-Identity? (always fail) ->
-Monoids! -> // life is amazing with monoids
-Materialized? projections of a few true imperative caches ->
-Contravariant Functors and Profunctors ->
-    (as an exsercise try and prove the laws)
+Too specific ->
+Abstraction ->
+Cache protocol ->
+Implementations of protocol ->
+Networking needs to give images ->
+Transformations ->
+Return value for map? ->
+Lambda cache / Basic cache ->
+Map still needs another contra-transform ->
+Because it needs both it's a profunctor ->
+Too slow to convert, need async map ->
+Key transforms are contravariant functors ->
+(need transition)
+Reusing inflight requests ->
+How do we reuse across disk and network ->
+Cache layering ->
+It's monoid ->
+Monoid means composable ->
 Legos ->
-
-Transformations on legos (for any legos) ->
+Transformations ons legos (for any legos) ->
 Simple(r) client-side caching ->
-
 Simpler?, you still need the imperative core! ->
-Bugs interfacing with native libs ->
-Bugs in the core of the library ->
+Bugs interfacing with native libs -> (networking) ->
+Bugs in the core of the library -> (futures) ->
+Better summary
 
 

@@ -6,41 +6,6 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 !!!
 
-Story:
-
-Photos app ->
-Needs caching ->
-Ad hoc caching is messy ->
-Let's manage the complexity ->
-Too specific ->
-Abstraction ->
-Cache protocol ->
-Implementations of protocol ->
-Networking needs to give images ->
-Transformations ->
-Return value for map? ->
-Lambda cache / Basic cache ->
-Map still needs another contra-transform ->
-Because it needs both it's a profunctor ->
-Too slow to convert, need async map ->
-Key transforms are contravariant functors ->
-(need transition)
-Reusing inflight requests ->
-How do we reuse across disk and network ->
-Cache layering ->
-It's monoid ->
-Monoid means composable ->
-Legos ->
-Transformations ons legos (for any legos) ->
-Simple(r) client-side caching ->
-Simpler?, you still need the imperative core! ->
-Bugs interfacing with native libs -> (networking) ->
-Bugs in the core of the library -> (futures) ->
-Better summary
-
-
-!!!
-
 ## Photos
 
 (image)
@@ -256,7 +221,7 @@ class NetworkCache<K>: Cache where K: URLConvertible {
 
 !!!
 
-### Network cache
+## Not quite there yet
 
 We need a network cache that gives us images not bytes!
 
@@ -275,11 +240,11 @@ let imageNetCache = netCache.mapValues(bytesToImage)
 
 !!!
 
-### How do we return a cache?
+### Not so simple
 
-* We want to define the operators on protocols not the concrete instances
-* You cannot return some type with existentials (like our `Cache` protocol)
-* So what do we return?
+* We want to define the _operators_ on _protocols_ not the concrete instances
+* In Swift you _cannot_ return some type with _existentials_ (like our `Cache` protocol)
+* We need some type _without_ an existential `associatedtype`.
 
 Note: We need some type with no existential `associatedtype`s.
 
@@ -300,29 +265,17 @@ struct LambdaCache<K, V>: Cache {
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-  func get(key: Key) -> Future<Value> { return getFn(key) }
-  func set(key: Key, value: Value) -> Future<Unit> { return setFn(key, value) }
+  func get(key: Key) -> Future<Value> {
+    return getFn(key)
+  }
+  func set(key: Key, value: Value) -> Future<Unit> {
+    return setFn(key, value)
+  }
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
-!!!
-
-### Type erasure
-
-(maybe)
-
-In Swift, type erasure is converting protocol constraints to a concrete struct full of lambdas.
-Existential associated types become universally quantified generics.
-
-Type erasure is usually used in Swift to simplify type signatures, but we can also use it to workaround this limitation in the language.
-You erase the type information that you had about the specific cache and add a small runtime penalty of an extra function call
-
-```swift
-func simplify() -> LambdaCache<K, V> {
-  return LambdaCache(getFn: self.get, setFn: self.set)
-}
-```
+Note: Type erasure
 
 !!!
 
@@ -338,7 +291,7 @@ Note: Let's try to build it
 
 ```swift
 extension Cache {
-  func mapValues<V2>(f: V -> V2) -> LambdaCache<K, V2> {
+  func mapValues<V2>(f: Value -> V2) -> LambdaCache<K, V2> {
 ```
 
 ```swift
@@ -359,7 +312,9 @@ extension Cache {
 
 ### Transforming caches
 
-The `v` appears in covariant and contravariant positions so we need two transformation functions
+The `v` appears in _covariant_ and _contravariant_ positions
+
+We need two transformation functions
 
 !!!
 
@@ -367,7 +322,9 @@ The `v` appears in covariant and contravariant positions so we need two transfor
 
 ```swift
 extension Cache {
-  func mapValues<V2>(f: V -> V2, _ fInv: V2 -> V) -> LambdaCache<K, V2> {
+  func mapValues<V2>(
+      f: V -> V2,
+      _ fInv: V2 -> V) -> LambdaCache<K, V2> {
 ```
 
 ```swift
@@ -400,7 +357,8 @@ Note: Plus some other things you need to prove it that I'm hand waving
 ```swift
 // bytesToImage: NSData -> JpegImage
 // imageToBytes: JpegImage -> NSData
-let imageNetCache = netCache.mapValues(bytesToImage, imageToBytes)
+let imageNetCache = 
+    netCache.mapValues(bytesToImage, imageToBytes)
 ```
 
 ```swift
@@ -417,7 +375,8 @@ Note: Ok cool, now we can get images… but it's slow
 ```swift
 // bytesToImageAsync: NSData -> Future<JpegImage>
 // imageToBytes: JpegImage -> Future<NSData>
-let imageNetCache = netCache.asyncMapValues(bytesToImage, imageToBytes)
+let imageNetCache =
+    netCache.asyncMapValues(bytesToImage, imageToBytes)
 
 // asyncMapValues implementation similar to mapValues
 ```
@@ -456,7 +415,9 @@ let urlCache = diskCache.mapKeys(urlToString)
 
 ### Transforming caches
 
-Note that these transformed caches are _virtual_. They provide different _projections_ onto the same underlying cache.
+Note that these transformed caches are _virtual_.
+
+They provide different _projections_ onto the same underlying cache.
 
 !!!
 
@@ -468,9 +429,11 @@ Note that these transformed caches are _virtual_. They provide different _projec
 
 ```swift
 extension Cache where K: Hashable {
-  func reuseInflight(dict: [K: Future<V>]) -> BasicCache<K, V> {
-    return new BasicCache {
-      get: { k in dict[k] ?? (let f = self.get(k); dict[k] = f; f) }
+  func reuseInflight(
+      dict: [K: Future<V>]) -> LambdaCache<K, V> {
+    return new LambdaCache {
+      get: { k in dict[k] ??
+              (let f = self.get(k); dict[k] = f; f) }
       set: { (k, v) in self.set(k, value: v) }
     }
   }
@@ -548,7 +511,7 @@ Note: We wouldn't reuse the request
 ### Multi-step request reuse
 
 ```swift
-// We need something that let's us apply 
+// We need something that lets us apply 
 // that cache combinator to both at the same time
 let safeCache = (netCache and diskCache).reuseInflight(dict)
 ```
@@ -585,18 +548,16 @@ extension Cache {
 ```swift
     return LambdaCache(
       get: { k in 
-          self.get(k).catchError{ e in 
-            other.get(k).map{ v in
-              self.set(k, v)
-              return v
-            }
-          }
+          self.get(k).catchError{ e in
+            other.get(k).map{ v in self.set(k, v); return v }
+          } }
       }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-      set: { k, v in Future.zip(self.set(k, v), other.set(k, v)) }
+      set: { k, v in
+         Future.join(self.set(k, v), other.set(k, v)) }
   }
 }
 ```
@@ -616,7 +577,9 @@ let c = a.onTopOf(b)
 ### Cache layering
 
 ```swift
-let safeCache = (netCache.onTopOf(diskCache)).reuseInflight(dict)
+let safeCache =
+    netCache.onTopOf(diskCache)
+          .reuseInflight(dict)
 // solved!
 ```
 
@@ -640,7 +603,7 @@ Note: Informal proof?
 
 ### Cache layering
 
-Associative binary operator + an identity element = Monoid
+Associative binary operator + an identity element = _Monoid_
 
 !!!
 
@@ -668,14 +631,16 @@ We're able to forget the provenance of the cache's construction
 ### Monoidal Caching
 
 * In our application logic we only need to care about `imageCache` now!
-* Or `videoCache` <!-- .element: class="fragment" data-fragment-index="1" -->
-* Or `jsonModelCache` <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="1" --> Or <!-- .element: class="fragment" data-fragment-index="1" --> `videoCache` <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Or <!-- .element: class="fragment" data-fragment-index="2" --> `jsonModelCache` <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
 ### Monoidal whatever
 
-The ability to hide the "history" of the construction anywhere enables the developer to put the information wherever it may make sense to a reader.
+The ability to _hide "history"_ of the construction anywhere enables the developer to put the information wherever it may make sense to a reader.
+
+(image)
 
 !!!
 
@@ -700,6 +665,7 @@ Monoid is math speak for composable
 ### Caching core
 
 The application logic is great now!
+
 But the core is still imperative and messy.
 
 !!!
@@ -708,9 +674,15 @@ But the core is still imperative and messy.
 
 !!!
 
+### Network Cache
+
+Imperative implementation to interface with native iOS APIs
+
+!!!
+
 ### Networking
 
-Network cache `get` failed to complete a future in one branch of an error case
+Network cache `get` failed to complete a future in one error case
 
 (image)
 
@@ -718,7 +690,9 @@ Network cache `get` failed to complete a future in one branch of an error case
 
 ### Networking
 
-The networking cache keeps track of how many requests are inflight to not oversaturate the bandwidth for higher priority things
+The networking cache caps inflight requests
+
+So high priority requests can take over
 
 !!!
 
@@ -738,26 +712,42 @@ A good abstraction doesn't save you from the concrete cruft underneath
 
 !!!
 
+## Library Bugs
+
+!!!
+
+### Aside: "Carlos" is awesome
+
+* [Carlos](https://github.com/WeltN24/Carlos) is the Swift cache library that implements what we've described
+* Vittorio Monaco, creator of Carlos, came up with these ideas
+* My contribution was formalizing the cache layering (as a monoid) and some pull requests
+
+Note: Something about being grateful for this awesome library
+
+!!!
+
 ### Library bugs
 
-Don't blidly trust code you have never seen, esp. with few consumers
+Bugs can go _unnoticed_ if not many are using a library
+
+Let's talk about a _memory leak_
 
 !!!
 
-### Aside: Swift's memmory model
+### Aside: Swift's memory model
 
-Swift uses atomic reference counting instead of garbage collection
+Swift uses _atomic reference counting_ instead of garbage collection
 
 !!!
 
-### Aside: Swift's memmory model
+### Aside: Swift's memory model
 
 * A garbage collector can reclaim reference cycles
 * Reference counting cannot
 
 !!!
 
-### Aside: Swift's memmory model
+### Aside: Swift's memory model
 
 ```swift
 class Node { var next: Node }
@@ -773,7 +763,7 @@ a.next.next = a;
 
 !!!
 
-### Aside: Swift's memmory model
+### Aside: Swift's memory model
 
 ```swift
 class Node { weak var next: Node }
@@ -784,7 +774,7 @@ let a = Node();
 let b = Node();
 a.next = b;
 a.next?.next = a;
-// a.next *could* be nil
+// a.next *could* be nil (weak ref)
 // no cycle!
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -839,9 +829,9 @@ Every single future created would retain a strong reference to the data
 
 ### Illusion of correctness
 
-* A clean abstraction seems to imply an illusion that everything will work
-* But the abstraction abstracts over something! <!-- .element: class="fragment" data-fragment-index="1" -->
-* Composition hides the provenance of some thing, but sometimes that provenance is where you need to look! <!-- .element: class="fragment" data-fragment-index="2" -->
+* Clean abstractions are provide an _illusion_ that everything is nice
+* <!-- .element: class="fragment" data-fragment-index="1" --> But the abstraction abstracts over something! <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Composition _hides_ the provenance, but sometimes that provenance is _exactly_ where you need to look! <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
@@ -855,36 +845,9 @@ The app worked. The caching worked.
 
 !!!
 
+### Purescript Implementation
 
-(extra)
-
-## Similarities between our get / set
-
-The calls inside `get` and `set` need to be in the same order
-
-* `checkRam` -> `setRam`
-* `checkDisk` -> `setDisk`
-
-!!!
-
-More generally...
-
-Take two things of some type `T` and make one thing that same type `T`.
-
-Implies => The shape of one thing informs the other
-
-!!!
-
-
-
-!!!
-
-
-## TODO
-
-!!!
-
-[Purescript implementation?](https://github.com/bkase/purescript-cache/blob/master/src/Main.purs)
+[Purescript implementation](https://github.com/bkase/purescript-cache/blob/master/src/Main.purs) to help formalize these ideas
 
 !!!
 
@@ -896,4 +859,27 @@ Implies => The shape of one thing informs the other
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
 Slide Deck: (todo insert link)
+
+Thanks to [Vittorio Monaco](https://twitter.com/Vittorio_Monaco) for making the [Carlos](https://github.com/WeltN24/Carlos) library
+
+
+!!!
+
+## Appendix
+
+!!!
+
+### Type erasure
+
+In Swift, type erasure is converting protocol constraints to a concrete struct full of lambdas.
+Existential associated types become universally quantified generics.
+
+Type erasure is usually used in Swift to simplify type signatures, but we can also use it to workaround this limitation in the language.
+You erase the type information that you had about the specific cache and add a small runtime penalty of an extra function call
+
+```swift
+func simplify() -> LambdaCache<K, V> {
+  return LambdaCache(getFn: self.get, setFn: self.set)
+}
+```
 
