@@ -167,6 +167,10 @@ Note: Don't wince at the side-effects. (unrelated) Also, you can do something si
 
 !!!
 
+Insert there's a librar about carlos
+
+!!!
+
 ## Instance of a cache
 
 ```swift
@@ -222,6 +226,8 @@ class NetworkCache<K>: Cache where K: URLConvertible {
 !!!
 
 ## Not quite there yet
+
+We have concrete caches….
 
 We need a network cache that gives us images not bytes!
 
@@ -513,7 +519,7 @@ Note: We wouldn't reuse the request
 ```swift
 // We need something that lets us apply 
 // that cache combinator to both at the same time
-let safeCache = (netCache and diskCache).reuseInflight(dict)
+let safeCache = (diskCache and netCache).reuseInflight(dict)
 ```
 
 !!!
@@ -548,7 +554,7 @@ extension Cache {
 ```swift
     return LambdaCache(
       get: { k in 
-          self.get(k).catchError{ e in
+          self.get(k).orElse{ e in
             other.get(k).map{ v in self.set(k, v); return v }
           } }
       }
@@ -578,7 +584,7 @@ let c = a.onTopOf(b)
 
 ```swift
 let safeCache =
-    netCache.onTopOf(diskCache)
+    diskCache.onTopOf(netCache)
           .reuseInflight(dict)
 // solved!
 ```
@@ -603,7 +609,7 @@ Note: Informal proof?
 
 ### Cache layering
 
-Associative binary operator + an identity element = _Monoid_
+_Associative binary_ operator + an _identity_ element = _Monoid_
 
 !!!
 
@@ -652,7 +658,11 @@ Monoid is math speak for composable
 
 ### Caching is now simple
 
-(image)
+```swift
+let diskAndNet = (diskCache <> netCache).reuseInflight()
+let diskAndNetJpeg = diskAndNet.mapValues(bytesToImg, imgToBytes)
+return ramCache <> diskAndNetJpeg
+```
 
 !!!
 
@@ -712,7 +722,7 @@ A good abstraction doesn't save you from the concrete cruft underneath
 
 !!!
 
-## Library Bugs
+# Library Bugs
 
 !!!
 
@@ -829,19 +839,23 @@ Every single future created would retain a strong reference to the data
 
 ### Illusion of correctness
 
-* Clean abstractions are provide an _illusion_ that everything is nice
+* Clean abstractions provide an _illusion_ that everything is nice
 * <!-- .element: class="fragment" data-fragment-index="1" --> But the abstraction abstracts over something! <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Composition _hides_ the provenance, but sometimes that provenance is _exactly_ where you need to look! <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
-## Caching
+## Overall win
 
 !!!
 
 ### Overall win
 
-The app worked. The caching worked.
+To
+
+To make application logic easier
+
+To make user experience better
 
 !!!
 

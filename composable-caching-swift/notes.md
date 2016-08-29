@@ -49,3 +49,89 @@ Bugs in the core of the library -> (futures) ->
 Better summary
 
 
+
+
+
+Don't summarize so fast
+
+Photos
+
+===
+
+Downloading from network: 30sec
+Disk: 1sec
+Ram: 1ms
+
+Have a picture; have a diagram;
+
+===
+
+Thanks p for sponsoring. Thanks for m
+
+===
+
+Maybe remove showing the progress of fetch
+
+Also videos and comments and...
+
+===
+
+Consider ripping out lambdacache and not-so-simple
+
+It's important to be generic
+
+Go slower on the `set` possibly
+
+Consider making squares and circls
+
+It's not that the actual caches changes, it's that when you call it, the functions
+
+===
+
+Picture (maybe an animation)
+showing where the new request comes in (loadDataSafley)
+
+===
+
+`onTopOf` is too fast
+Simplify the type signature of `onTopOf`
+don't need `e in` in the `onTopOf` come from
+
+===
+
+Insert carlos callout
+
+===
+
+We're staying in the real problems section
+Real problem #2
+
+===
+
+When using some library and you call `.magic`, you can't assume that everything is amazing in that function
+
+===
+
+Now that we've fixed the bugs...
+
+===
+
+Real example? loading the images (a diagram)
+SUMMARY at the end
+
+
+1. see if we have the images
+2. load them from dictionary?
+3. load them from...
+...
+7. Fetch from database
+
+New feature (users can upload videso)
+
+Show how crappy the world is, then show the not crappy
+
+At the end so we want to load anything?
+
+1.dd
+2. sad
+3. asd
