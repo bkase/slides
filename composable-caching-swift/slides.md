@@ -16,6 +16,18 @@ Note: We want to have an app with photos in it
 
 ## Photos
 
+Review these numbers
+
+| Action                   | Milliseconds |
+| ------------------------ | ------- |
+| Downloading over 3g | 5000 |
+| Reading from disk | 500 |
+| Reading from memory | 1 |
+
+!!!
+
+## Photos
+
 (image)
 
 Note: Bandwidth, data caps, battery, coverage, etc
@@ -24,7 +36,13 @@ Note: Bandwidth, data caps, battery, coverage, etc
 
 ## Caching
 
-(image)
+1. Does this url exist in my hashmap (url to bitmap)?
+2. If so, return the bitmap <!-- .element: class="fragment" data-fragment-index="1" -->
+3. If not, does the jpeg exist on disk? <!-- .element: class="fragment" data-fragment-index="2" -->
+4. If so, convert it to a bitmap, save it to the hashmap, return it <!-- .element: class="fragment" data-fragment-index="3" -->
+5. If not, does a network request for the jpeg succeed? <!-- .element: class="fragment" data-fragment-index="4" -->
+6. If so, store it to disk, convert it to a bitmap, save it to the hashmap, return it <!-- .element: class="fragment" data-fragment-index="5" -->
+7. If not, fail <!-- .element: class="fragment" data-fragment-index="6" -->
 
 Note: Ad-hoc caching logic makes code messy fast
 
@@ -89,15 +107,16 @@ This isn't what your real code will look like though...
 
 ## Production Image Caches
 
-We need to know the progress of things as they download
+1. Does this url exist in my hashmap (url to bitmap)?
+2. If so, return the bitmap
+3. If not, _lookup url in a hashmap to reuse inflight request if possible_ 
+4. Does the jpeg exist on disk?
+4. If so, convert it to a bitmap, save it to the hashmap, _remove from inflight-map_, return it
+5. If not, does a network request for the jpeg succeed?
+6. If so, store it to disk, convert it to a bitmap, save it to the hashmap, _remove from inflight-map_, return it
+7. If not, fail
 
-(image)
 
-!!!
-
-## Production Image Caches
-
-We need to reuse inflight requests, instead of loading some asset twice
 
 (image -- like avatars in a comment thread)
 
@@ -105,19 +124,29 @@ We need to reuse inflight requests, instead of loading some asset twice
 
 ## Production ~~Image~~ Video Caches
 
-We need to support video!
-
-(image)
+1. Does this url exist in my hashmap (url to _video data_)?
+2. If so, return the _video data_
+3. If not, lookup url in a hashmap to reuse inflight request if possible_ 
+4. Does the _mp4_ exist on disk?
+4. If so, _read the video data_, save it to the hashmap, remove from inflight-map, return it
+5. If not, does a network request for the _mp4_ succeed?
+6. If so, store it to disk, _read h264 frames_, save it to the hashmap, remove from inflight-map, return it
+7. If not, fail
 
 !!!
 
 ## Production ~~Image~~ Everything Caches
 
-And don't we need to cache our model data?
+1. Does this url exist in my hashmap (url to _user profile_)?
+2. If so, return the _profile_
+3. If not, lookup url in a hashmap to reuse inflight request if possible_ 
+4. Does the _json data_ exist on disk?
+4. If so, _parse the data_, save _the user profile_ to the hashmap, remove from inflight-map, return it
+5. If not, does a network request for the _json data_ succeed?
+6. If so, store it to disk, _parse the data_, save it to the hashmap, remove from inflight-map, return it
+7. If not, fail
 
-Do we need to re-build everything again?
-
-(image)
+Notes: And don't we need to cache our model data?; Do we need to re-build everything again?
 
 !!!
 
@@ -167,7 +196,11 @@ Note: Don't wince at the side-effects. (unrelated) Also, you can do something si
 
 !!!
 
-Insert there's a librar about carlos
+### Aside: Carlos Cachine
+
+* An open source library called Carlos
+* Originally created by @x and @y (TODO)
+* Formal understanding by me?
 
 !!!
 
@@ -246,45 +279,6 @@ let imageNetCache = netCache.mapValues(bytesToImage)
 
 !!!
 
-### Not so simple
-
-* We want to define the _operators_ on _protocols_ not the concrete instances
-* In Swift you _cannot_ return some type with _existentials_ (like our `Cache` protocol)
-* We need some type _without_ an existential `associatedtype`.
-
-Note: We need some type with no existential `associatedtype`s.
-
-!!!
-
-### Lambda cache
-
-```swift
-struct LambdaCache<K, V>: Cache {
-  typealias Key = K
-  typealias Value = V
-```
-
-```swift
-  let getFn: K -> Future<V>
-  let setFn: (K, V) -> Future<Unit>
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-  func get(key: Key) -> Future<Value> {
-    return getFn(key)
-  }
-  func set(key: Key, value: Value) -> Future<Unit> {
-    return setFn(key, value)
-  }
-}
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-Note: Type erasure
-
-!!!
-
 ### MapValues
 
 (image)
@@ -301,7 +295,7 @@ extension Cache {
 ```
 
 ```swift
-    return new LambdaCache(
+    return new BasicCache(
       get: { k in self.get(k).map(f) }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -334,7 +328,7 @@ extension Cache {
 ```
 
 ```swift
-    return new LambdaCache(
+    return new BasicCache(
       get: { k in self.get(k).map(f) }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -424,6 +418,12 @@ let urlCache = diskCache.mapKeys(urlToString)
 Note that these transformed caches are _virtual_.
 
 They provide different _projections_ onto the same underlying cache.
+
+!!!
+
+### Virtual caches
+
+(image of the circles and squares)
 
 !!!
 
@@ -554,7 +554,7 @@ extension Cache {
 ```swift
     return LambdaCache(
       get: { k in 
-          self.get(k).orElse{ e in
+          self.get(k).orElse{
             other.get(k).map{ v in self.set(k, v); return v }
           } }
       }
@@ -851,11 +851,10 @@ Every single future created would retain a strong reference to the data
 
 ### Overall win
 
-To
+1. Build virtual cache out of primitives
+2. Call _get_ on the appropriate cache
 
-To make application logic easier
-
-To make user experience better
+Notes: That's it
 
 !!!
 
@@ -896,4 +895,46 @@ func simplify() -> LambdaCache<K, V> {
   return LambdaCache(getFn: self.get, setFn: self.set)
 }
 ```
+
+!!!
+
+### Not so simple
+
+* We want to define the _operators_ on _protocols_ not the concrete instances
+* In Swift you _cannot_ return some type with _existentials_ (like our `Cache` protocol)
+* We need some type _without_ an existential `associatedtype`.
+
+Note: We need some type with no existential `associatedtype`s.
+
+!!!
+
+### Lambda cache
+
+```swift
+struct LambdaCache<K, V>: Cache {
+  typealias Key = K
+  typealias Value = V
+```
+
+```swift
+  let getFn: K -> Future<V>
+  let setFn: (K, V) -> Future<Unit>
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+  func get(key: Key) -> Future<Value> {
+    return getFn(key)
+  }
+  func set(key: Key, value: Value) -> Future<Unit> {
+    return setFn(key, value)
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: Type erasure
+
+!!!
+
 
