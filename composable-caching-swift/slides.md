@@ -55,12 +55,12 @@ class ImageCache {
 ```
 
 ```swift
-  func get(url: Url) -> Future<JpegImage>
+  func get(url: Url) -> Future<UIImage>
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-  func set(url: Url, image: JpegImage) -> Future<Unit>
+  func set(url: Url, image: UIImage) -> Future<Unit>
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
@@ -73,14 +73,16 @@ class ImageCache {
 ## Image Cache (get)
 
 ```swift
-func get(url: Url) -> Future<JpegImage> {
+func get(url: Url) -> Future<UIImage> {
   return checkRam(url).orElse{
-    checkDisk(url)
+    checkDiskAndFallbackToRam(url)
   }.orElse{
-    hitNetwork(url)
+    hitNetworkAndFallbackToAll(url)
   }
 }
 ```
+
+Note: We're shoving a lot of domain-specific details into our helper functions here, but this should work
 
 !!!
 
@@ -116,9 +118,7 @@ This isn't what your real code will look like though...
 6. If so, store it to disk, convert it to a bitmap, save it to the hashmap, _remove from inflight-map_, return it
 7. If not, fail
 
-
-
-(image -- like avatars in a comment thread)
+Note: But then your PM says we need videos!
 
 !!!
 
@@ -196,11 +196,11 @@ Note: Don't wince at the side-effects. (unrelated) Also, you can do something si
 
 !!!
 
-### Aside: Carlos Cachine
+### Aside: Carlos Caching
 
-* An open source library called Carlos
-* Originally created by @x and @y (TODO)
-* Formal understanding by me?
+* [Carlos](https://github.com/WeltN24/Carlos) is an open source Swift library
+* Created by [@Vittorio_Monaco](https://twitter.com/Vittorio_Monaco) and [@esad](https://twitter.com/esad)
+* My contribution is some formalization and a few pull-requests
 
 !!!
 
@@ -260,7 +260,7 @@ class NetworkCache<K>: Cache where K: URLConvertible {
 
 ## Not quite there yet
 
-We have concrete caches….
+We have concrete caches…
 
 We need a network cache that gives us images not bytes!
 
@@ -291,7 +291,7 @@ Note: Let's try to build it
 
 ```swift
 extension Cache {
-  func mapValues<V2>(f: Value -> V2) -> LambdaCache<K, V2> {
+  func mapValues<V2>(f: Value -> V2) -> BasicCache<K, V2> {
 ```
 
 ```swift
@@ -324,7 +324,7 @@ We need two transformation functions
 extension Cache {
   func mapValues<V2>(
       f: V -> V2,
-      _ fInv: V2 -> V) -> LambdaCache<K, V2> {
+      _ fInv: V2 -> V) -> BasicCache<K, V2> {
 ```
 
 ```swift
@@ -436,8 +436,8 @@ They provide different _projections_ onto the same underlying cache.
 ```swift
 extension Cache where K: Hashable {
   func reuseInflight(
-      dict: [K: Future<V>]) -> LambdaCache<K, V> {
-    return new LambdaCache {
+      dict: [K: Future<V>]) -> BasicCache<K, V> {
+    return new BasicCache {
       get: { k in dict[k] ??
               (let f = self.get(k); dict[k] = f; f) }
       set: { (k, v) in self.set(k, value: v) }
@@ -546,13 +546,13 @@ Consider A `on-top-of` B
 
 ```swift
 extension Cache {
-  func onTopOf<K, V, B: Cache>(other: B) -> LambdaCache<K, V>
+  func onTopOf<K, V, B: Cache>(other: B) -> BasicCache<K, V>
       where Self.Key == B.Key, B.Key == K,
             Self.Value == B.Value, B.Value == V {
 ```
 
 ```swift
-    return LambdaCache(
+    return BasicCache(
       get: { k in 
           self.get(k).orElse{
             other.get(k).map{ v in self.set(k, v); return v }
@@ -650,12 +650,6 @@ The ability to _hide "history"_ of the construction anywhere enables the develop
 
 !!!
 
-### Composable Caches
-
-Monoid is math speak for composable
-
-!!!
-
 ### Caching is now simple
 
 ```swift
@@ -680,7 +674,9 @@ But the core is still imperative and messy.
 
 !!!
 
-## Real Problems
+## Real Problem #1
+
+#### Imperative Core
 
 !!!
 
@@ -718,21 +714,9 @@ A good abstraction doesn't save you from the concrete cruft underneath
 
 !!!
 
-## Real problems
+## Real problem #2
 
-!!!
-
-# Library Bugs
-
-!!!
-
-### Aside: "Carlos" is awesome
-
-* [Carlos](https://github.com/WeltN24/Carlos) is the Swift cache library that implements what we've described
-* Vittorio Monaco, creator of Carlos, came up with these ideas
-* My contribution was formalizing the cache layering (as a monoid) and some pull requests
-
-Note: Something about being grateful for this awesome library
+#### Library bugs
 
 !!!
 
@@ -831,7 +815,7 @@ Every single future created would retain a strong reference to the data
 
 ### Leaks
 
-`Future<JpegImage>`
+`Future<UIImage>`
 
 (image)
 
@@ -840,8 +824,10 @@ Every single future created would retain a strong reference to the data
 ### Illusion of correctness
 
 * Clean abstractions provide an _illusion_ that everything is nice
-* <!-- .element: class="fragment" data-fragment-index="1" --> But the abstraction abstracts over something! <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="1" --> When using some black box `.magic()`, you can't just assume it's perfect <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Composition _hides_ the provenance, but sometimes that provenance is _exactly_ where you need to look! <!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: Now that we've fixed the bugs...
 
 !!!
 
@@ -854,7 +840,7 @@ Every single future created would retain a strong reference to the data
 1. Build virtual cache out of primitives
 2. Call _get_ on the appropriate cache
 
-Notes: That's it
+Notes: That's it. Not seven steps
 
 !!!
 
@@ -875,26 +861,9 @@ Slide Deck: (todo insert link)
 
 Thanks to [Vittorio Monaco](https://twitter.com/Vittorio_Monaco) for making the [Carlos](https://github.com/WeltN24/Carlos) library
 
-
 !!!
 
 ## Appendix
-
-!!!
-
-### Type erasure
-
-In Swift, type erasure is converting protocol constraints to a concrete struct full of lambdas.
-Existential associated types become universally quantified generics.
-
-Type erasure is usually used in Swift to simplify type signatures, but we can also use it to workaround this limitation in the language.
-You erase the type information that you had about the specific cache and add a small runtime penalty of an extra function call
-
-```swift
-func simplify() -> LambdaCache<K, V> {
-  return LambdaCache(getFn: self.get, setFn: self.set)
-}
-```
 
 !!!
 
@@ -908,10 +877,26 @@ Note: We need some type with no existential `associatedtype`s.
 
 !!!
 
-### Lambda cache
+### Type erasure
+
+In Swift, type erasure is converting protocol constraints to a concrete struct full of lambdas.
+Existential associated types become universally quantified generics.
+
+Type erasure is usually used in Swift to simplify type signatures, but we can also use it to workaround this limitation in the language.
+You erase the type information that you had about the specific cache and add a small runtime penalty of an extra function call
 
 ```swift
-struct LambdaCache<K, V>: Cache {
+func simplify() -> BasicCache<K, V> {
+  return BasicCache(getFn: self.get, setFn: self.set)
+}
+```
+
+!!!
+
+### Type-erased cache
+
+```swift
+struct BasicCache<K, V>: Cache {
   typealias Key = K
   typealias Value = V
 ```
@@ -934,7 +919,4 @@ struct LambdaCache<K, V>: Cache {
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 Note: Type erasure
-
-!!!
-
 
