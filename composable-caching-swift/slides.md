@@ -1,20 +1,23 @@
-<!-- .slide: data-background="#2aa198" -->
+<!-- .slide: data-background="#DAA852" -->
 <!-- .slide: data-state="terminal" -->
+
 # Composable Caching in Swift
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
 !!!
 
-## Photos
+### Photos
 
-(image)
+![photo](img/photos2.jpg)
+
+> https://pixabay.com/p-1150076
 
 Note: We want to have an app with photos in it
 
 !!!
 
-## Photos
+### Photos
 
 Review these numbers
 
@@ -26,15 +29,7 @@ Review these numbers
 
 !!!
 
-## Photos
-
-(image)
-
-Note: Bandwidth, data caps, battery, coverage, etc
-
-!!!
-
-## Caching
+### Load an image
 
 1. Does this url exist in my hashmap (url to bitmap)?
 2. If so, return the bitmap <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -48,7 +43,7 @@ Note: Ad-hoc caching logic makes code messy fast
 
 !!!
 
-## Image Cache
+### Image Cache
 
 ```swift
 class ImageCache {
@@ -70,7 +65,7 @@ class ImageCache {
 
 !!!
 
-## Image Cache (get)
+### Image Cache (get)
 
 ```swift
 func get(url: Url) -> Future<UIImage> {
@@ -86,10 +81,10 @@ Note: We're shoving a lot of domain-specific details into our helper functions h
 
 !!!
 
-## Image Cache (set)
+### Image Cache (set)
 
 ```swift
-func set(url: Url, image: JpegImage) -> Future<Unit> {
+func set(url: Url, image: UIImage) -> Future<Unit> {
   return Futures.join(
     setRam(url, image),
     setDisk(url, image)
@@ -101,13 +96,13 @@ Note: Okay so this sort of makes sense
 
 !!!
 
-## Image Cache
+### Image Cache
 
 This isn't what your real code will look like though...
 
 !!!
 
-## Production Image Caches
+### Production Image Caches
 
 1. Does this url exist in my hashmap (url to bitmap)?
 2. If so, return the bitmap
@@ -116,17 +111,17 @@ This isn't what your real code will look like though...
 4. If so, convert it to a bitmap, save it to the hashmap, _remove from inflight-map_, return it
 5. If not, does a network request for the jpeg succeed?
 6. If so, store it to disk, convert it to a bitmap, save it to the hashmap, _remove from inflight-map_, return it
-7. If not, fail
+7. If not, fail and _remove from inflight-map_
 
 Note: But then your PM says we need videos!
 
 !!!
 
-## Production ~~Image~~ Video Caches
+### Production ~~Image~~ Video Caches
 
 1. Does this url exist in my hashmap (url to _video data_)?
 2. If so, return the _video data_
-3. If not, lookup url in a hashmap to reuse inflight request if possible_ 
+3. If not, lookup url in a hashmap to reuse inflight request if possible
 4. Does the _mp4_ exist on disk?
 4. If so, _read the video data_, save it to the hashmap, remove from inflight-map, return it
 5. If not, does a network request for the _mp4_ succeed?
@@ -135,28 +130,32 @@ Note: But then your PM says we need videos!
 
 !!!
 
-## Production ~~Image~~ Everything Caches
+### Production ~~Image~~ Everything Caches
 
 1. Does this url exist in my hashmap (url to _user profile_)?
 2. If so, return the _profile_
-3. If not, lookup url in a hashmap to reuse inflight request if possible_ 
+3. If not, lookup url in a hashmap to reuse inflight request if possible
 4. Does the _json data_ exist on disk?
 4. If so, _parse the data_, save _the user profile_ to the hashmap, remove from inflight-map, return it
 5. If not, does a network request for the _json data_ succeed?
 6. If so, store it to disk, _parse the data_, save it to the hashmap, remove from inflight-map, return it
 7. If not, fail
 
-Notes: And don't we need to cache our model data?; Do we need to re-build everything again?
+Note: And don't we need to cache our model data?; Do we need to re-build everything again?
 
 !!!
 
 ## Abstraction
 
-Okay, let's try again
+![abstract](img/abstract.jpg)
+
+> https://pixabay.com/p-1066182
+
+Note: Okay, let's try again
 
 !!!
 
-## Whatever Cache
+### Whatever Cache
 
 ```swift
 class Cache<Key, Value>
@@ -166,7 +165,7 @@ Note: Then we'll subclass or something?
 
 !!!
 
-## Protocol-oriented Design
+### Protocol-oriented Design
 
 ```swift
 protocol Cache {
@@ -192,7 +191,7 @@ protocol Cache {
 }
 ```
 
-Note: Don't wince at the side-effects. (unrelated) Also, you can do something similar in Rust
+Note: Blueprint that can be adopted
 
 !!!
 
@@ -204,7 +203,7 @@ Note: Don't wince at the side-effects. (unrelated) Also, you can do something si
 
 !!!
 
-## Instance of a cache
+### Instance of a cache
 
 ```swift
 class RamCache<K, V>: Cache where K: Hashable {
@@ -228,18 +227,18 @@ class RamCache<K, V>: Cache where K: Hashable {
 
 !!!
 
-## Other Instances
+### Other Instances
 
 ```swift
-// hash string key
+// md5 string key
 class DiskCache<K>: Cache where K: StringConvertible {
   typealias Key = K
-  typealias V = NSData // byte array
+  typealias Value = NSData // byte array
 }
 ```
 
 ```swift
-// does the photo exist in the camera roll on the device (no-op set)
+// does the photo exist in the camera roll (no-op set)
 class LocalPhotoKitCache: Cache {
   typealias Key = LocalPhotoKey
   typealias Value = UIImage
@@ -258,11 +257,13 @@ class NetworkCache<K>: Cache where K: URLConvertible {
 
 !!!
 
-## Not quite there yet
+### Not quite there yet
 
-We have concrete caches…
+![thinking](img/thinking2.jpg)
 
-We need a network cache that gives us images not bytes!
+> https://upload.wikimedia.org/wikipedia/commons/8/81/A_woman_thinking.jpg
+
+Note: We need a network cache that gives us images not bytes!
 
 !!!
 
@@ -273,15 +274,17 @@ We need a network cache that gives us images not bytes!
 ### Transforming Caches
 
 ```swift
-// bytesToImage: NSData -> JpegImage
-let imageNetCache = netCache.mapValues(bytesToImage)
+// bytesToImage: NSData -> UIImage
+// netCache: Cache<Value=NSData>
+let imageNetCache: Cache<Value=UIImage> =
+    netCache.mapValues(bytesToImage)
 ```
 
 !!!
 
 ### MapValues
 
-(image)
+![mapvalues](img/mapvalues.png)
 
 Note: Let's try to build it
 
@@ -310,11 +313,19 @@ extension Cache {
 
 !!!
 
+### MapValues
+
+![mapvalues2](img/mapvalues2.png)
+
+!!!
+
 ### Transforming caches
 
-The `v` appears in _covariant_ and _contravariant_ positions
+* The `v` appears in _covariant output_ and _contravariant input_ positions
+* We need two transformation functions
+* Caches are _profunctors_ w.r.t. values
 
-We need two transformation functions
+Note: Plus some other things you need to prove it that I'm hand waving
 
 !!!
 
@@ -343,21 +354,12 @@ extension Cache {
 
 !!!
 
-### Profunctor w.r.t. values
-
-* Because we need both transformations
-* Caches are _profunctors_ w.r.t. values
-
-Note: Plus some other things you need to prove it that I'm hand waving
-
-!!!
-
 ### Transforming caches
 
 ```swift
-// bytesToImage: NSData -> JpegImage
-// imageToBytes: JpegImage -> NSData
-let imageNetCache = 
+// bytesToImage: NSData -> UIImage
+// imageToBytes: UIImage -> NSData
+let imageNetCache: Cache<Value=UIImage> = 
     netCache.mapValues(bytesToImage, imageToBytes)
 ```
 
@@ -373,10 +375,13 @@ Note: Ok cool, now we can get images… but it's slow
 ### Transforming caches
 
 ```swift
-// bytesToImageAsync: NSData -> Future<JpegImage>
-// imageToBytes: JpegImage -> Future<NSData>
-let imageNetCache =
-    netCache.asyncMapValues(bytesToImage, imageToBytes)
+// bytesToImageAsync: NSData -> Future<UIImage>
+// imageToBytes: UIImage -> Future<NSData>
+let imageNetCache: Cache<Value=UIImage> =
+    netCache.asyncMapValues(
+        bytesToImageAsync,
+        imageToBytesAsync
+    )
 
 // asyncMapValues implementation similar to mapValues
 ```
@@ -392,14 +397,13 @@ let imageNetCache =
   // we only need an inverse transform
 ```
 
+Note: Caches are contravariant functors w.r.t. the keys
+
 !!!
 
-### Contravariant-functors w.r.t. keys
+### Map Keys
 
-* Because we only need the inverse transform
-* Caches are _contravariant functors_ w.r.t. values
-
-Note: Plus some other things you need to prove it that I'm hand waving
+![mapkeys](img/mapkeys.png)
 
 !!!
 
@@ -423,7 +427,14 @@ They provide different _projections_ onto the same underlying cache.
 
 ### Virtual caches
 
-(image of the circles and squares)
+![virtualcache](img/virtualcache.png)
+
+!!!
+
+### Caches
+
+* Network cache now returns images if necessary
+* What about re-using inflight requests?
 
 !!!
 
@@ -437,6 +448,9 @@ They provide different _projections_ onto the same underlying cache.
 extension Cache where K: Hashable {
   func reuseInflight(
       dict: [K: Future<V>]) -> BasicCache<K, V> {
+```
+
+```swift
     return new BasicCache {
       get: { k in dict[k] ??
               (let f = self.get(k); dict[k] = f; f) }
@@ -446,6 +460,7 @@ extension Cache where K: Hashable {
   // logic for freeing the memory elided
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
@@ -490,8 +505,8 @@ let smartDisk = diskCache.reuseInflight(dict)
 ```swift
 // Note: Don't do this
 func loadDataSafely(url: Url) -> Future<NSData> {
-  return smartDisk(url).orElse {
-    smartNetwork(url)
+  return smartDisk.get(url).orElse {
+    smartNetwork.get(url)
   }
 }
 ```
@@ -530,15 +545,16 @@ let safeCache = (diskCache and netCache).reuseInflight(dict)
 
 ### Cache Layering
 
-Consider A `on-top-of` B
+![layers](img/layers.png)
 
-(diagram)
+Note: Consider A on-top-of B
+
 
 !!!
 
 ### Cache Layering
 
-(same diagram with a circle around it)
+![layers2](img/layers2.png)
 
 !!!
 
@@ -546,16 +562,18 @@ Consider A `on-top-of` B
 
 ```swift
 extension Cache {
-  func onTopOf<K, V, B: Cache>(other: B) -> BasicCache<K, V>
-      where Self.Key == B.Key, B.Key == K,
-            Self.Value == B.Value, B.Value == V {
+  func onTopOf<B: Cache>(other: B) ->
+          BasicCache<Self.Key, Self.Value>
+      where Self.Key == B.Key
+            Self.Value == B.Value {
 ```
 
 ```swift
     return BasicCache(
       get: { k in 
           self.get(k).orElse{
-            other.get(k).map{ v in self.set(k, v); return v }
+            other.get(k)
+              .map{ v in self.set(k, v); return v }
           } }
       }
 ```
@@ -593,7 +611,7 @@ let safeCache =
 
 ### Associative -- Cache layering
 
-(diagram)
+![assoc](img/assoc.png)
 
 Note: Proof left as excersise to reader
 
@@ -601,7 +619,7 @@ Note: Proof left as excersise to reader
 
 ### Identity -- Cache layering
 
-(diagram)
+![identity](img/identity2.png)
 
 Note: Informal proof?
 
@@ -628,7 +646,9 @@ let imageCache = fold(
 
 ### Monoidal Caching
 
-We're able to forget the provenance of the cache's construction
+![noprovenance](img/noprovenance.png)
+
+Note: We're able to forget the provenance of the cache's construction
 
 (image)
 
@@ -636,25 +656,19 @@ We're able to forget the provenance of the cache's construction
 
 ### Monoidal Caching
 
-* In our application logic we only need to care about `imageCache` now!
+* In our application, we only need to care about `imageCache`!
 * <!-- .element: class="fragment" data-fragment-index="1" --> Or <!-- .element: class="fragment" data-fragment-index="1" --> `videoCache` <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Or <!-- .element: class="fragment" data-fragment-index="2" --> `jsonModelCache` <!-- .element: class="fragment" data-fragment-index="2" -->
-
-!!!
-
-### Monoidal whatever
-
-The ability to _hide "history"_ of the construction anywhere enables the developer to put the information wherever it may make sense to a reader.
-
-(image)
 
 !!!
 
 ### Caching is now simple
 
 ```swift
-let diskAndNet = (diskCache <> netCache).reuseInflight()
-let diskAndNetJpeg = diskAndNet.mapValues(bytesToImg, imgToBytes)
+let diskAndNet =
+    (diskCache <> netCache).reuseInflight()
+let diskAndNetJpeg =
+    diskAndNet.mapValues(bytesToImg, imgToBytes)
 return ramCache <> diskAndNetJpeg
 ```
 
@@ -662,15 +676,9 @@ return ramCache <> diskAndNetJpeg
 
 ### Caching is now simple?
 
-(image)
+![whatcore](img/whatcore.png)
 
-!!!
-
-### Caching core
-
-The application logic is great now!
-
-But the core is still imperative and messy.
+Note: Application logic great! The core is imperative and potentially messy
 
 !!!
 
@@ -688,29 +696,41 @@ Imperative implementation to interface with native iOS APIs
 
 ### Networking
 
-Network cache `get` failed to complete a future in one error case
+```swift
+if {
+  /* … */
+} else if {
+  // forgot to complete promise!!
+  /* … */
+} else if {
+  /* … */
+} /* … */
+```
 
-(image)
+Note: Forgot to complete a promise (mutable builder of future) in a branch
 
 !!!
 
 ### Networking
 
-The networking cache caps inflight requests
-
-So high priority requests can take over
+* The networking cache caps inflight requests
+* So high priority requests can take over
 
 !!!
 
 ### Networking
 
-The network cache eventually becomes unresponsive and requests hang forever!
+![freezingrain](img/freezingrain2.jpg)
+
+> https://upload.wikimedia.org/wikipedia/commons/0/0c/Freezing_Rain_on_Tree_Branch.jpg
+
+Note: The network cache eventually becomes unresponsive and requests hang forever!
 
 !!!
 
 ### Real problems
 
-A good abstraction doesn't save you from the concrete cruft underneath
+A good abstraction doesn't save you from cruft underneath
 
 !!!
 
@@ -778,7 +798,8 @@ a.next?.next = a;
 ### Core future library
 
 ```swift
-// Inside Promise.swift (the mutable builder of a future)
+// Inside Promise.swift
+// (the mutable builder of a future)
 ```
 
 ```swift
@@ -803,28 +824,30 @@ public lazy weak var future: Future<T> /*...*/
 
 ### Leaks
 
-What did this leak mean?
+![deadbattery](img/deadbattery2.png)
+
+> https://pixabay.com/p-1623377/
+
+Note: What did this leak mean?
 
 !!!
 
 ### Leaks
 
-Every single future created would retain a strong reference to the data
+Every future created retained a strong reference to the data
 
 !!!
 
-### Leaks
+### Leak UIImage
 
-`Future<UIImage>`
-
-(image)
+![bigpoint](img/bigpoint2.png)
 
 !!!
 
 ### Illusion of correctness
 
 * Clean abstractions provide an _illusion_ that everything is nice
-* <!-- .element: class="fragment" data-fragment-index="1" --> When using some black box `.magic()`, you can't just assume it's perfect <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="1" --> When using black box `.magic()`, you can't assume perfection <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Composition _hides_ the provenance, but sometimes that provenance is _exactly_ where you need to look! <!-- .element: class="fragment" data-fragment-index="2" -->
 
 Note: Now that we've fixed the bugs...
@@ -840,17 +863,17 @@ Note: Now that we've fixed the bugs...
 1. Build virtual cache out of primitives
 2. Call _get_ on the appropriate cache
 
-Notes: That's it. Not seven steps
+Note: That's it. Not seven steps
 
 !!!
 
 ### Purescript Implementation
 
-[Purescript implementation](https://github.com/bkase/purescript-cache/blob/master/src/Main.purs) to help formalize these ideas
+[Purescript implementation](https://github.com/bkase/purescript-cache/blob/master/src/Main.purs) created to help formalize these ideas
 
 !!!
 
-<!-- .slide: data-background="#2aa198" -->
+<!-- .slide: data-background="#DAA852" -->
 <!-- .slide: data-state="terminal" -->
 
 # Thanks!
@@ -919,4 +942,15 @@ struct BasicCache<K, V>: Cache {
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 Note: Type erasure
+
+!!!
+
+### Monoidal whatever
+
+The ability to _hide "history"_ of the construction anywhere enables the developer to put the information wherever it may make sense to a reader.
+
+(image)
+
+!!!
+
 
