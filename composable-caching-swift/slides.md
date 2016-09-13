@@ -1,4 +1,4 @@
-<!-- .slide: data-background="#DAA852" -->
+<!-- .slide: data-background="#2aa198" -->
 <!-- .slide: data-state="terminal" -->
 
 # Composable Caching in Swift
@@ -604,7 +604,7 @@ Note: Now that we've fixed the bugs...
 
 !!!
 
-<!-- .slide: data-background="#DAA852" -->
+<!-- .slide: data-background="#2aa198" -->
 <!-- .slide: data-state="terminal" -->
 
 # Thanks!
