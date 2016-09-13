@@ -60,6 +60,30 @@ Note: Disk; Network
 
 !!!
 
+### One Instance to Rule them all
+
+![shareddisk](img/shareddisk2.png)
+
+> https://pixabay.com/en/hard-disk-storage-computer-159264/
+
+!!!
+
+### One Instance to Rule them all
+
+![sharednetwork](img/sharednetwork2.png)
+
+> https://pixabay.com/en/internet-wlan-radio-network-1606099/
+
+!!!
+
+### Goal
+
+![dream](img/dream.png)
+
+Note: This is the sort of shape we want; boxes drawn like this because...
+
+!!!
+
 ### Cache Protocol
 
 ```swift
