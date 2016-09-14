@@ -8,7 +8,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
-### Why Caching?
+### Aside: Why Caching?
 
 | Action                   | Milliseconds |
 | ------------------------ | ------- |
@@ -18,19 +18,25 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
-### Production Image Caching
+### Goal
+
+![dream](img/dream.png)
+
+!!!
+
+### Image Caching
 
 ![flow image](img/flowimage2.png)
 
 !!!
 
-### Production ~~Image~~ Video Caches
+### ~~Image~~ Video Caching
 
 ![flow video](img/flowvideo.png)
 
 !!!
 
-### Production ~~Image~~ Everything Caches
+### ~~Image~~ Model Caching
 
 ![flow profile](img/flowprofile2.png)
 
@@ -39,16 +45,6 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 ### Goal
 
 ![dream](img/dream.png)
-
-Note: This is the sort of shape we want; boxes drawn like this because...
-
-!!!
-
-### Goal
-
-![dream2](img/dream2.png)
-
-Note: Sometimes we'll leave out pieces; Not only the same shape, but also...
 
 !!!
 
@@ -73,14 +69,6 @@ Note: Disk; Network
 ![sharednetwork](img/sharednetwork2.png)
 
 > https://pixabay.com/en/internet-wlan-radio-network-1606099/
-
-!!!
-
-### Goal
-
-![dream](img/dream.png)
-
-Note: This is the sort of shape we want; boxes drawn like this because...
 
 !!!
 
@@ -189,7 +177,7 @@ Note: Consider A on-top-of B
 
 ```swift
 extension Cache {
-  func onTopOf<B: Cache>(other: B) ->
+  func compose<B: Cache>(other: B) ->
           BasicCache<Self.Key, Self.Value>
       where Self.Key == B.Key
             Self.Value == B.Value {
@@ -219,7 +207,7 @@ extension Cache {
 ### Cache layering
 
 ```swift
-let c = a.onTopOf(b)
+let c = a.compose(b)
 // c is a cache!
 ```
 
@@ -228,7 +216,7 @@ let c = a.onTopOf(b)
 ### Cache layering
 
 ```swift
-let c = a.onTopOf(b).onTopOf(x)
+let c = a.compose(b).compose(x)
 // c is a cache!
 ```
 
@@ -251,11 +239,11 @@ class NetworkCache<K>: Cache where K: URLConvertible {
 ### Associative -- Cache layering
 
 ```swift
-let c1 = (ram.onTopOf(disk))
-    .onTopOf(network)
+let c1 = (ram.compose(disk))
+    .compose(network)
 // vs
-let c2 = ram.onTopOf(
-    (disk.onTopOf(network))
+let c2 = ram.compose(
+    (disk.compose(network))
 )
 ```
 
@@ -273,10 +261,16 @@ Note: Cache that always misses
 
 ### Identity Layering
 
+![identity](img/identity.png)
+
+!!!
+
+### Identity Layering
+
 ```swift
-let ram1 = ram.onTopOf(identity)
+let ram1 = ram.compose(identity)
 // vs
-let ram2 = identity.onTopOf(ram)
+let ram2 = identity.compose(ram)
 // ram == ram1 == ram2
 ```
 
@@ -407,8 +401,8 @@ extension Cache {
 ```swift
 extension Cache {
   func mapValues(
-      f: Bytes -> UIImage,
-      _ fInv: UIImage -> Bytes
+      f: NSData -> UIImage,
+      _ fInv: UIImage -> NSData
   ) -> BasicCache<Key, UIImage> {
 
     return new BasicCache(
@@ -510,10 +504,10 @@ Note: Now it works!
 
 ```swift
 let diskAndNet =
-    diskCache.onTopOf(netCache)
-let diskAndNetJpeg =
+    diskCache.compose(netCache)
+let diskAndNetImage =
     diskAndNet.mapValues(bytesToImg, imgToBytes)
-return ramCache.onTopOf(diskAndNetJpeg)
+return ramCache.compose(diskAndNetImage)
 ```
 
 !!!
@@ -568,7 +562,7 @@ let f2 = smartNetworkCache.get(url)
 ## Reuse across composed caches!
 
 ```swift
-let optimizedCache = diskCache.onTopOf(netCache)
+let optimizedCache = diskCache.compose(netCache)
     .reuseInflight(dict)
 ```
 
@@ -580,32 +574,22 @@ Note: This same technique applies for any sort of cache agnostic operations you 
 
 ```swift
 let diskAndNet =
-    diskCache.onTopOf(netCache).reuseInflight(dict)
-let diskAndNetJpeg =
+    diskCache.compose(netCache).reuseInflight(dict)
+let diskAndNetImage =
     diskAndNet.mapValues(bytesToImg, imgToBytes)
-return ramCache.onTopOf(diskAndNetJpeg)
+return ramCache.compose(diskAndNetImage)
 ```
 
 !!!
 
-## Other problems
-
-#### Illusion of correctness
+## Complexity
 
 !!!
 
-### Illusion of correctness
+### Complexity in one place
 
-* Clean abstractions provide an _illusion_ that everything is nice
-* <!-- .element: class="fragment" data-fragment-index="1" --> Memory leak deep in caching implementation hard to find <!-- .element: class="fragment" data-fragment-index="1" -->
-* <!-- .element: class="fragment" data-fragment-index="2" --> When using black box `.magic()`, you can't assume perfection <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> Composition _hides_ the provenance, but sometimes that provenance is _exactly_ where you need to look! <!-- .element: class="fragment" data-fragment-index="3" -->
-
-Note: Now that we've fixed the bugs...
-
-!!!
-
-## Overall win
+* We've taken an inherently complex problem, and minimized the complex surface area
+* <!-- .element: class="fragment" data-fragment-index="1" --> We had a memory leak, but once it's fixed, it's fixed everywhere <!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
