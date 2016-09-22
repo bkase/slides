@@ -608,7 +608,7 @@ Note: Profunctor and Contravariant functor
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
-Slide Deck: (todo insert link)
+Slide Deck: [https://is.gd/edLKW7](https://is.gd/edLKW7)
 
 Thanks to [Vittorio Monaco](https://twitter.com/Vittorio_Monaco) for making the [Carlos](https://github.com/WeltN24/Carlos) library
 
