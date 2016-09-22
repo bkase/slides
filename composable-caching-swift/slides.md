@@ -46,6 +46,8 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 ![dream](img/dream.png)
 
+Note: See the inner section, same shape + same instance
+
 !!!
 
 ### One Instance to Rule them all
@@ -177,11 +179,15 @@ Note: Consider A on-top-of B
 
 ```swift
 extension Cache {
+```
+
+```swift
   func compose<B: Cache>(other: B) ->
           BasicCache<Self.Key, Self.Value>
       where Self.Key == B.Key
             Self.Value == B.Value {
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
     return BasicCache(
@@ -192,15 +198,17 @@ extension Cache {
           } }
       }
 ```
-<!-- .element: class="fragment" data-fragment-index="1" -->
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
       set: { k, v in
          Future.join(self.set(k, v), other.set(k, v)) }
   }
+
+```swift
 }
 ```
-<!-- .element: class="fragment" data-fragment-index="2" -->
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
@@ -261,10 +269,10 @@ Note: Cache that always misses
 
 ### Identity Layering
 
-![identity](img/identity.png)
+![identity-layer](img/identity-layer2.png)
 
 !!!
-
+<!--
 ### Identity Layering
 
 ```swift
@@ -275,8 +283,7 @@ let ram2 = identity.compose(ram)
 ```
 
 Note: Informal proof?
-
-!!!
+-->
 
 ### Cache layering
 
@@ -348,16 +355,6 @@ let imageNetCache: Cache<Value=UIImage> =
 
 ### Transforming caches
 
-* The `v` appears in _covariant output_ and _contravariant input_ positions
-* We need two transformation functions
-* Caches are _profunctors_ w.r.t. values
-
-Note: The laws should hold
-
-!!!
-
-### Transforming caches
-
 Note that these transformed caches are _virtual_.
 
 They provide different _projections_ onto the same underlying cache.
@@ -382,7 +379,7 @@ extension Cache {
 
 ```swift
     return new BasicCache(
-      get: { k in self.get(k).map(f) }
+      get: { k in self.get(k).map(f) },
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -439,15 +436,6 @@ extension Cache {
 ![keytransform](img/keytransform.png)
 
 > https://pixabay.com/p-30417/?no_redirect
-
-!!!
-
-### Key transformations
-
-* The `k` appears in _contravariant input_ positions
-* Caches are contravariant functors w.r.t. the keys
-
-Note: The laws should hold
 
 !!!
 
@@ -514,7 +502,7 @@ return ramCache.compose(diskAndNetImage)
 
 ## Problem
 
-![chat client](img/chatclient.png)
+![chat client](img/chatclient2.png)
 
 Note: For efficiency, we don't want to hit the network 10 times here
 
@@ -582,14 +570,13 @@ return ramCache.compose(diskAndNetImage)
 
 !!!
 
-## Complexity
+## Complexity in one place
 
-!!!
+![chaos](img/chaos2.jpg)
 
-### Complexity in one place
+> https://pixabay.com/p-724096
 
-* We've taken an inherently complex problem, and minimized the complex surface area
-* <!-- .element: class="fragment" data-fragment-index="1" --> We had a memory leak, but once it's fixed, it's fixed everywhere <!-- .element: class="fragment" data-fragment-index="1" -->
+Note: Taken an inherently complex problem and minimized the surface area of complexity; but it's still there. Fix once, fix everywhere
 
 !!!
 
@@ -609,6 +596,8 @@ return ramCache.compose(diskAndNetImage)
 ### Purescript Implementation
 
 [Purescript implementation](https://github.com/bkase/purescript-cache/blob/master/src/Main.purs) created to help formalize these ideas
+
+Note: Profunctor and Contravariant functor
 
 !!!
 
@@ -716,4 +705,22 @@ Note: We're able to forget the provenance of the cache's construction
 
 !!!
 
+### Transforming caches
+
+* The `v` appears in _covariant output_ and _contravariant input_ positions
+* We need two transformation functions
+* Caches are _profunctors_ w.r.t. values
+
+Note: The laws should hold
+
+!!!
+
+### Key transformations
+
+* The `k` appears in _contravariant input_ positions
+* Caches are contravariant functors w.r.t. the keys
+
+Note: The laws should hold
+
+!!!
 
