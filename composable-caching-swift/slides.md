@@ -379,7 +379,7 @@ extension Cache {
 
 ```swift
     return new BasicCache(
-      get: { k in self.get(k).map(f) },
+      get: { k in self.get(k).map(f) }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -520,7 +520,7 @@ extension Cache where K: Hashable {
     return new BasicCache {
       get: { k in dict[k] ??
               (let f = self.get(k); dict[k] = f; f) }
-      set: { (k, v) in self.set(k, value: v) }
+      set: self.set
     }
   }
   // logic for freeing the memory elided
