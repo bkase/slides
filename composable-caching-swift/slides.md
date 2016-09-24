@@ -204,11 +204,12 @@ extension Cache {
       set: { k, v in
          Future.join(self.set(k, v), other.set(k, v)) }
   }
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 ```swift
 }
 ```
-<!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
