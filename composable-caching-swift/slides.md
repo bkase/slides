@@ -619,7 +619,7 @@ Thanks to [Vittorio Monaco](https://twitter.com/Vittorio_Monaco) for making the 
 
 !!!
 
-### Not so simple
+### Type Erasure
 
 * We want to define the _operators_ on _protocols_ not the concrete instances
 * In Swift you _cannot_ return some type with _existentials_ (like our `Cache` protocol)
@@ -674,14 +674,6 @@ Note: Type erasure
 
 !!!
 
-### Monoidal whatever
-
-The ability to _hide "history"_ of the construction anywhere enables the developer to put the information wherever it may make sense to a reader.
-
-(image)
-
-!!!
-
 ### Async Transforming caches
 
 ```swift
@@ -695,14 +687,6 @@ let imageNetCache: Cache<Value=UIImage> =
 
 // asyncMapValues implementation similar to mapValues
 ```
-
-!!!
-
-### Monoidal Caching
-
-![noprovenance](img/noprovenance.png)
-
-Note: We're able to forget the provenance of the cache's construction
 
 !!!
 
@@ -722,6 +706,4 @@ Note: The laws should hold
 * Caches are contravariant functors w.r.t. the keys
 
 Note: The laws should hold
-
-!!!
 
