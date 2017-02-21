@@ -1,15 +1,32 @@
 Title?
+
 Making the subjective objective: Composable algebraic APIs are elegant?
 Algebraic APIs
+
+
 Applying Abstract Algebra at APIs
 
-You don't need HKTs to get use out of thinking algebraically
+* Cache composition
+
+* Cancellation of asynchronous work
+
+* Parallel composition of animations
+
+
+
+// You don't need HKTs to get use out of thinking algebraically
+
 
 Composition lets us amplify the amount of expressive power we have relative to the number of primitives in our library.
 
+
 We are all familiar with composable arithmatic APIs
 5 + 10 + 400 = 415
+
 What if our numbers couldn't compose with addition if they had a different amount of digits
+
+
+
 /// 1,2,3,4,5 etc
 /// NOT 10 or 100 or 1000
 protocol OnesNumber {
@@ -36,6 +53,11 @@ While composition helps us minimize the surface area of our types, function, val
 Various laws over the composition helps us reason over our code and give us more expressive power
 
 Building blocks:
+c3 = c1.and(c2)
+        .and(c3)
+        .and(c4)
+
+
   * Closed binary operation: (T, T) -> T
   * Associativity
     * No need for parentheses; run different parts in parallel
@@ -47,11 +69,11 @@ Building blocks:
     * factor out common chunks of code in business logic to reduce code and compute needed to solve a problem
     * x*y + x*z = x * (y + z)
   * Idempotence
-    * freedom to do things more than once; out-of-order execution in a distributed system
+    * freedom to do things more than once; at-least-once semantics execution in a distributed system
     * max(5, 6) = 6 and max(max(5, 6), 6) = 6
   * Identity
     * not doing something is still a value of the same type (no need for option etc)
-    * 0 + x = 0
+    * 0 + x = x
   * Inverse
     * I can undo anything
     * x + (-x) = 0
@@ -86,11 +108,11 @@ Also there has been lots of academic research lately on applying these algebraic
 struct Monoid<T> {
     let empty: T
     let append: (T, T) -> T
-    
+
     func fold(_ arr: [T]) -> T {
         return arr.reduce(empty, append)
     }
-    
+
     func foldMap<R>(_ arr: [R], _ f: (R) -> T) -> T {
         return fold(arr.map(f))
     }
@@ -109,15 +131,15 @@ func once(_ f: @escaping () -> ()) -> () -> () {
 
 struct CancelToken {
     static let monoid: Monoid<CancelToken> =
-        Monoid(empty: CancelToken(cancel: {}), append: { f, g in 
-            CancelToken(cancel: { f.cancel(); g.cancel() }) 
+        Monoid(empty: CancelToken(cancel: {}), append: { f, g in
+            CancelToken(cancel: { f.cancel(); g.cancel() })
         })
 
     private let fn: () -> ()
     init(cancel: @escaping () -> ()) {
         self.fn = once(cancel)
     }
-    
+
     func cancel() {
         fn()
     }
@@ -193,25 +215,25 @@ struct AllProps {
 enum Time {
     case cancelled
     case millis(Int64)
-    
+
     var isCancelled: Bool {
         switch self {
         case .cancelled: return true
         default: return false
         }
     }
-    
+
     // ignores cancellation (parallel)
     func max(_ other: Time) -> Time {
         switch (self, other) {
-            case (.cancelled, .millis(_)), 
+            case (.cancelled, .millis(_)),
                  (.cancelled, .cancelled): return other
             case (.millis(_), .cancelled): return self
-            case (.millis(let x), .millis(let y)): 
+            case (.millis(let x), .millis(let y)):
                 return .millis(fixedMax(x, y))
         }
     }
-    
+
     // cancel annihalates rightwards
     func plus(_ other: Time) -> Time {
         switch (self, other) {
@@ -221,7 +243,7 @@ enum Time {
             case let (.millis(x), .millis(y)): return .millis(x + y)
         }
     }
-    
+
     func proportion(_ other: Time) -> Double {
         switch (self, other) {
             case (.cancelled, .cancelled),
@@ -235,7 +257,7 @@ struct Animation {
 // TODO: Cancellation
     let curve: (_ prop: SomeProp, _ time: ZeroToOneInclusive) -> ZeroToOneInclusive?
     let duration: Time
-    
+
     static let one = Animation(
         curve: { p, t in t },
         duration: .millis(0)
@@ -245,13 +267,13 @@ struct Animation {
         curve: { p, t in 1.0 },
         duration: .cancelled
     )
-    
+
     func parallel(_ other: Animation) -> Animation {
         return Animation(
-            curve: { prop, time in 
+            curve: { prop, time in
                 let curve1contrib = self.curve(prop, time)
                 let curve2contrib = other.curve(prop, time)
-        
+
                 switch (curve1contrib, curve2contrib) {
                 case (.none, .none): return .none
                 case (.none, let x): return x
@@ -262,12 +284,12 @@ struct Animation {
             duration: duration.max(other.duration)
         )
     }
-    
+
     func sequence(_ other: Animation) -> Animation {
         if duration.isCancelled {
             return self
         }
-        
+
         let aProportion = duration.proportion(other.duration)
         let bProportion = 1 - aProportion
         return Animation(
@@ -287,7 +309,7 @@ struct Animation {
             Opacity.run(animation: self, step: step)
             XPosition.run(animation: self, step: step)
         }
-    
+
         switch duration {
             case .cancelled:
                 print("Cancelled, not running")
@@ -314,7 +336,7 @@ struct Animation {
 let linear: (Double) -> Double = { t in t }
 let quad: (Double) -> Double = { t in t*t }
 // TODO: this could be nicer with prisms I think
-let opacityLinear = Animation(curve: { p, t in 
+let opacityLinear = Animation(curve: { p, t in
     switch p {
     case .opacity: return linear(t)
     default: return .none
