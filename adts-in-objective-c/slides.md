@@ -10,7 +10,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 (pinterest feed picture)
 
-Note: for many cases of information modelling (taking the spec and putting it into code); I'm using the feed as an example of where this type of thing would fit: Right now we have Pin, Story, Board (and now Tries?), maybe food reviews?, it seems like we're going to keep adding new variants
+Note: for many cases of information modelling (taking the spec and putting it into code); I'm using the feed as an example of where this type of thing would fit: Right now we have Pin, Story, Board, what if we add another variant
 
 !!!
 
@@ -203,7 +203,7 @@ case one(Void)
 
 Not having a `sum` type (aka a Swift `enum`) is like not being able to add numbers.
 
-It's insane! It is fundamental to modeling information!
+Note: It's insane! It is fundamental to modeling information!
 
 !!!
 
@@ -218,7 +218,8 @@ Okay so how can we get a sum-of-product in Objective-C?
 
 ### Step 1: Impossible states are impossible by construction
 
-There is no way to make a Pin and Story at the same time. There is no way to create some object that has neither a Pin nor a Story.
+* No way to make a Pin and Story at the same time
+* No way to create some object that has neither a Pin nor a Story.
 
 !!!
 
@@ -227,7 +228,7 @@ There is no way to make a Pin and Story at the same time. There is no way to cre
 ```objective-c
 // inheritance and constructor specialization
 @interface FeedItem : NSObject
--(instancetype)init NS_NOT_ALLOWED; (lookup)
+-(instancetype)init NS_UNAVAILABLE;
 @end
 @interface StoryFeedItem 
 -(FeedItem)init withStoryData:(StoryData *)
@@ -241,7 +242,9 @@ Note: Omitting namespace for clarity
 
 ### Step 2: Compiler enforces all cases are handled
 
-(picture)
+![enforce](img/enforce.jpg)
+
+> http://www.justingary.com/wp-content/uploads/2016/07/Enforcement.jpg
 
 Note: we can use a method with parameters for each case
 
@@ -314,6 +317,8 @@ FeedItem<ValueType>
 
 ![matrix](img/code-matrix.jpg)
 
+> http://www.myfreewallpapers.net/abstract/wallpapers/code-matrix.jpg
+
 Note: So why is this not good enough?
 
 !!!
@@ -355,7 +360,9 @@ Note: And we still have the same sort of problem as before to manage this boiler
 
 ## Macros can manage boilerplate
 
-(picture)
+![manager](img/manager.jpg)
+
+> http://www.eylean.com/blog/wp-content/uploads/2014/06/project-manager-multitasking.jpg
 
 !!!
 
@@ -397,7 +404,9 @@ Note: explain it in detail here
 
 ## How can we build it?
 
-(picture)
+![builder](img/builder.jpg)
+
+> http://clipart-library.com/clipart/385426.htm
 
 Note: Let's talk about macros
 
@@ -411,7 +420,7 @@ Note: Let's talk about macros
 NSLog(FOO); // logs "bar"
 ```
 
-Note: Replace a string
+Note: Replace with a string
 
 !!!
 
@@ -423,7 +432,7 @@ Note: Replace a string
 NSLog(FOO(before, after)); // logs "before bar after"
 ```
 
-Note: Macro functoins? (read this more)
+Note: Macro functions
 
 !!!
 
@@ -441,7 +450,9 @@ Note: Token pasting
 
 ## How can we build it?
 
-(picture building a complex thing out of nothing)
+![crazy toothpick city street](img/toothpicks.jpg)
+
+> http://s535395661.websitehome.co.uk/wp-content/uploads/2011/12/San-Fran-Toothpick-Model-41.jpg
 
 Note: This seems like it's not enough
 
@@ -457,7 +468,7 @@ ONE_OF(FeedItem,
 )
 ```
 
-Note: variadic within the case, variadic across the cases, we need the 
+Note: variadic within the case, variadic across the cases, we need to communicate between the macros
 
 !!!
 
@@ -484,15 +495,81 @@ Note: What if we want to map over the args
 
 !!!
 
-## FOR_EACH
+## CONCATENATE
 
-(picture of the crazy)
+```
+// This macro lets you x##y but x and/or y
+// can be nested macro calls.
+#define CONCATENATE(x, y) CONCATENATE1(x, y)
+#define CONCATENATE1(x, y) CONCATENATE2(x, y)
+#define CONCATENATE2(x, y) x##y
+```
+
+TODO attribute to stack overflow
+
 
 !!!
 
 ## FOR_EACH
 
-(explain each bit)
+![for each](img/foreach.png)
+
+Note:
+
+!!!
+
+## FOR_EACH
+
+```objective-c
+#define FOR_EACH_0(...)
+#define FOR_EACH_1(what, x, ...) what(x)
+#define FOR_EACH_2(what, x, ...)\
+  what(x) \
+  FOR_EACH_1(what, __VA_ARGS__)
+#define FOR_EACH_3(what, x, ...)\
+  what(x) \
+  FOR_EACH_2(what, __VA_ARGS__)
+// etc
+```
+
+TODO attribute the stack overflow
+
+Note: one of these will be called, and cascades downwards
+
+!!!
+
+## FOR_EACH
+
+```objective-c
+#define FOR_EACH_NARG(...) FOR_EACH_NARG_(__VA_ARGS__, FOR_EACH_RSEQ_N())
+#define FOR_EACH_NARG_(...) FOR_EACH_ARG_N(__VA_ARGS__)
+#define FOR_EACH_ARG_N(_0, _1, _2, _3, _4, _5, _6, _7, N, ...) N
+#define FOR_EACH_RSEQ_N() 8, 7, 6, 5, 4, 3, 2, 1, 0
+```
+
+Note: NARG will be invoked to select the suffix of the correct spot in the waterfall, the trick is that the numbers push back the others
+
+!!!
+
+## FOR_EACH
+
+```
+#define ARG_N(_0, _1, _2, _3, _4, _5, _6, _7, N, ...) N
+ARG_N(8, 7, 6, 5, 4, 3, 2, 1, 0) // yeilds 0
+ARG_N(x, 8, 7, 6, 5, 4, 3, 2, 1, 0) // yeilds 1
+ARG_N(x, y, 8, 7, 6, 5, 4, 3, 2, 1, 0) // yeilds 2
+```
+
+!!!
+
+## FOR_EACH
+
+```objective-c
+#define FOR_EACH_(N, what, ...) CONCATENATE(FOR_EACH_, N)(what, __VA_ARGS__)
+#define FOR_EACH(what, ...) FOR_EACH_(FOR_EACH_NARG(__VA_ARGS__), what, __VA_ARGS__)
+```
+
+Note: Invoke the proper FOR_EACH_N using FOR_EACH_NARG
 
 !!!
 
@@ -508,31 +585,116 @@ CASE(Pin, PinData *, pinData, NSNumber *, otherStuff)
 
 ## FOR_DOUBLE_EACH
 
-(secret sauce)
+```
+#define FOR_DOUBLE_EACH_0(...)
+#define FOR_DOUBLE_EACH_1(what, x, y, ...) what(x, y)
+#define FOR_DOUBLE_EACH_2(what, x, y, ...)\
+  what(x, y) \
+  FOR_DOUBLE_EACH_1(what, __VA_ARGS__)
+```
+
+Note: Similar but we're invoking the inner macro with two params
 
 !!!
 
-## Passing data upwards (case -> one_of)
+## FOR_DOUBLE_EACH
 
-(secret sauce)
+```
+#define FOR_DOUBLE_EACH_ARG_N(_0, F0, F01, _1, F1, _2, F2, _3, F3, _4, F4, _5, F5, _6, F6, _7, F7, N, ...) N
+#define FOR_DOUBLE_EACH_RSEQ_N() 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 0
+```
+
+Note: Here's how we adjust the arg pushing
+
+!!!
+
+## Handling Case
+
+```objective-c
+CASE(Pin, PinData *, pinData, NSNumber *, otherStuff)
+```
+
+Note: Now we can run through the type and values and expand that to what we need
+
+!!!
+
+## Passing data upwards
+
+```objective-c
+#define CHILD(a, b) a , b , using##a##b 
+#define PARENT(secret, c) RUN (c, secret)
+#define RUN(x, y, z, secret) x woo secret y woo z
+PARENT(password, CHILD(a, b))
+```
+
+Note: we return a list of arguments to be evaulated by another macro
+
+!!!
+
+## Passing data upwards
+
+```objective-c
+// name, (typ, arg)...
+// returns:
+//    (name, ifaceChunk, implChunk, privateChunk)...
+//    where chunk =
+//        starting at the line after @interface
+//        and the line after @implementation
+//        INCLUDES @end
+#define CASE(name, typ, var, ...) \
+/* … */
+```
+
+Note: Case returns it's name so the parent can use it, and a few chunks of code that rely on the knowledge of the parameters inside case
+
+!!!
+
+## Passing data down
+
+We can do this by including an extra parameter inside our `FOR_EACH`
 
 !!!
 
 ## Passing data
 
-Secret is: only pass upwards
+```objective-c
+// returns:
+//    (name, ifaceChunk, implChunk, privateChunk)...
+#define CASE(name, typ, var, ...) \
+/* … */
+#define ONE_OF(prefix, ...) \
+```
 
-!!!
-
-## Passing data
-
-We pass up 4 things from case; that means we want to run a macro over groups of 4 things + we need the prefix (a constant)
+Note: We pass up 4 things from each case; that means we want to run a macro over groups of 4 things + we need the prefix (a constant)
 
 !!!
 
 ## FOR_QUAD_CONST_EACH
 
-(secret sauce)
+```
+#define ONE_OF(prefix, ...) \
+  FOR_QUAD_CONST_EACH(ONE_FORWARD_DECLARATION, prefix, __VA_ARGS__) \
+  /* … */
+```
+
+Note: Invoke ONE_FORWARD_DECLARATION macro with the constant `prefix` parameter over every 4 arguments in va args
+
+!!!
+
+## FOR_QUAD_CONST_EACH
+
+```objective-c
+#define FOR_QUAD_CONST_EACH_0(...)
+#define FOR_QUAD_CONST_EACH_1(what, c, x, y, z, w, ...) what(c, x, y, z, w)
+#define FOR_QUAD_CONST_EACH_2(what, c, x, y, z, w, ...)\
+  what(c, x, y, z, w) \
+  FOR_QUAD_CONST_EACH_1(what, c, __VA_ARGS__)
+
+#define FOR_QUAD_CONST_EACH_ARG_N(_0, F0, F00, F000, _1, F1, F11, F111, _2, F2, F22, F222, /* … */
+#define FOR_QUAD_CONST_EACH_RSEQ_N() 8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, /* … */
+```
+
+Note: Same story as before
 
 !!!
 
