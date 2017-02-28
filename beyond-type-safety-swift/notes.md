@@ -26,6 +26,7 @@ They are all examples of closed binary operations
 16. Takeaways: Type safety is important. Laws are the next step. Just as type safety improves correctness so do laws
 
 
+Law is an equivalence between two programs that should always be true
 
 
 
