@@ -6,6 +6,10 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
+# Why
+
+!!!
+
 ## Swift Enums are good
 
 (pinterest feed picture)
@@ -89,6 +93,10 @@ Note: In other words, your code won't compile if you or your teammates forget so
 
 !!!
 
+## Using the feed items
+
+!!!
+
 ## Swift Enums are good
 
 ```swift
@@ -99,7 +107,7 @@ func render(item: BadFeedItem) {
     // draw pin
   } /* … */
 }
-// what if we add a new type of feeditem??
+// what if we add a new type of feeditem, without updating this??
 ```
 
 Note: Answer: we would just not draw -- and see a blank space; Consider what would happen if you had this sort of if-elseif tree in lots of places.
@@ -128,6 +136,21 @@ func render(item: GoodFeedItem) {
 Swift enums *protect* us by requiring that all cases are handled
 
 Note: In other words, your code won't compile if you mess up
+
+!!!
+
+### Why Swift Enums are good
+
+* Impossible states are impossible by construction
+* Compiler enforces all cases are handled 
+
+Note: For modelling something like the Pinterest home feed
+
+!!!
+
+## Intuition
+
+(image)
 
 !!!
 
@@ -338,7 +361,7 @@ Note: It's so much easier to do it this way
 
 !!!
 
-## Implementation of match
+### Implementation of match
 
 ```objective-c
 +(ValueType)match:(FeedItem *)item
@@ -448,6 +471,18 @@ Note: Token pasting
 
 !!!
 
+## Variadic macros
+
+```objective-c
+#define BAZ(a, b, c, ...) a##b##c
+#define BAR(a, b, ...) a##b
+#define FOO(...) BAR(__VA_ARGS__) BAZ(__VA_ARGS__)
+
+FOO(1,2,3,4) // replaced with "12 123"
+```
+
+!!!
+
 ## How can we build it?
 
 ![crazy toothpick city street](img/toothpicks.jpg)
@@ -461,7 +496,6 @@ Note: This seems like it's not enough
 ## What do we need?
 
 ```
-// if you squint they look similar
 ONE_OF(FeedItem,
   CASE(Pin, PinData *, pinData),
   CASE(Story, StoryData *, storyData)
@@ -481,20 +515,6 @@ Note: variadic within the case, variadic across the cases, we need to communicat
 
 !!!
 
-## Variadic macros
-
-```objective-c
-#define BAZ(a, b, c, ...) a##b##c
-#define BAR(a, b, ...) a##b
-#define FOO(...) BAR(__VA_ARGS__) BAZ(__VA_ARGS__)
-
-FOO(1,2,3,4) // replaced with "12 123"
-```
-
-Note: What if we want to map over the args
-
-!!!
-
 ## CONCATENATE
 
 ```
@@ -506,7 +526,6 @@ Note: What if we want to map over the args
 ```
 
 TODO attribute to stack overflow
-
 
 !!!
 
@@ -541,9 +560,11 @@ Note: one of these will be called, and cascades downwards
 ## FOR_EACH
 
 ```objective-c
-#define FOR_EACH_NARG(...) FOR_EACH_NARG_(__VA_ARGS__, FOR_EACH_RSEQ_N())
-#define FOR_EACH_NARG_(...) FOR_EACH_ARG_N(__VA_ARGS__)
-#define FOR_EACH_ARG_N(_0, _1, _2, _3, _4, _5, _6, _7, N, ...) N
+#define FOR_EACH_NARG(...) \
+  FOR_EACH_NARG_(__VA_ARGS__, FOR_EACH_RSEQ_N())
+#define FOR_EACH_NARG_(...) \
+  FOR_EACH_ARG_N(__VA_ARGS__)
+#define FOR_EACH_ARG_N(_0, _1, /* … */, _7, N, ...) N
 #define FOR_EACH_RSEQ_N() 8, 7, 6, 5, 4, 3, 2, 1, 0
 ```
 
@@ -554,10 +575,10 @@ Note: NARG will be invoked to select the suffix of the correct spot in the water
 ## FOR_EACH
 
 ```
-#define ARG_N(_0, _1, _2, _3, _4, _5, _6, _7, N, ...) N
-ARG_N(8, 7, 6, 5, 4, 3, 2, 1, 0) // yeilds 0
-ARG_N(x, 8, 7, 6, 5, 4, 3, 2, 1, 0) // yeilds 1
-ARG_N(x, y, 8, 7, 6, 5, 4, 3, 2, 1, 0) // yeilds 2
+#define ARG_N(_0, _1, _2, _3, N, ...) N
+ARG_N(4, 3, 2, 1, 0) // yeilds 0
+ARG_N(x, 4, 3, 2, 1, 0) // yeilds 1
+ARG_N(x, y, 4, 3, 2, 1, 0) // yeilds 2
 ```
 
 !!!
@@ -565,8 +586,10 @@ ARG_N(x, y, 8, 7, 6, 5, 4, 3, 2, 1, 0) // yeilds 2
 ## FOR_EACH
 
 ```objective-c
-#define FOR_EACH_(N, what, ...) CONCATENATE(FOR_EACH_, N)(what, __VA_ARGS__)
-#define FOR_EACH(what, ...) FOR_EACH_(FOR_EACH_NARG(__VA_ARGS__), what, __VA_ARGS__)
+#define FOR_EACH_(N, what, ...) \
+  CONCATENATE(FOR_EACH_, N)(what, __VA_ARGS__)
+#define FOR_EACH(what, ...) \
+  FOR_EACH_(FOR_EACH_NARG(__VA_ARGS__), what, __VA_ARGS__)
 ```
 
 Note: Invoke the proper FOR_EACH_N using FOR_EACH_NARG
@@ -600,8 +623,8 @@ Note: Similar but we're invoking the inner macro with two params
 ## FOR_DOUBLE_EACH
 
 ```
-#define FOR_DOUBLE_EACH_ARG_N(_0, F0, F01, _1, F1, _2, F2, _3, F3, _4, F4, _5, F5, _6, F6, _7, F7, N, ...) N
-#define FOR_DOUBLE_EACH_RSEQ_N() 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 0
+#define FDE_ARG_N(_0, /* … */, _1, F1, /* … */, _7, F7, N, ...) N
+#define FDE_RSEQ_N() 8, 8, 7, 7, /* … */, 1, 1, 0
 ```
 
 Note: Here's how we adjust the arg pushing
@@ -673,7 +696,7 @@ Note: We pass up 4 things from each case; that means we want to run a macro over
 
 ```
 #define ONE_OF(prefix, ...) \
-  FOR_QUAD_CONST_EACH(ONE_FORWARD_DECLARATION, prefix, __VA_ARGS__) \
+  FOR_QUAD_CONST_EACH(FOO, prefix, __VA_ARGS__) \
   /* … */
 ```
 
@@ -685,13 +708,14 @@ Note: Invoke ONE_FORWARD_DECLARATION macro with the constant `prefix` parameter 
 
 ```objective-c
 #define FOR_QUAD_CONST_EACH_0(...)
-#define FOR_QUAD_CONST_EACH_1(what, c, x, y, z, w, ...) what(c, x, y, z, w)
+#define FOR_QUAD_CONST_EACH_1(what, c, x, y, z, w, ...)\
+  what(c, x, y, z, w)
 #define FOR_QUAD_CONST_EACH_2(what, c, x, y, z, w, ...)\
   what(c, x, y, z, w) \
   FOR_QUAD_CONST_EACH_1(what, c, __VA_ARGS__)
 
-#define FOR_QUAD_CONST_EACH_ARG_N(_0, F0, F00, F000, _1, F1, F11, F111, _2, F2, F22, F222, /* … */
-#define FOR_QUAD_CONST_EACH_RSEQ_N() 8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, /* … */
+#define FQCE_ARG_N(/* … */, _1, F1, F11, F111, /* … */
+#define FQCE_RSEQ_N() 8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, /* … */
 ```
 
 Note: Same story as before
