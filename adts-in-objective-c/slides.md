@@ -14,7 +14,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 (pinterest feed picture)
 
-Note: for many cases of information modelling (taking the spec and putting it into code); I'm using the feed as an example of where this type of thing would fit: Right now we have Pin, Story, Board, what if we add another variant
+Note: for many cases of information modelling (taking the spec and putting it into code); I'm using the feed as an example of where this type of thing would fit: Right now we have Pin, User, Board, what if we add another variant
 
 !!!
 
@@ -23,7 +23,7 @@ Note: for many cases of information modelling (taking the spec and putting it in
 ```swift
 // bad
 struct BadFeedItem {
-  let storyData: StoryData?
+  let userData: UserData?
   let pinData: PinData?
   /* … */
 }
@@ -34,9 +34,9 @@ struct BadFeedItem {
 ## Swift Enums are good
 
 ```swift
-let story = BadFeedItem(storyData: data, pinData: nil)
+let user = BadFeedItem(userData: data, pinData: nil)
 // forced to deal with optionals
-story.storyData!
+user.userData!
 ```
 
 !!!
@@ -44,9 +44,9 @@ story.storyData!
 ## Swift Enums are good
 
 ```swift
-let oops = BadFeedItem(storyData: nil, pinData: nil)
+let oops = BadFeedItem(userData: nil, pinData: nil)
 // oops I messed up my constructor
-oops.storyData!
+oops.userData!
 ```
 
 !!!
@@ -54,8 +54,8 @@ oops.storyData!
 ## Swift Enums are good
 
 ```swift
-let wat = BadFeedItem(storyData: data1, pinData: data2)
-// weird object, should I render a pin or a story?
+let wat = BadFeedItem(userData: data1, pinData: data2)
+// weird object, should I render a pin or a user?
 ```
 
 Note: Let's compare that to a good feeditem
@@ -66,8 +66,8 @@ Note: Let's compare that to a good feeditem
 
 ```swift
 enum GoodFeedItem {
-  case Story(data: StoryData)
-  case Pin(data: PinData)
+  case user(data: UserData)
+  case pin(data: PinData)
   /* … */
 }
 ```
@@ -77,11 +77,11 @@ enum GoodFeedItem {
 ## Swift Enums are good
 
 ```swift
-let story = .Story(data: storyData)
-let pin = .Pin(data: pinData)
+let user = .user(data: userData)
+let pin = .pin(data: pinData)
 ```
 
-Note: a pin is a pin, it can't have nil data. A story is a story. You can't construct mysterious things.
+Note: a pin is a pin, it can't have nil data. A user is a user. You can't construct mysterious things.
 
 !!!
 
@@ -101,8 +101,8 @@ Note: In other words, your code won't compile if you or your teammates forget so
 
 ```swift
 func render(item: BadFeedItem) {
-  if let storyData = item.storyData {
-    // draw story
+  if let userData = item.userData {
+    // draw user
   } else if let pinData = item.pinData {
     // draw pin
   } /* … */
@@ -119,9 +119,9 @@ Note: Answer: we would just not draw -- and see a blank space; Consider what wou
 ```swift
 func render(item: GoodFeedItem) {
   switch item {
-    case let .Story(storyData):
-      // draw story
-    case let .Pin(pinData):
+    case let .user(userData):
+      // draw user
+    case let .pin(pinData):
       // draw pin
   }
   // if you add a new case
@@ -150,7 +150,7 @@ Note: For modelling something like the Pinterest home feed
 
 ## Intuition
 
-(image)
+![intuition](img/intuition.jpg)
 
 !!!
 
@@ -241,8 +241,8 @@ Okay so how can we get a sum-of-product in Objective-C?
 
 ### Step 1: Impossible states are impossible by construction
 
-* No way to make a Pin and Story at the same time
-* No way to create some object that has neither a Pin nor a Story.
+* No way to make a Pin and user at the same time
+* No way to create some object that has neither a Pin nor a user.
 
 !!!
 
@@ -253,8 +253,8 @@ Okay so how can we get a sum-of-product in Objective-C?
 @interface FeedItem : NSObject
 -(instancetype)init NS_UNAVAILABLE;
 @end
-@interface StoryFeedItem 
--(FeedItem)init withStoryData:(StoryData *)
+@interface UserFeedItem 
+-(FeedItem)init withUserData:(UserData *)
 @end
 @interface PinFeedItem // etc
 ```
@@ -277,7 +277,7 @@ Note: we can use a method with parameters for each case
 
 ```objective-c
 // take 1
--(void)matchWithStory:^(StoryData *)story pin:^(PinData *)pin;
+-(void)matchWithUser:^(UserData *)user pin:^(PinData *)pin;
 ```
 
 !!!
@@ -287,8 +287,8 @@ Note: we can use a method with parameters for each case
 ```objective-c
 // take 1
 -(void)render {
-  [feedItem matchWithStory:^(StoryData * storyData){
-    // draw story
+  [feedItem matchWithUser:^(UserData * userData){
+    // draw user
   }, pin:^(PinData * pin) {
     // draw pin
   }];
@@ -310,7 +310,7 @@ We can one-up `Swift enums`!
 // take 2
 FeedItem<ValueType>
 +(ValueType)match:(FeedItem *)item
-            story:^ValueType(StoryData *)story
+            user:^ValueType(UserData *)user
               pin:^ValueType(PinData *)pin;
 ```
 
@@ -322,8 +322,8 @@ FeedItem<ValueType>
 // take 1
 -(NSNumber *)render {
   return [FeedItem<NSNumber *> match:item
-                         story:^NSNumber *(StoryData *storyData){
-    // draw story
+                         user:^NSNumber *(UserData *userData){
+    // draw user
     return @1
   }, pin:^NSNumber *(PinData *pin) {
     // draw pin
@@ -351,7 +351,7 @@ Note: So why is this not good enough?
 ```objective-c
 // compare to this
 @interface FeedItem
-@property (nonatomic, strong) story;
+@property (nonatomic, strong) user;
 @property (nonatomic, strong) pin;
 @end
 // that's it!
@@ -365,10 +365,10 @@ Note: It's so much easier to do it this way
 
 ```objective-c
 +(ValueType)match:(FeedItem *)item
-            story:^ValueType(StoryData *)story
+            user:^ValueType(UserData *)user
               pin:^ValueType(PinData *)pin {
-  if ([item isKindOfClass: [StoryFeedItem class]]) {
-    return story((StoryData *)item);
+  if ([item isKindOfClass: [UserFeedItem class]]) {
+    return user((UserData *)item);
   } else if ([item isKindOfClass: [PinFeedItem class]]) {
     return pin((PinData *)item);
   } /* … */
@@ -394,12 +394,12 @@ Note: And we still have the same sort of problem as before to manage this boiler
 ```objective-c
 ONE_OF(FeedItem,
   CASE(Pin, PinData *, pinData)
-  CASE(Story, StoryData *, storyData /*, … */)
+  CASE(user, UserData *, userData /*, … */)
   /* … */
 )
 ```
 
-Note: We can make Swift enums! One of either a pin or a story
+Note: We can make Swift enums! One of either a pin or a user
 
 !!!
 
@@ -409,7 +409,7 @@ Note: We can make Swift enums! One of either a pin or a story
 // if you squint they look similar
 enum FeedItem {
   case pin(PinData)
-  case story(StoryData)
+  case user(UserData)
 }
 ```
 
@@ -417,7 +417,7 @@ enum FeedItem {
 // if you squint they look similar
 ONE_OF(FeedItem,
   CASE(Pin, PinData *, pinData),
-  CASE(Story, StoryData *, storyData)
+  CASE(user, UserData *, userData)
 )
 ```
 
@@ -498,7 +498,7 @@ Note: This seems like it's not enough
 ```
 ONE_OF(FeedItem,
   CASE(Pin, PinData *, pinData),
-  CASE(Story, StoryData *, storyData)
+  CASE(user, UserData *, userData)
 )
 ```
 
