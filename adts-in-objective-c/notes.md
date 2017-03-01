@@ -1,3 +1,9 @@
+* Rework slide on "Intuition" after type algebra
+* Make sure that all code compiles
+* Macro section needs work (actually use before and after the macro evaluates as examples)
+* The for-each stuff is very confusing; try to simplify
+
+
 Abstract:
 
 Abusing the C Preprocessor to bring algebraic data types to iOS development with Objective-C
