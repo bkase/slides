@@ -2,119 +2,188 @@
 <!-- .slide: data-state="terminal" -->
 ## Bringing Swift Enums to Objective-C
 
-By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
+By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
 !!!
 
-# Why
+#### Model mutually exclusive information?
+
+<img alt="pinterest home feed" src="img/feed.png" width="33%" height="33%">
+
+Note: In this case, the homefeed of our app can have pins or users or boards, but one individual item can't be both?
 
 !!!
 
-## Swift Enums are good
+### Standard Objective-C modelling
 
-(pinterest feed picture)
+```objc
+@interface FeedItem
+@property (nullable, nonatomic, strong) User *user;
+@property (nullable, nonatomic, strong) Pin *pin;
+@end
+```
 
-Note: for many cases of information modelling (taking the spec and putting it into code); I'm using the feed as an example of where this type of thing would fit: Right now we have Pin, User, Board, what if we add another variant
+Note: ...and in general we are okay with this. But...
 
 !!!
 
-## Swift Enums are good
+### Problems with this approach
 
-```swift
-// bad
-struct BadFeedItem {
-  let userData: UserData?
-  let pinData: PinData?
-  /* … */
+!!!
+
+### Problems with this approach
+
+* Impossible states *are constructible*
+* Case analysis is *not checked for exhaustivity*
+
+!!!
+
+### Impossible states are constructible
+
+(image)
+
+!!!
+
+### FeedItem with no data
+
+```objc
+FeedItem *item = [[FeedItem alloc] init];
+// oops I forgot to set item.user or item.pin
+```
+
+!!!
+
+### FeedItem with too much data
+
+```objc
+FeedItem *item = [[FeedItem alloc] init];
+item.user = u;
+// ...
+item.pin = p;
+// oops!
+```
+
+!!!
+
+### Case analysis is not checked for exhaustivity
+
+(image)
+
+!!!
+
+### Today we handle all the cases
+
+```objc
+-(void)render(FeedItem *item) {
+  if (item.user) {
+    // draw with user
+  } else if (item.pin) {
+    // draw with pin
+  } /* else if { ... etc */
 }
 ```
 
 !!!
 
-## Swift Enums are good
+## Tomorrow we forget
 
-```swift
-let user = BadFeedItem(userData: data, pinData: nil)
-// forced to deal with optionals
-user.userData!
+```objc
+// add new property
+@property (nullable, nonatomic, strong) Board *board;
+
+// don't fix all the usages!
 ```
 
 !!!
 
-## Swift Enums are good
+### Problems with this approach
 
-```swift
-let oops = BadFeedItem(userData: nil, pinData: nil)
-// oops I messed up my constructor
-oops.userData!
+* Impossible states *are constructible*
+* Case analysis is *not checked for exhaustivity*
+
+!!!
+
+#### Aside: Immutability doesn't solve the problems (but is still good)
+
+```objc
+// public interface
+@interface FeedItem
+@property (nullable, readonly, nonatomic, strong) User *user;
+@property (nullable, readonly, nonatomic, strong) Pin *pin;
+@end
+// we can do readonly, but we still need nullable!
 ```
 
 !!!
 
-## Swift Enums are good
-
-```swift
-let wat = BadFeedItem(userData: data1, pinData: data2)
-// weird object, should I render a pin or a user?
-```
-
-Note: Let's compare that to a good feeditem
+## Swift Approach
 
 !!!
 
-## Swift Enums are good
+### How would we do it in Swift?
+
+<img alt="pinterest home feed" src="img/feed.png" width="33%" height="33%">
+
+!!!
+
+### Swift Enums!
 
 ```swift
-enum GoodFeedItem {
-  case user(data: UserData)
-  case pin(data: PinData)
-  /* … */
+enum FeedItem {
+  case user(user: User)
+  case pin(pin: Pin)
 }
 ```
 
 !!!
 
-## Swift Enums are good
+### Why Swift Enums are good
+
+* Impossible states are impossible *by construction*
+* Compiler enforces *exhaustive* case analysis
+
+!!!
+
+### Impossible states are impossible by construction
+
+(image)
+
+!!!
+
+### User is a user
 
 ```swift
 let user = .user(data: userData)
-let pin = .pin(data: pinData)
 ```
-
-Note: a pin is a pin, it can't have nil data. A user is a user. You can't construct mysterious things.
 
 !!!
 
-## Swift Enums are good
+### Pin is a pin
 
-With Swift enums, impossible states are *impossible by construction*
+```swift
+let pin = .pin(data: pinData)
+```
+
+!!!
+
+### Mysterious things not possible
+
+```swift
+let bothPinAndUser = ???
+let neitherPinNorUser = ???
+```
 
 Note: In other words, your code won't compile if you or your teammates forget some constraint
 
 !!!
 
-## Using the feed items
+### Compiler enforces exhaustive case analysis
+
+(image)
 
 !!!
 
-## Swift Enums are good
-
-```swift
-func render(item: BadFeedItem) {
-  if let userData = item.userData {
-    // draw user
-  } else if let pinData = item.pinData {
-    // draw pin
-  } /* … */
-}
-// what if we add a new type of feeditem, without updating this??
-```
-
-Note: Answer: we would just not draw -- and see a blank space; Consider what would happen if you had this sort of if-elseif tree in lots of places.
-
-!!!
-
-## Swift enums are good
+### Exhaustive case analysis
 
 ```swift
 func render(item: GoodFeedItem) {
@@ -131,111 +200,94 @@ func render(item: GoodFeedItem) {
 
 !!!
 
-## Swift Enums are good
-
-Swift enums *protect* us by requiring that all cases are handled
-
-Note: In other words, your code won't compile if you mess up
-
-!!!
-
 ### Why Swift Enums are good
 
-* Impossible states are impossible by construction
-* Compiler enforces all cases are handled 
-
-Note: For modelling something like the Pinterest home feed
+* Impossible states are *impossible by construction*
+* Compiler enforces *exhaustive case analysis*
 
 !!!
 
-## Intuition
+### How often does this really happen?
 
 ![intuition](img/intuition.jpg)
 
 !!!
 
-## Algebraic Data Type
-
-`Swift Enums` == `Algebraic Data Types`
-
-`Swift Enums` == `Sum of Products`
-
-Note: This construct is not just in Swift, it's in several modern languages
+## More use-cases
 
 !!!
 
-## Type Algebra?
-
-Bool has 2 values: `true` and `false` (let's just call it 2)
-
-Void has 1 value: `()` (let's just call it 1)
-
-Note: The algebra in Algebraic data type
+### Aside: Apple didn't invent this
 
 !!!
 
-## Type Algebra?
+### Aside: Apple didn't invent this
 
-```
-struct Product{
-  let two: Bool
-  let one: Void
+Other names for this construct:
+
+* Algebraic data types
+* Sum-of-products
+
+!!!
+
+### Examples of Algebraic Data Types
+
+(image)
+
+!!!
+
+### Actions on a view-controller (1/3)
+
+```swift
+enum Action {
+  case longPress(whichButton: ButtonTag)
+  case submit(text: String)
+  case cancel
 }
-// two possible instances
-let a = Product(two: false, one: ())
-let b = Product(two: true, one: ())
-// 2 * 1 = 2
 ```
 
 !!!
 
-## Type Algebra?
+### Barcode (2/3)
 
-```
-enum Sum {
-case two(Bool)
-case one(Void)
+```swift
+enum Barcode {
+  case upc(Int, Int, Int, Int)
+  case qr(String)
 }
-// three possible instances
-let (a, b, c) = (.two(false), .two(true), .one(()))
-// 2 + 1 = 3
 ```
 
 !!!
 
-## Type Algebra
+### Success or failure (3/3)
 
-We can add an multiply types or do *algebra* just like numbers! 
-
-!!!
-
-## Sum of Products
-
-```
-enum SumOfProducts {
-case twoAndTwo(Bool, Bool)
-case one(Void)
+```swift
+enum Result<Value,Error> {
+  case Success(Value)
+  case Failure(Error)
 }
-// 5 possible values
-// (2 * 2) + 1
 ```
 
 !!!
 
 ## Intuition about ADTs
 
-Not having a `sum` type (aka a Swift `enum`) is like not being able to add numbers.
+<img alt="yin and yang" src="img/yinyang.png" width="50%" height="50%">
 
-Note: It's insane! It is fundamental to modeling information!
+> https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Yin_yang.svg/1200px-Yin_yang.svg.png
+
+Note: Dual to a class with properties, or tuple or struct in swift
 
 !!!
 
-## We want it. Let's do it
+### Safe modelling in Objective-C
 
-Okay so how can we get a sum-of-product in Objective-C?
+!!!
 
-* Impossible states are impossible by construction
-* Compiler enforces all cases are handled 
+### Requirements for safe modelling
+
+* Impossible states are *impossible by construction*
+* Compiler enforces *exhaustive case analysis*
 
 !!!
 
@@ -248,13 +300,14 @@ Okay so how can we get a sum-of-product in Objective-C?
 
 ### Step 1: Impossible states are impossible by construction
 
-```objective-c
+```objc
 // inheritance and constructor specialization
+// UserFeedItemTag=0 PinFeedItemTag=1
 @interface FeedItem : NSObject
--(instancetype)init NS_UNAVAILABLE;
+-(instancetype)initWithTag:(FeedItemTag *)tag;
 @end
-@interface UserFeedItem 
--(FeedItem)init withUserData:(UserData *)
+@interface UserFeedItem
+-(FeedItem)initWithUserData:(UserData *)userData;
 @end
 @interface PinFeedItem // etc
 ```
@@ -275,21 +328,22 @@ Note: we can use a method with parameters for each case
 
 ### Step 2: Compiler enforces all cases are handled
 
-```objective-c
+```objc
 // take 1
--(void)matchWithUser:^(UserData *)user pin:^(PinData *)pin;
+- (void)matchCaseUser:(void (^)(UserData *))caseUser
+                orPin:(void (^)(PinData *))casePin;
 ```
 
 !!!
 
 ### Step 2: Compiler enforces all cases are handled
 
-```objective-c
+```objc
 // take 1
 -(void)render {
-  [feedItem matchWithUser:^(UserData * userData){
+  [feedItem matchCaseUser:^(UserData * userData){
     // draw user
-  }, pin:^(PinData * pin) {
+  }, orPin:^(PinData * pin) {
     // draw pin
   }];
   // if we add another case, this will no longer compile
@@ -306,26 +360,27 @@ We can one-up `Swift enums`!
 
 ### Step 2: Compiler enforces all cases are handled
 
-```objective-c
+```objc
 // take 2
 FeedItem<ValueType>
 +(ValueType)match:(FeedItem *)item
-            user:^ValueType(UserData *)user
-              pin:^ValueType(PinData *)pin;
+           orUser:(ValueType (^)(UserData *))caseUser
+            orPin:(ValueType (^)(PinData *))casePin;
 ```
 
 !!!
 
 ### Step 2: Compiler enforces all cases are handled
 
-```objective-c
+```objc
 // take 1
 -(NSNumber *)render {
-  return [FeedItem<NSNumber *> match:item
-                         user:^NSNumber *(UserData *userData){
+  return [FeedItem<NSNumber *>
+     match:item
+    orUser:^NSNumber *(UserData *userData){
     // draw user
     return @1
-  }, pin:^NSNumber *(PinData *pin) {
+  }, orPin:^NSNumber *(PinData *pin) {
     // draw pin
     return @2
   }];
@@ -336,23 +391,34 @@ FeedItem<ValueType>
 
 !!!
 
-## We did it?
+## So why do we need "Swift Enums"?
+
+!!!
+
+### This code is not good enough
+
+* Too much boilerplate
+* Case analysis not exhaustive everywhere
+
+!!!
+
+## Too much boilerplate
 
 ![matrix](img/code-matrix.jpg)
 
 > http://www.myfreewallpapers.net/abstract/wallpapers/code-matrix.jpg
 
-Note: So why is this not good enough?
+Note: Constrast with...
 
 !!!
 
-## So much code
+### No boilerplate
 
-```objective-c
+```objc
 // compare to this
 @interface FeedItem
-@property (nonatomic, strong) user;
-@property (nonatomic, strong) pin;
+@property (nullable, nonatomic, strong) user;
+@property (nullable, nonatomic, strong) pin;
 @end
 // that's it!
 ```
@@ -361,23 +427,37 @@ Note: It's so much easier to do it this way
 
 !!!
 
+### Case analysis not exhaustive everywhere
+
+(image)
+
+!!!
+
 ### Implementation of match
 
-```objective-c
+```objc
 +(ValueType)match:(FeedItem *)item
-            user:^ValueType(UserData *)user
-              pin:^ValueType(PinData *)pin {
-  if ([item isKindOfClass: [UserFeedItem class]]) {
-    return user((UserData *)item);
-  } else if ([item isKindOfClass: [PinFeedItem class]]) {
-    return pin((PinData *)item);
-  } /* … */
-  // we have the if-else tree!
+           orUser:(ValueType(^)(UserData *))caseUser
+            orPin:(ValueType(^)(PinData *))casePin {
+  switch (item.tag) {
+  case UserFeedItemTag:
+    return caseUser((UserData *)item);
+  case PinFeedItemTag:
+    return casePin((PinData *)item);
+  /* … */
+  }
+  // we have the branch tree!
   // We can't forget to update this!
 }
 ```
 
 Note: And we still have the same sort of problem as before to manage this boilerplate
+
+!!!
+
+## Fix: Macros
+
+Note: Macros can manage boilerplate and couple exhaustivity checks
 
 !!!
 
@@ -389,12 +469,12 @@ Note: And we still have the same sort of problem as before to manage this boiler
 
 !!!
 
-## ONE_OF
+## The macro: ONE_OF
 
-```objective-c
+```objc
 ONE_OF(FeedItem,
   CASE(Pin, PinData *, pinData)
-  CASE(user, UserData *, userData /*, … */)
+  CASE(User, UserData *, userData /*, … */)
   /* … */
 )
 ```
@@ -405,7 +485,7 @@ Note: We can make Swift enums! One of either a pin or a user
 
 ## Swift enum in Objective-C
 
-```
+```swift
 // if you squint they look similar
 enum FeedItem {
   case pin(PinData)
@@ -413,15 +493,13 @@ enum FeedItem {
 }
 ```
 
-```
+```objc
 // if you squint they look similar
 ONE_OF(FeedItem,
   CASE(Pin, PinData *, pinData),
-  CASE(user, UserData *, userData)
+  CASE(User, UserData *, userData)
 )
 ```
-
-Note: explain it in detail here
 
 !!!
 
@@ -437,7 +515,7 @@ Note: Let's talk about macros
 
 ## Macros in Objective-C
 
-```objective-c
+```objc
 #define FOO @"bar"
 
 NSLog(FOO); // logs "bar"
@@ -449,7 +527,7 @@ Note: Replace with a string
 
 ## Macros in Objective-C
 
-```objective-c
+```objc
 #define FOO(x, y) @"x bar y"
 
 NSLog(FOO(before, after)); // logs "before bar after"
@@ -461,7 +539,7 @@ Note: Macro functions
 
 ## Macros in Objective-C
 
-```objective-c
+```objc
 #define FOO(x, y) @"x##y"
 
 NSLog(FOO(before, after)); // logs "beforeafter"
@@ -473,7 +551,7 @@ Note: Token pasting
 
 ## Variadic macros
 
-```objective-c
+```objc
 #define BAZ(a, b, c, ...) a##b##c
 #define BAR(a, b, ...) a##b
 #define FOO(...) BAR(__VA_ARGS__) BAZ(__VA_ARGS__)
@@ -495,7 +573,7 @@ Note: This seems like it's not enough
 
 ## What do we need?
 
-```
+```objc
 ONE_OF(FeedItem,
   CASE(Pin, PinData *, pinData),
   CASE(user, UserData *, userData)
@@ -517,7 +595,7 @@ Note: variadic within the case, variadic across the cases, we need to communicat
 
 ## CONCATENATE
 
-```
+```objc
 // This macro lets you x##y but x and/or y
 // can be nested macro calls.
 #define CONCATENATE(x, y) CONCATENATE1(x, y)
@@ -539,7 +617,7 @@ Note:
 
 ## FOR_EACH
 
-```objective-c
+```objc
 #define FOR_EACH_0(...)
 #define FOR_EACH_1(what, x, ...) what(x)
 #define FOR_EACH_2(what, x, ...)\
@@ -559,7 +637,7 @@ Note: one of these will be called, and cascades downwards
 
 ## FOR_EACH
 
-```objective-c
+```objc
 #define FOR_EACH_NARG(...) \
   FOR_EACH_NARG_(__VA_ARGS__, FOR_EACH_RSEQ_N())
 #define FOR_EACH_NARG_(...) \
@@ -574,7 +652,7 @@ Note: NARG will be invoked to select the suffix of the correct spot in the water
 
 ## FOR_EACH
 
-```
+```objc
 #define ARG_N(_0, _1, _2, _3, N, ...) N
 ARG_N(4, 3, 2, 1, 0) // yeilds 0
 ARG_N(x, 4, 3, 2, 1, 0) // yeilds 1
@@ -585,7 +663,7 @@ ARG_N(x, y, 4, 3, 2, 1, 0) // yeilds 2
 
 ## FOR_EACH
 
-```objective-c
+```objc
 #define FOR_EACH_(N, what, ...) \
   CONCATENATE(FOR_EACH_, N)(what, __VA_ARGS__)
 #define FOR_EACH(what, ...) \
@@ -598,7 +676,7 @@ Note: Invoke the proper FOR_EACH_N using FOR_EACH_NARG
 
 ## FOR_DOUBLE_EACH
 
-```objective-c
+```objc
 CASE(Pin, PinData *, pinData, NSNumber *, otherStuff)
 // we want to run a macro on the type and value in a pairs
 // FOO(type, value)
@@ -608,7 +686,7 @@ CASE(Pin, PinData *, pinData, NSNumber *, otherStuff)
 
 ## FOR_DOUBLE_EACH
 
-```
+```objc
 #define FOR_DOUBLE_EACH_0(...)
 #define FOR_DOUBLE_EACH_1(what, x, y, ...) what(x, y)
 #define FOR_DOUBLE_EACH_2(what, x, y, ...)\
@@ -622,7 +700,7 @@ Note: Similar but we're invoking the inner macro with two params
 
 ## FOR_DOUBLE_EACH
 
-```
+```objc
 #define FDE_ARG_N(_0, /* … */, _1, F1, /* … */, _7, F7, N, ...) N
 #define FDE_RSEQ_N() 8, 8, 7, 7, /* … */, 1, 1, 0
 ```
@@ -633,7 +711,7 @@ Note: Here's how we adjust the arg pushing
 
 ## Handling Case
 
-```objective-c
+```objc
 CASE(Pin, PinData *, pinData, NSNumber *, otherStuff)
 ```
 
@@ -643,7 +721,7 @@ Note: Now we can run through the type and values and expand that to what we need
 
 ## Passing data upwards
 
-```objective-c
+```objc
 #define CHILD(a, b) a , b , using##a##b 
 #define PARENT(secret, c) RUN (c, secret)
 #define RUN(x, y, z, secret) x woo secret y woo z
@@ -656,7 +734,7 @@ Note: we return a list of arguments to be evaulated by another macro
 
 ## Passing data upwards
 
-```objective-c
+```objc
 // name, (typ, arg)...
 // returns:
 //    (name, ifaceChunk, implChunk, privateChunk)...
@@ -680,7 +758,7 @@ We can do this by including an extra parameter inside our `FOR_EACH`
 
 ## Passing data
 
-```objective-c
+```objc
 // returns:
 //    (name, ifaceChunk, implChunk, privateChunk)...
 #define CASE(name, typ, var, ...) \
@@ -694,7 +772,7 @@ Note: We pass up 4 things from each case; that means we want to run a macro over
 
 ## FOR_QUAD_CONST_EACH
 
-```
+```objc
 #define ONE_OF(prefix, ...) \
   FOR_QUAD_CONST_EACH(FOO, prefix, __VA_ARGS__) \
   /* … */
@@ -706,7 +784,7 @@ Note: Invoke ONE_FORWARD_DECLARATION macro with the constant `prefix` parameter 
 
 ## FOR_QUAD_CONST_EACH
 
-```objective-c
+```objc
 #define FOR_QUAD_CONST_EACH_0(...)
 #define FOR_QUAD_CONST_EACH_1(what, c, x, y, z, w, ...)\
   what(c, x, y, z, w)
@@ -736,7 +814,7 @@ Debugging?
 
 ## Downsides
 
-```objective-c
+```objc
 // Macros can't capitalize
 [PinFeedItem initWithpinData:(PinData *)data]
 ```
