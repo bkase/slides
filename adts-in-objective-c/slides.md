@@ -6,7 +6,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
-#### Model mutually exclusive information?
+### Model mutually exclusive information?
 
 <img alt="pinterest home feed" src="img/feed.png" width="33%" height="33%">
 
@@ -27,7 +27,7 @@ Note: ...and in general we are okay with this. But...
 
 !!!
 
-### Problems with this approach
+## Problems with this approach
 
 !!!
 
@@ -85,7 +85,7 @@ item.pin = p;
 
 !!!
 
-## Tomorrow we forget
+### Tomorrow we forget
 
 ```objc
 // add new property
@@ -213,7 +213,7 @@ func render(item: GoodFeedItem) {
 
 !!!
 
-## More use-cases
+## Swift enums in the real world
 
 !!!
 
@@ -270,7 +270,7 @@ enum Result<Value,Error> {
 
 !!!
 
-## Intuition about ADTs
+### Intuition about ADTs
 
 <img alt="yin and yang" src="img/yinyang.png" width="50%" height="50%">
 
@@ -280,7 +280,7 @@ Note: Dual to a class with properties, or tuple or struct in swift
 
 !!!
 
-### Safe modelling in Objective-C
+## Safe modelling in Objective-C
 
 !!!
 
@@ -391,7 +391,7 @@ FeedItem<ValueType>
 
 !!!
 
-## So why do we need "Swift Enums"?
+## Why do we need ADTs?
 
 !!!
 
@@ -402,7 +402,7 @@ FeedItem<ValueType>
 
 !!!
 
-## Too much boilerplate
+### Too much boilerplate
 
 ![matrix](img/code-matrix.jpg)
 
@@ -461,7 +461,7 @@ Note: Macros can manage boilerplate and couple exhaustivity checks
 
 !!!
 
-## Macros can manage boilerplate
+### Macros can manage boilerplate
 
 ![manager](img/manager.jpg)
 
@@ -469,7 +469,7 @@ Note: Macros can manage boilerplate and couple exhaustivity checks
 
 !!!
 
-## The macro: ONE_OF
+### The macro: ONE_OF
 
 ```objc
 ONE_OF(FeedItem,
@@ -483,7 +483,7 @@ Note: We can make Swift enums! One of either a pin or a user
 
 !!!
 
-## Swift enum in Objective-C
+### Swift enum in Objective-C
 
 ```swift
 // if you squint they look similar
@@ -503,7 +503,7 @@ ONE_OF(FeedItem,
 
 !!!
 
-## How can we build it?
+### How can we build it?
 
 ![builder](img/builder.jpg)
 
@@ -513,7 +513,11 @@ Note: Let's talk about macros
 
 !!!
 
-## Macros in Objective-C
+## Macros 101
+
+!!!
+
+### Simple replacement
 
 ```objc
 #define FOO @"bar"
@@ -525,31 +529,29 @@ Note: Replace with a string
 
 !!!
 
-## Macros in Objective-C
+### Macro functions
 
 ```objc
 #define FOO(x, y) @"x bar y"
 
-NSLog(FOO(before, after)); // logs "before bar after"
+NSLog(FOO(before, after));
+// logs "before bar after"
 ```
-
-Note: Macro functions
 
 !!!
 
-## Macros in Objective-C
+### Token Pasting
 
 ```objc
 #define FOO(x, y) @"x##y"
 
-NSLog(FOO(before, after)); // logs "beforeafter"
+NSLog(FOO(before, after));
+// logs "beforeafter"
 ```
-
-Note: Token pasting
 
 !!!
 
-## Variadic macros
+### Variadic macros
 
 ```objc
 #define BAZ(a, b, c, ...) a##b##c
@@ -561,7 +563,7 @@ FOO(1,2,3,4) // replaced with "12 123"
 
 !!!
 
-## How can we build it?
+### Building out of nothing
 
 ![crazy toothpick city street](img/toothpicks.jpg)
 
@@ -571,7 +573,11 @@ Note: This seems like it's not enough
 
 !!!
 
-## What do we need?
+## Going deeper
+
+!!!
+
+### What do we need?
 
 ```objc
 ONE_OF(FeedItem,
@@ -584,7 +590,7 @@ Note: variadic within the case, variadic across the cases, we need to communicat
 
 !!!
 
-## What do we need?
+### What do we need?
 
 1. Variadic within the case
 2. Variadic across the cases
@@ -593,7 +599,11 @@ Note: variadic within the case, variadic across the cases, we need to communicat
 
 !!!
 
-## CONCATENATE
+## Handling the inside of CASE
+
+!!!
+
+### Concatenate
 
 ```objc
 // This macro lets you x##y but x and/or y
@@ -603,19 +613,39 @@ Note: variadic within the case, variadic across the cases, we need to communicat
 #define CONCATENATE2(x, y) x##y
 ```
 
-TODO attribute to stack overflow
+> http://stackoverflow.com/questions/1872220/is-it-possible-to-iterate-over-arguments-in-variadic-macros
 
 !!!
 
-## FOR_EACH
+### Concatenate
+
+```objc
+#define FOO_1(x) hello##x
+
+CONCATENATE(FOO, _1)(world)
+// helloworld
+```
+
+!!!
+
+### Foreach
+
+```objc
+#define PREPEND(x) pre##x
+
+FOR_EACH(PREPEND, a, b, c)
+// prea preb prec
+```
+
+!!!
+
+### Foreach
 
 ![for each](img/foreach.png)
 
-Note:
-
 !!!
 
-## FOR_EACH
+### Foreach
 
 ```objc
 #define FOR_EACH_0(...)
@@ -635,7 +665,7 @@ Note: one of these will be called, and cascades downwards
 
 !!!
 
-## FOR_EACH
+### Foreach
 
 ```objc
 #define FOR_EACH_NARG(...) \
@@ -650,7 +680,7 @@ Note: NARG will be invoked to select the suffix of the correct spot in the water
 
 !!!
 
-## FOR_EACH
+### Foreach
 
 ```objc
 #define ARG_N(_0, _1, _2, _3, N, ...) N
@@ -661,30 +691,17 @@ ARG_N(x, y, 4, 3, 2, 1, 0) // yeilds 2
 
 !!!
 
-## FOR_EACH
-
-```objc
-#define FOR_EACH_(N, what, ...) \
-  CONCATENATE(FOR_EACH_, N)(what, __VA_ARGS__)
-#define FOR_EACH(what, ...) \
-  FOR_EACH_(FOR_EACH_NARG(__VA_ARGS__), what, __VA_ARGS__)
-```
-
-Note: Invoke the proper FOR_EACH_N using FOR_EACH_NARG
-
-!!!
-
-## FOR_DOUBLE_EACH
+### For double each
 
 ```objc
 CASE(Pin, PinData *, pinData, NSNumber *, otherStuff)
 // we want to run a macro on the type and value in a pairs
-// FOO(type, value)
+// FOO(type, value) FOO(type, value)
 ```
 
 !!!
 
-## FOR_DOUBLE_EACH
+### For double each
 
 ```objc
 #define FOR_DOUBLE_EACH_0(...)
@@ -698,18 +715,7 @@ Note: Similar but we're invoking the inner macro with two params
 
 !!!
 
-## FOR_DOUBLE_EACH
-
-```objc
-#define FDE_ARG_N(_0, /* … */, _1, F1, /* … */, _7, F7, N, ...) N
-#define FDE_RSEQ_N() 8, 8, 7, 7, /* … */, 1, 1, 0
-```
-
-Note: Here's how we adjust the arg pushing
-
-!!!
-
-## Handling Case
+### Case is handled
 
 ```objc
 CASE(Pin, PinData *, pinData, NSNumber *, otherStuff)
@@ -738,10 +744,6 @@ Note: we return a list of arguments to be evaulated by another macro
 // name, (typ, arg)...
 // returns:
 //    (name, ifaceChunk, implChunk, privateChunk)...
-//    where chunk =
-//        starting at the line after @interface
-//        and the line after @implementation
-//        INCLUDES @end
 #define CASE(name, typ, var, ...) \
 /* … */
 ```
