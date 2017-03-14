@@ -554,11 +554,11 @@ NSLog(FOO(before, after));
 ### Variadic macros
 
 ```objc
-#define BAZ(a, b, c, ...) a##b##c
+#define FOO(...) foo BAR(__VA_ARGS__)
 #define BAR(a, b, ...) a##b
-#define FOO(...) BAR(__VA_ARGS__) BAZ(__VA_ARGS__)
 
-FOO(1,2,3,4) // replaced with "12 123"
+FOO(1,2,3,4)
+// foo 12
 ```
 
 !!!
@@ -592,10 +592,10 @@ Note: variadic within the case, variadic across the cases, we need to communicat
 
 ### What do we need?
 
-1. Variadic within the case
-2. Variadic across the cases
+1. Variadic within the case (type, value, type, value, ...)
+2. Send the case info up to the ONE_OF
 3. Send the FeedItem prefix down to the cases
-4. Send the case info up to the parent to put in match and constructors
+4. Variadic across the cases (support many variants)
 
 !!!
 
@@ -727,23 +727,56 @@ Note: Now we can run through the type and values and expand that to what we need
 
 ## Passing data upwards
 
-```objc
-#define CHILD(a, b) a , b , using##a##b 
-#define PARENT(secret, c) RUN (c, secret)
-#define RUN(x, y, z, secret) x woo secret y woo z
-PARENT(password, CHILD(a, b))
-```
+!!!
 
-Note: we return a list of arguments to be evaulated by another macro
+### Macro view: Passing data up problem
+
+```objc
+ONE_OF(FeedItem,
+  CASE(Pin, PinData *, pinData)
+/* ... */
+```
 
 !!!
 
-## Passing data upwards
+### Generated view: Passing data up problem
+
+```objc
+/* ... */
+@interface FeedItemPin
+@property (nonatomic, readonly, strong) PinData *pinData;
+@end
+/* ... */
+@implementation FeedItemPin
+/* ... */
+@end
+```
+
+Note: We need to weave the CASE information through our generated code
+
+!!!
+
+### Solution: Pass chunks of information up
+
+```objc
+#define CASE_SIMPLE(x,y) interface x y , impl x y
+#define ONEOF_SIMPLE(prefix, iface, impl) \
+   boiler iface plate impl
+
+ONEOF_SIMPLE(FeedItem, CASE_SIMPLE(a, b))
+// boiler interface a b plate impl a b
+```
+
+Note: Comma-separated macro results can be fed back into a parent macro
+
+!!!
+
+### Actual CASE behavior
 
 ```objc
 // name, (typ, arg)...
 // returns:
-//    (name, ifaceChunk, implChunk, privateChunk)...
+//    (name, ifaceChunk, implChunk1, implChunk2, privateChunk)...
 #define CASE(name, typ, var, ...) \
 /* … */
 ```
@@ -754,67 +787,112 @@ Note: Case returns it's name so the parent can use it, and a few chunks of code 
 
 ## Passing data down
 
-We can do this by including an extra parameter inside our `FOR_EACH`
+!!!
+
+### Macro view: Passing data downwards
+
+```objc
+ONE_OF(FeedItem,
+  CASE(Pin, PinData *, pinData)
+/* ... */
+```
+
+Note: FeedItem prefix needs to be pasted in front of Pin
 
 !!!
 
-## Passing data
+### Generated view: Passing data downwards
+
+```objc
+@class FeedItemPin;
+/* ... */
+@interface FeedItemPin
+/* ... */
+@implementation FeedItemPin
+```
+
+!!!
+
+### Solution: Pass data down by including extra param everywhere
+
+```objc
+#define FORWARD_DECLARE(prefix, caseName) \
+    @class prefix##caseName;
+
+FORWARD_DECLARE(FeedItem, Pin)
+// @class FeedItemPin;
+```
+
+!!!
+
+## Support many cases
+
+!!!
+
+### Macro view: Many cases
 
 ```objc
 // returns:
-//    (name, ifaceChunk, implChunk, privateChunk)...
+//    (name, ifaceChunk, implChunk1, implChunk2, privateChunk)...
 #define CASE(name, typ, var, ...) \
 /* … */
 #define ONE_OF(prefix, ...) \
 ```
 
-Note: We pass up 4 things from each case; that means we want to run a macro over groups of 4 things + we need the prefix (a constant)
+Note: We pass up 5 things from each case; that means we want to run a macro over groups of 4 things + we need the prefix (a constant)
 
 !!!
 
-## FOR_QUAD_CONST_EACH
+### FOR_QUINT_CONST_EACH definition
 
 ```objc
-#define ONE_OF(prefix, ...) \
-  FOR_QUAD_CONST_EACH(FOO, prefix, __VA_ARGS__) \
+#define FOO(c, x, y, z, w, t) c##x y z w t
+FOR_QUINT_CONST_EACH(
+  FOO, constant, x1,y1,z1,w1,t1, x2,y2,z2,w2,t2)
+// constantx1 y1 z1 w1 t1 constantx2 y2 z2 w2 t2
+```
+
+!!!
+
+### FOR_QUINT_CONST_EACH usage
+
+```objc
+#define ONE_OF(prefix, /* CASE(Pin, PinData *, pinData) */...) \
+  FOR_QUINT_CONST_EACH(FORWARD_DECL, prefix, __VA_ARGS__) \
   /* … */
+// @class FeedItemPin; @class FeedItemUser; ...
 ```
 
 Note: Invoke ONE_FORWARD_DECLARATION macro with the constant `prefix` parameter over every 4 arguments in va args
 
 !!!
 
-## FOR_QUAD_CONST_EACH
+### FOR_QUINT_CONST_EACH internals
 
 ```objc
-#define FOR_QUAD_CONST_EACH_0(...)
-#define FOR_QUAD_CONST_EACH_1(what, c, x, y, z, w, ...)\
-  what(c, x, y, z, w)
-#define FOR_QUAD_CONST_EACH_2(what, c, x, y, z, w, ...)\
-  what(c, x, y, z, w) \
-  FOR_QUAD_CONST_EACH_1(what, c, __VA_ARGS__)
-
-#define FQCE_ARG_N(/* … */, _1, F1, F11, F111, /* … */
-#define FQCE_RSEQ_N() 8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, /* … */
+#define FOR_QUINT_CONST_EACH_0(...)
+#define FOR_QUINT_CONST_EACH_1(what, c, x, y, z, w, t, ...)\
+  what(c, x, y, z, w, t)
+#define FOR_QUINT_CONST_EACH_2(what, c, x, y, z, w, t, ...)\
+  what(c, x, y, z, w, t) \
+  FOR_QUINT_CONST_EACH_1(what, c, __VA_ARGS__)
 ```
 
 Note: Same story as before
 
 !!!
 
-## Macro
+### Macro
 
-The rest is simple!
-
-!!!
-
-## Downsides
-
-Debugging?
+The rest is simple token substitutions!
 
 !!!
 
 ## Downsides
+
+!!!
+
+### Downside: Macros can't capitalize
 
 ```objc
 // Macros can't capitalize
@@ -823,8 +901,30 @@ Debugging?
 
 !!!
 
-## Pinterest usage
+### Downside: Errors are complicated
+
+(screenshot)
 
 !!!
 
+### Pinterest usage
+
+> PIN_ONE_OF is great! I can't believe I've lived without this?
+
+Note: something like that
+
+!!!
+
+## Open Source Soon
+
+!!!
+
+<!-- .slide: data-background="#2aa198" -->
+<!-- .slide: data-state="terminal" -->
+
+# Thanks!
+
+By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
+
+Slide Deck: [https://is.gd/edLKW7](https://is.gd/edLKW7)
 
