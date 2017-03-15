@@ -17,7 +17,7 @@ Note: In this case, the homefeed of our app can have pins or users or boards, bu
 ### Standard Objective-C modelling
 
 ```objc
-@interface FeedItem
+@interface FeedItem : NSObject
 @property (nullable, nonatomic, strong) User *user;
 @property (nullable, nonatomic, strong) Pin *pin;
 @end
@@ -103,19 +103,6 @@ item.pin = p;
 
 !!!
 
-#### Aside: Immutability doesn't solve the problems (but is still good)
-
-```objc
-// public interface
-@interface FeedItem
-@property (nullable, readonly, nonatomic, strong) User *user;
-@property (nullable, readonly, nonatomic, strong) Pin *pin;
-@end
-// we can do readonly, but we still need nullable!
-```
-
-!!!
-
 ## Swift Approach
 
 !!!
@@ -186,7 +173,7 @@ Note: In other words, your code won't compile if you or your teammates forget so
 ### Exhaustive case analysis
 
 ```swift
-func render(item: GoodFeedItem) {
+func render(item: FeedItem) {
   switch item {
     case let .user(userData):
       // draw user
@@ -204,79 +191,6 @@ func render(item: GoodFeedItem) {
 
 * Impossible states are *impossible by construction*
 * Compiler enforces *exhaustive case analysis*
-
-!!!
-
-### How often does this really happen?
-
-![intuition](img/intuition.jpg)
-
-!!!
-
-## Swift enums in the real world
-
-!!!
-
-### Aside: Apple didn't invent this
-
-!!!
-
-### Aside: Apple didn't invent this
-
-Other names for this construct:
-
-* Algebraic data types
-* Sum-of-products
-
-!!!
-
-### Examples of Algebraic Data Types
-
-(image)
-
-!!!
-
-### Actions on a view-controller (1/3)
-
-```swift
-enum Action {
-  case longPress(whichButton: ButtonTag)
-  case submit(text: String)
-  case cancel
-}
-```
-
-!!!
-
-### Barcode (2/3)
-
-```swift
-enum Barcode {
-  case upc(Int, Int, Int, Int)
-  case qr(String)
-}
-```
-
-!!!
-
-### Success or failure (3/3)
-
-```swift
-enum Result<Value,Error> {
-  case Success(Value)
-  case Failure(Error)
-}
-```
-
-!!!
-
-### Intuition about ADTs
-
-<img alt="yin and yang" src="img/yinyang.png" width="50%" height="50%">
-
-> https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Yin_yang.svg/1200px-Yin_yang.svg.png
-
-Note: Dual to a class with properties, or tuple or struct in swift
 
 !!!
 
@@ -352,46 +266,7 @@ Note: we can use a method with parameters for each case
 
 !!!
 
-### Step 2: Compiler enforces all cases are handled
-
-We can one-up `Swift enums`!
-
-!!!
-
-### Step 2: Compiler enforces all cases are handled
-
-```objc
-// take 2
-FeedItem<ValueType>
-+(ValueType)match:(FeedItem *)item
-           orUser:(ValueType (^)(UserData *))caseUser
-            orPin:(ValueType (^)(PinData *))casePin;
-```
-
-!!!
-
-### Step 2: Compiler enforces all cases are handled
-
-```objc
-// take 1
--(NSNumber *)render {
-  return [FeedItem<NSNumber *>
-     match:item
-    orUser:^NSNumber *(UserData *userData){
-    // draw user
-    return @1
-  }, orPin:^NSNumber *(PinData *pin) {
-    // draw pin
-    return @2
-  }];
-  // we can return something as long as type
-  // is the same in all branches
-}
-```
-
-!!!
-
-## Why do we need ADTs?
+## Why do we need "Swift Enums"?
 
 !!!
 
@@ -416,9 +291,9 @@ Note: Constrast with...
 
 ```objc
 // compare to this
-@interface FeedItem
-@property (nullable, nonatomic, strong) user;
-@property (nullable, nonatomic, strong) pin;
+@interface FeedItem : NSObject
+@property (nullable, nonatomic, strong) User *user;
+@property (nullable, nonatomic, strong) PIn *pin;
 @end
 // that's it!
 ```
