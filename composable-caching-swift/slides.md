@@ -14,7 +14,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 | ------------------------ | ------- |
 | Downloading over 3g | 500 |
 | Reading from disk | 50 |
-| Reading from memory | <1 |
+| Reading from memory | 1 |
 
 !!!
 
@@ -92,7 +92,7 @@ protocol Cache {
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-  func set(key: Key, value: Value) -> Future<Unit>
+  func set(key: Key, value: Value) -> Future<Void>
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
@@ -118,7 +118,7 @@ class RamCache<K, V>: Cache where K: Hashable {
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-  func set(key: Key, value: Value) -> Future<Unit> { /* ... */ }
+  func set(key: Key, value: Value) -> Future<Void> { /* ... */ }
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
@@ -137,7 +137,7 @@ class DiskCache<K>: Cache where K: StringConvertible {
   typealias Value = NSData // byte array
 
   func get(key: Key) -> Future<Value> { /* ... */ }
-  func set(key: Key, value: Value) -> Future<Unit> { /* ... */ }
+  func set(key: Key, value: Value) -> Future<Void> { /* ... */ }
 }
 ```
 
@@ -379,7 +379,7 @@ extension Cache {
 ```
 
 ```swift
-    return new BasicCache(
+    return BasicCache(
       get: { k in self.get(k).map(f) }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -403,7 +403,7 @@ extension Cache {
       _ fInv: UIImage -> NSData
   ) -> BasicCache<Key, UIImage> {
 
-    return new BasicCache(
+    return BasicCache(
       get: { k in self.get(k).map(f) }
       set: { k, v in self.set(k, fInv(v)) }
     )
@@ -422,7 +422,7 @@ extension Cache {
       _ fInv: V2 -> Value
   ) -> BasicCache<Key, V2> {
 
-    return new BasicCache(
+    return BasicCache(
       get: { k in self.get(k).map(f) }
       set: { k, v in self.set(k, fInv(v)) }
     )
@@ -450,7 +450,7 @@ extension Cache {
 ```
 
 ```swift
-    return new BasicCache(
+    return BasicCache(
       get: { k in self.get(fInv(k)) }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -518,11 +518,15 @@ extension Cache where K: Hashable {
 ```
 
 ```swift
-    return new BasicCache {
-      get: { k in dict[k] ??
-              (let f = self.get(k); dict[k] = f; f) }
+    var dict = dict
+    return BasicCache(
+      get: { k in dict[k] ?? ({
+              let f = self.get(k)
+              dict[k] = f
+              return f
+           })() }
       set: self.set
-    }
+    )
   }
   // logic for freeing the memory elided
 }
@@ -655,7 +659,7 @@ struct BasicCache<K, V>: Cache {
 
 ```swift
   let getFn: K -> Future<V>
-  let setFn: (K, V) -> Future<Unit>
+  let setFn: (K, V) -> Future<Void>
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -663,7 +667,7 @@ struct BasicCache<K, V>: Cache {
   func get(key: Key) -> Future<Value> {
     return getFn(key)
   }
-  func set(key: Key, value: Value) -> Future<Unit> {
+  func set(key: Key, value: Value) -> Future<Void> {
     return setFn(key, value)
   }
 }
