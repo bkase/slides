@@ -21,7 +21,8 @@ They are all examples of closed binary operations
     Identity + associativity = monoid
 12. Idempotence -- at-least-once semantics
     =Semilattice
-13. Commutativity -- 
+13. Commutativity -- order doesn't matter; non-deterministic concurrency okay
+    =Commutative semilattice
 14. Vocabulary is important; talking at a higher level
 16. Takeaways: Type safety is important. Laws are the next step. Just as type safety improves correctness so do laws
 
