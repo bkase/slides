@@ -18,8 +18,15 @@ Note: In this case, the homefeed of our app can have pins or users or boards, bu
 
 ```objc
 @interface FeedItem : NSObject
+```
+
+```objc
 @property (nullable, nonatomic, strong) User *user;
 @property (nullable, nonatomic, strong) Pin *pin;
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
 @end
 ```
 
@@ -27,14 +34,13 @@ Note: ...and in general we are okay with this. But...
 
 !!!
 
-## Problems with this approach
-
-!!!
-
 ### Problems with this approach
 
-* Impossible states *are constructible*
-* Case analysis is *not checked for exhaustivity*
+
+* Impossible states <!-- .element: class="fragment" data-fragment-index="1" --> *are constructible*
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* Case analysis is <!-- .element: class="fragment" data-fragment-index="2" --> *not checked for exhaustivity*
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
@@ -75,11 +81,27 @@ item.pin = p;
 
 ```objc
 -(void)render(FeedItem *item) {
+```
+
+```objc
   if (item.user) {
     // draw with user
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
   } else if (item.pin) {
     // draw with pin
-  } /* else if { ... etc */
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```objc
+  /* else if { ... etc */
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```objc
 }
 ```
 
@@ -98,8 +120,10 @@ item.pin = p;
 
 ### Problems with this approach
 
-* Impossible states *are constructible*
-* Case analysis is *not checked for exhaustivity*
+* Impossible states <!-- .element: class="fragment" data-fragment-index="1" --> *are constructible*
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* Case analysis is <!-- .element: class="fragment" data-fragment-index="2" --> *not checked for exhaustivity*
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
@@ -117,8 +141,19 @@ item.pin = p;
 
 ```swift
 enum FeedItem {
+```
+
+```swift
   case user(user: User)
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
   case pin(pin: Pin)
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
 }
 ```
 
@@ -126,8 +161,8 @@ enum FeedItem {
 
 ### Why Swift Enums are good
 
-* Impossible states are impossible *by construction*
-* Compiler enforces *exhaustive* case analysis
+* Impossible states are impossible <!-- .element: class="fragment" data-fragment-index="1" --> *by construction* <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Compiler enforces *exhaustive*  case analysis <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
@@ -157,8 +192,12 @@ let pin = .pin(data: pinData)
 
 ```swift
 let bothPinAndUser = ???
+```
+
+```swift
 let neitherPinNorUser = ???
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 Note: In other words, your code won't compile if you or your teammates forget some constraint
 
@@ -174,14 +213,33 @@ Note: In other words, your code won't compile if you or your teammates forget so
 
 ```swift
 func render(item: FeedItem) {
+```
+
+```swift
   switch item {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
     case let .user(userData):
       // draw user
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
     case let .pin(pinData):
       // draw pin
   }
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
   // if you add a new case
   // the compiler will *save* you
+```
+<!-- .element: class="fragment" data-fragment-index="4" -->
+
+```swift
 }
 ```
 
@@ -194,163 +252,28 @@ func render(item: FeedItem) {
 
 !!!
 
-## Safe modelling in Objective-C
+## Swift Enum - ObjectiveC
 
 !!!
 
-### Requirements for safe modelling
-
-* Impossible states are *impossible by construction*
-* Compiler enforces *exhaustive case analysis*
-
-!!!
-
-### Step 1: Impossible states are impossible by construction
-
-* No way to make a Pin and user at the same time
-* No way to create some object that has neither a Pin nor a user.
-
-!!!
-
-### Step 1: Impossible states are impossible by construction
-
-```objc
-// inheritance and constructor specialization
-// UserFeedItemTag=0 PinFeedItemTag=1
-@interface FeedItem : NSObject
--(instancetype)initWithTag:(FeedItemTag *)tag;
-@end
-@interface UserFeedItem
--(FeedItem)initWithUserData:(UserData *)userData;
-@end
-@interface PinFeedItem // etc
-```
-
-Note: Omitting namespace for clarity
-
-!!!
-
-### Step 2: Compiler enforces all cases are handled
-
-![enforce](img/enforce.jpg)
-
-> http://www.justingary.com/wp-content/uploads/2016/07/Enforcement.jpg
-
-Note: we can use a method with parameters for each case
-
-!!!
-
-### Step 2: Compiler enforces all cases are handled
-
-```objc
-// take 1
-- (void)matchCaseUser:(void (^)(UserData *))caseUser
-                orPin:(void (^)(PinData *))casePin;
-```
-
-!!!
-
-### Step 2: Compiler enforces all cases are handled
-
-```objc
-// take 1
--(void)render {
-  [feedItem matchCaseUser:^(UserData * userData){
-    // draw user
-  }, orPin:^(PinData * pin) {
-    // draw pin
-  }];
-  // if we add another case, this will no longer compile
-}
-```
-
-!!!
-
-## Why do we need "Swift Enums"?
-
-!!!
-
-### This code is not good enough
-
-* Too much boilerplate
-* Case analysis not exhaustive everywhere
-
-!!!
-
-### Too much boilerplate
-
-![matrix](img/code-matrix.jpg)
-
-> http://www.myfreewallpapers.net/abstract/wallpapers/code-matrix.jpg
-
-Note: Constrast with...
-
-!!!
-
-### No boilerplate
-
-```objc
-// compare to this
-@interface FeedItem : NSObject
-@property (nullable, nonatomic, strong) User *user;
-@property (nullable, nonatomic, strong) PIn *pin;
-@end
-// that's it!
-```
-
-Note: It's so much easier to do it this way
-
-!!!
-
-### Case analysis not exhaustive everywhere
-
-(image)
-
-!!!
-
-### Implementation of match
-
-```objc
-+(ValueType)match:(FeedItem *)item
-           orUser:(ValueType(^)(UserData *))caseUser
-            orPin:(ValueType(^)(PinData *))casePin {
-  switch (item.tag) {
-  case UserFeedItemTag:
-    return caseUser((UserData *)item);
-  case PinFeedItemTag:
-    return casePin((PinData *)item);
-  /* … */
-  }
-  // we have the branch tree!
-  // We can't forget to update this!
-}
-```
-
-Note: And we still have the same sort of problem as before to manage this boilerplate
-
-!!!
-
-## Fix: Macros
-
-Note: Macros can manage boilerplate and couple exhaustivity checks
-
-!!!
-
-### Macros can manage boilerplate
-
-![manager](img/manager.jpg)
-
-> http://www.eylean.com/blog/wp-content/uploads/2014/06/project-manager-multitasking.jpg
-
-!!!
-
-### The macro: ONE_OF
+### The aesthetics: ONE_OF
 
 ```objc
 ONE_OF(FeedItem,
+```
+
+```objc
   CASE(Pin, PinData *, pinData)
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
   CASE(User, UserData *, userData /*, … */)
   /* … */
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```objc
 )
 ```
 
@@ -358,37 +281,47 @@ Note: We can make Swift enums! One of either a pin or a user
 
 !!!
 
-### Swift enum in Objective-C
+### Aesthetics comparison
 
 ```swift
 // if you squint they look similar
 enum FeedItem {
+```
+
+```swift
   case pin(PinData)
   case user(UserData)
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
 }
 ```
 
 ```objc
 // if you squint they look similar
 ONE_OF(FeedItem,
+```
+
+```objc
   CASE(Pin, PinData *, pinData),
   CASE(User, UserData *, userData)
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
 )
 ```
 
 !!!
 
-### How can we build it?
-
-![builder](img/builder.jpg)
-
-> http://clipart-library.com/clipart/385426.htm
-
-Note: Let's talk about macros
+## Aside: Macros 101
 
 !!!
 
-## Macros 101
+### What is an Objective-C macro
+
+Objective-C macros are compiler directives to expand strings *before* your Objective-C code is actually compiled
 
 !!!
 
@@ -397,8 +330,13 @@ Note: Let's talk about macros
 ```objc
 #define FOO @"bar"
 
-NSLog(FOO); // logs "bar"
+FOO
 ```
+
+```objc
+// @"bar"
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 Note: Replace with a string
 
@@ -409,9 +347,13 @@ Note: Replace with a string
 ```objc
 #define FOO(x, y) @"x bar y"
 
-NSLog(FOO(before, after));
+FOO(before, after)
+```
+
+```objc
 // logs "before bar after"
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
@@ -420,9 +362,13 @@ NSLog(FOO(before, after));
 ```objc
 #define FOO(x, y) @"x##y"
 
-NSLog(FOO(before, after));
-// logs "beforeafter"
+FOO(before, after);
 ```
+
+```objc
+// @"beforeafter"
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
@@ -433,333 +379,317 @@ NSLog(FOO(before, after));
 #define BAR(a, b, ...) a##b
 
 FOO(1,2,3,4)
-// foo 12
 ```
 
-!!!
-
-### Building out of nothing
-
-![crazy toothpick city street](img/toothpicks.jpg)
-
-> http://s535395661.websitehome.co.uk/wp-content/uploads/2011/12/San-Fran-Toothpick-Model-41.jpg
-
-Note: This seems like it's not enough
+```objc
+// foo 12
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
-## Going deeper
+## Back to our macro
 
 !!!
 
-### What do we need?
+### Our macro: ONE_OF
 
 ```objc
 ONE_OF(FeedItem,
-  CASE(Pin, PinData *, pinData),
-  CASE(user, UserData *, userData)
+  CASE(Pin, PinData *, pinData)
+  CASE(User, UserData *, userData /*, … */)
+  /* … */
 )
 ```
 
-Note: variadic within the case, variadic across the cases, we need to communicate between the macros
+!!!
+
+### What does this expand to?
+
+![expand](img/expand.png)
 
 !!!
 
-### What do we need?
+### Requirements for safe modelling
 
-1. Variadic within the case (type, value, type, value, ...)
-2. Send the case info up to the ONE_OF
-3. Send the FeedItem prefix down to the cases
-4. Variadic across the cases (support many variants)
+* Impossible states are *impossible by construction*
+* Compiler enforces *exhaustive case analysis*
 
 !!!
 
-## Handling the inside of CASE
-
-!!!
-
-### Concatenate
+### Constructor: Interfaces
 
 ```objc
-// This macro lets you x##y but x and/or y
-// can be nested macro calls.
-#define CONCATENATE(x, y) CONCATENATE1(x, y)
-#define CONCATENATE1(x, y) CONCATENATE2(x, y)
-#define CONCATENATE2(x, y) x##y
+// FeedItemUserTag=0 FeedItemPinTag=1
 ```
 
-> http://stackoverflow.com/questions/1872220/is-it-possible-to-iterate-over-arguments-in-variadic-macros
-
-!!!
-
-### Concatenate
-
 ```objc
-#define FOO_1(x) hello##x
-
-CONCATENATE(FOO, _1)(world)
-// helloworld
+@interface FeedItem : NSObject
 ```
-
-!!!
-
-### Foreach
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```objc
-#define PREPEND(x) pre##x
-
-FOR_EACH(PREPEND, a, b, c)
-// prea preb prec
+-(instancetype)initWithTag:(FeedItemTag *)tag;
 ```
-
-!!!
-
-### Foreach
-
-![for each](img/foreach.png)
-
-!!!
-
-### Foreach
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```objc
-#define FOR_EACH_0(...)
-#define FOR_EACH_1(what, x, ...) what(x)
-#define FOR_EACH_2(what, x, ...)\
-  what(x) \
-  FOR_EACH_1(what, __VA_ARGS__)
-#define FOR_EACH_3(what, x, ...)\
-  what(x) \
-  FOR_EACH_2(what, __VA_ARGS__)
+@end
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
+@interface FeedItemUser : FeedItem
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```objc
+-(instancetype)initWithUserData:(UserData *)userData;
+```
+<!-- .element: class="fragment" data-fragment-index="4" -->
+
+```objc
+@end
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```objc
+@interface FeedItemPin : FeedItem
 // etc
 ```
+<!-- .element: class="fragment" data-fragment-index="5" -->
 
-TODO attribute the stack overflow
-
-Note: one of these will be called, and cascades downwards
+Note: inheritance, Omitting namespace for clarity
 
 !!!
 
-### Foreach
+### Constructor: Variant Implementation
 
 ```objc
-#define FOR_EACH_NARG(...) \
-  FOR_EACH_NARG_(__VA_ARGS__, FOR_EACH_RSEQ_N())
-#define FOR_EACH_NARG_(...) \
-  FOR_EACH_ARG_N(__VA_ARGS__)
-#define FOR_EACH_ARG_N(_0, _1, /* … */, _7, N, ...) N
-#define FOR_EACH_RSEQ_N() 8, 7, 6, 5, 4, 3, 2, 1, 0
+@implementation FeedItemUser
 ```
 
-Note: NARG will be invoked to select the suffix of the correct spot in the waterfall, the trick is that the numbers push back the others
-
-!!!
-
-### Foreach
-
 ```objc
-#define ARG_N(_0, _1, _2, _3, N, ...) N
-ARG_N(4, 3, 2, 1, 0) // yeilds 0
-ARG_N(x, 4, 3, 2, 1, 0) // yeilds 1
-ARG_N(x, y, 4, 3, 2, 1, 0) // yeilds 2
+-(id)initWithuserData:(UserData *)userData {
 ```
-
-!!!
-
-### For double each
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```objc
-CASE(Pin, PinData *, pinData, NSNumber *, otherStuff)
-// we want to run a macro on the type and value in a pairs
-// FOO(type, value) FOO(type, value)
+  FeedItemTag tag = FeedItemUserTag;
+  if (self = [super initWithTag: tag]) {
+    _userData = userData;
+  }
+  return self;
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+
+```objc
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
+@end
 ```
 
 !!!
 
-### For double each
+### Constructor: Macro view
 
 ```objc
-#define FOR_DOUBLE_EACH_0(...)
-#define FOR_DOUBLE_EACH_1(what, x, y, ...) what(x, y)
-#define FOR_DOUBLE_EACH_2(what, x, y, ...)\
-  what(x, y) \
-  FOR_DOUBLE_EACH_1(what, __VA_ARGS__)
+CASE(User, UserData *, user)
+
+// -->
 ```
-
-Note: Similar but we're invoking the inner macro with two params
-
-!!!
-
-### Case is handled
 
 ```objc
-CASE(Pin, PinData *, pinData, NSNumber *, otherStuff)
+
+@interface FeedItemUser
+-(instancetype)initWithUserData:(UserData *)userData;
+@end
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: FeedItem appears in the output?
+
+!!!
+
+### How do we get FeedItem?
+
+```objc
+ONE_OF(FeedItem,
+  CASE(User, UserData *, user)
+/* ... */
 ```
 
-Note: Now we can run through the type and values and expand that to what we need
+!!!
+
+### How do we get Feeditem?
+
+![case expand](img/case-expand.png)
 
 !!!
 
-## Passing data upwards
-
-!!!
-
-### Macro view: Passing data up problem
+### Macro: Exhaustive case analysis?
 
 ```objc
 ONE_OF(FeedItem,
   CASE(Pin, PinData *, pinData)
-/* ... */
-```
-
-!!!
-
-### Generated view: Passing data up problem
-
-```objc
-/* ... */
-@interface FeedItemPin
-@property (nonatomic, readonly, strong) PinData *pinData;
-@end
-/* ... */
-@implementation FeedItemPin
-/* ... */
-@end
-```
-
-Note: We need to weave the CASE information through our generated code
-
-!!!
-
-### Solution: Pass chunks of information up
-
-```objc
-#define CASE_SIMPLE(x,y) interface x y , impl x y
-#define ONEOF_SIMPLE(prefix, iface, impl) \
-   boiler iface plate impl
-
-ONEOF_SIMPLE(FeedItem, CASE_SIMPLE(a, b))
-// boiler interface a b plate impl a b
-```
-
-Note: Comma-separated macro results can be fed back into a parent macro
-
-!!!
-
-### Actual CASE behavior
-
-```objc
-// name, (typ, arg)...
-// returns:
-//    (name, ifaceChunk, implChunk1, implChunk2, privateChunk)...
-#define CASE(name, typ, var, ...) \
-/* … */
-```
-
-Note: Case returns it's name so the parent can use it, and a few chunks of code that rely on the knowledge of the parameters inside case
-
-!!!
-
-## Passing data down
-
-!!!
-
-### Macro view: Passing data downwards
-
-```objc
-ONE_OF(FeedItem,
-  CASE(Pin, PinData *, pinData)
-/* ... */
-```
-
-Note: FeedItem prefix needs to be pasted in front of Pin
-
-!!!
-
-### Generated view: Passing data downwards
-
-```objc
-@class FeedItemPin;
-/* ... */
-@interface FeedItemPin
-/* ... */
-@implementation FeedItemPin
-```
-
-!!!
-
-### Solution: Pass data down by including extra param everywhere
-
-```objc
-#define FORWARD_DECLARE(prefix, caseName) \
-    @class prefix##caseName;
-
-FORWARD_DECLARE(FeedItem, Pin)
-// @class FeedItemPin;
-```
-
-!!!
-
-## Support many cases
-
-!!!
-
-### Macro view: Many cases
-
-```objc
-// returns:
-//    (name, ifaceChunk, implChunk1, implChunk2, privateChunk)...
-#define CASE(name, typ, var, ...) \
-/* … */
-#define ONE_OF(prefix, ...) \
-```
-
-Note: We pass up 5 things from each case; that means we want to run a macro over groups of 4 things + we need the prefix (a constant)
-
-!!!
-
-### FOR_QUINT_CONST_EACH definition
-
-```objc
-#define FOO(c, x, y, z, w, t) c##x y z w t
-FOR_QUINT_CONST_EACH(
-  FOO, constant, x1,y1,z1,w1,t1, x2,y2,z2,w2,t2)
-// constantx1 y1 z1 w1 t1 constantx2 y2 z2 w2 t2
-```
-
-!!!
-
-### FOR_QUINT_CONST_EACH usage
-
-```objc
-#define ONE_OF(prefix, /* CASE(Pin, PinData *, pinData) */...) \
-  FOR_QUINT_CONST_EACH(FORWARD_DECL, prefix, __VA_ARGS__) \
+  CASE(User, UserData *, userData /*, … */)
   /* … */
-// @class FeedItemPin; @class FeedItemUser; ...
+)
 ```
-
-Note: Invoke ONE_FORWARD_DECLARATION macro with the constant `prefix` parameter over every 4 arguments in va args
 
 !!!
 
-### FOR_QUINT_CONST_EACH internals
+### Match: Interface
 
 ```objc
-#define FOR_QUINT_CONST_EACH_0(...)
-#define FOR_QUINT_CONST_EACH_1(what, c, x, y, z, w, t, ...)\
-  what(c, x, y, z, w, t)
-#define FOR_QUINT_CONST_EACH_2(what, c, x, y, z, w, t, ...)\
-  what(c, x, y, z, w, t) \
-  FOR_QUINT_CONST_EACH_1(what, c, __VA_ARGS__)
+FeedItem<ValueType>
 ```
 
-Note: Same story as before
+```objc
++ (ValueType)matchCaseUser:(ValueType (^)(UserData *))caseUser
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
+                     orPin:(ValueType (^)(PinData *))casePin;
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
-### Macro
+### Match: Usage
 
-The rest is simple token substitutions!
+```objc
+-(void)render {
+```
+
+```objc
+  [feedItem matchCaseUser:^(UserData * userData){
+    // draw user
+  }, orPin:^(PinData * pin) {
+    // draw pin
+  }];
+  // if we add another case, this will no longer compile
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
+}
+```
+
+!!!
+
+### Match: Implementation
+
+```objc
++(ValueType)match:(FeedItem *)item
+           orUser:(ValueType(^)(UserData *))caseUser
+            orPin:(ValueType(^)(PinData *))casePin {
+```
+
+```objc
+  switch (item.tag) {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
+  case UserFeedItemTag:
+    return caseUser((UserData *)item);
+  case PinFeedItemTag:
+    return casePin((PinData *)item);
+  /* … */
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```objc
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```objc
+}
+```
+
+!!!
+
+## Now what else can we do with this?
+
+!!!
+
+### Aside: Otherwise known-as
+
+* Algebraic Data Types (or ADTs)
+* Sum type (or sum of products)
+
+Note: See appendix for more information
+
+!!!
+
+### Case 1: Data is inheritantly mutually exclusive
+
+!!!
+
+### Data: Heterogenous feed
+
+<img alt="pinterest home feed" src="img/feed.png" width="33%" height="33%">
+
+!!!
+
+### Data: Barcodes
+
+```swift
+enum Barcode {
+```
+
+```swift
+case upc(Int, Int, Int, Int)
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+case qr(String)
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+}
+```
+
+!!!
+
+### Case 2: Branchy control flow can be reified into a data structure
+
+!!!
+
+### Reification: Capturing the data associated with an indexPath
+
+```swift
+func somethingUsing(indexPath: NSIndexPath) {
+```
+
+```swift
+  let dataForNode = (indexPath.row == 0) ?
+    .Header :
+    .Item(self.items[indexPath.row-1]);
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+  inTheBackground {
+    doSomething(dataForNode)
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+}
+```
+
+Note: In ASDK, we need to extract the model on the UI thread but we don't create the underlying view holder until the background; ADTs let us capture the conditionals so we don't need to check the same things twice
 
 !!!
 
@@ -778,19 +708,29 @@ The rest is simple token substitutions!
 
 ### Downside: Errors are complicated
 
-(screenshot)
-
-!!!
-
-### Pinterest usage
-
-> PIN_ONE_OF is great! I can't believe I've lived without this?
-
-Note: something like that
+![errors complicated](img/errors.png)
 
 !!!
 
 ## Open Source Soon
+
+Note: We're using it in a few places
+
+!!!
+
+## One last thought
+
+![thought](img/thought.jpg)
+
+> https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Tim_Berners-Lee_in_thought.jpg/683px-Tim_Berners-Lee_in_thought.jpg
+
+Note: I've done this across many languages I've worked with. Go, Kotlin (before kotlin had it), and now Objective-C. If there's one thing you take away from this talk, it's not the macro it's that...
+
+!!!
+
+## Algebraic Data Types are awesome
+
+and you should use them.
 
 !!!
 
