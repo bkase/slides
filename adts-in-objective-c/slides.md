@@ -661,26 +661,69 @@ case qr(String)
 
 !!!
 
-### Case 2: Branchy control flow can be reified into a data structure
+### Case 2: Can capture soon-to-be invalid control flow
+
+!!!
+
+### Bad case: Not capturing
+
+```swift
+func tableNode(/*...*/, nodeBlockForRowAt indexPath: IndexPath)
+      -> ASCellNodeBlock {
+```
+
+```swift
+  return {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    if indexPath.row == 0 {
+      return getCellForHeader()
+    } else if indexPath.row < 5 {
+      return getCellForMid(self.middleItems[indexPath.row-1])
+    } else {
+      return getCellForLast(self.lastItems[indexPath.row-5])
+    }
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+}
+```
 
 !!!
 
 ### Reification: Capturing the data associated with an indexPath
 
 ```swift
-func somethingUsing(indexPath: NSIndexPath) {
+func tableNode(/*...*/, nodeBlockForRowAt indexPath: IndexPath)
+      -> ASCellNodeBlock {
 ```
 
 ```swift
-  let dataForNode = (indexPath.row == 0) ?
-    .Header :
-    .Item(self.items[indexPath.row-1]);
+  if indexPath.row == 0 {
+    dataForNode = .Header
+  } else if indexPath.row < 5 {
+    dataForNode = .Mid(self.middleItems[indexPath.row-1])
+  } else {
+    dataForNode = .Last(self.lastItems[indexPath.row-5])
+  }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-  inTheBackground {
-    doSomething(dataForNode)
+  return {
+    switch dataForNode {
+    case .Header: return getCellForHeader()
+    case let .Mid(item): return getCellForMid(item)
+    case let .Last(item): return getCellForLast(item)
+    }
   }
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
