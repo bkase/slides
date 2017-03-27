@@ -46,7 +46,9 @@ Note: ...and in general we are okay with this. But...
 
 ### Impossible states are constructible
 
-(image)
+<img alt="impossible" src="img/impossible-construct.jpg" width="50%" height="50%">
+
+> https://s-media-cache-ak0.pinimg.com/736x/94/a9/22/94a922f0ad46d8fa583357fa9abb6cbc.jpg
 
 !!!
 
@@ -168,7 +170,7 @@ enum FeedItem {
 
 ### Impossible states are impossible by construction
 
-(image)
+<img alt="impossible" src="img/not-impossible-construct.jpg" width="50%" height="50%">
 
 !!!
 
@@ -550,12 +552,16 @@ FeedItem<ValueType>
 ```
 
 ```objc
-+ (ValueType)matchCaseUser:(ValueType (^)(UserData *))caseUser
++ (ValueType)matchWith:(FeedItem *)item
+```
+
+```objc
+                orUser:(ValueType (^)(FeedItemUser *))caseUser
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```objc
-                     orPin:(ValueType (^)(PinData *))casePin;
+                 orPin:(ValueType (^)(FeedItemPin *))casePin;
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
@@ -564,13 +570,14 @@ FeedItem<ValueType>
 ### Match: Usage
 
 ```objc
--(void)render {
+-(void)render(FeedItem *item) {
 ```
 
 ```objc
-  [feedItem matchCaseUser:^(UserData * userData){
+  [FeedItem match:item
+           orUser:^id(FeedItemUser * user){
     // draw user
-  }, orPin:^(PinData * pin) {
+  }, orPin:^id(FeedItemPin * pin) {
     // draw pin
   }];
   // if we add another case, this will no longer compile
@@ -587,8 +594,8 @@ FeedItem<ValueType>
 
 ```objc
 +(ValueType)match:(FeedItem *)item
-           orUser:(ValueType(^)(UserData *))caseUser
-            orPin:(ValueType(^)(PinData *))casePin {
+           orUser:(ValueType(^)(FeedItemUser *))caseUser
+            orPin:(ValueType(^)(FeedItemPin *))casePin {
 ```
 
 ```objc
@@ -598,9 +605,9 @@ FeedItem<ValueType>
 
 ```objc
   case UserFeedItemTag:
-    return caseUser((UserData *)item);
+    return caseUser((FeedItemUser *)item);
   case PinFeedItemTag:
-    return casePin((PinData *)item);
+    return casePin((FeedItemPin *)item);
   /* … */
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
@@ -616,7 +623,32 @@ FeedItem<ValueType>
 
 !!!
 
-## Now what else can we do with this?
+## Open Sourced
+
+Note: We're using it in a few places, but is it perfect...
+
+!!!
+
+## Downsides
+
+!!!
+
+### Downside: Macros can't capitalize
+
+```objc
+// Macros can't capitalize
+[PinFeedItem initWithpinData:(PinData *)data]
+```
+
+!!!
+
+### Downside: Errors are complicated
+
+![errors complicated](img/errors.png)
+
+!!!
+
+## Upside?
 
 !!!
 
@@ -699,7 +731,7 @@ func tableNode(/*...*/, nodeBlockForRowAt indexPath: IndexPath)
 
 !!!
 
-### Reification: Capturing the data associated with an indexPath
+### Good case: Capturing the data associated with an indexPath
 
 ```swift
 func tableNode(/*...*/, nodeBlockForRowAt indexPath: IndexPath)
@@ -736,34 +768,9 @@ Note: In ASDK, we need to extract the model on the UI thread but we don't create
 
 !!!
 
-## Downsides
-
-!!!
-
-### Downside: Macros can't capitalize
-
-```objc
-// Macros can't capitalize
-[PinFeedItem initWithpinData:(PinData *)data]
-```
-
-!!!
-
-### Downside: Errors are complicated
-
-![errors complicated](img/errors.png)
-
-!!!
-
-## Open Source Soon
-
-Note: We're using it in a few places
-
-!!!
-
 ## One last thought
 
-![thought](img/thought.jpg)
+<img alt="thought" src="img/thought.jpg" width="35%" height="35%">
 
 > https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Tim_Berners-Lee_in_thought.jpg/683px-Tim_Berners-Lee_in_thought.jpg
 
@@ -784,5 +791,5 @@ and you should use them.
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
-Slide Deck: [https://is.gd/edLKW7](https://is.gd/edLKW7)
+Slide Deck: TODO
 
