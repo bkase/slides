@@ -75,7 +75,9 @@ item.pin = p;
 
 ### Case analysis is not checked for exhaustivity
 
-(image)
+<img alt="wide awake" src="img/awake.jpg" width="60%" height="60%">
+
+> http://c1.staticflickr.com/3/2618/3687665853_02ef810db6_b.jpg
 
 !!!
 
@@ -207,7 +209,10 @@ Note: In other words, your code won't compile if you or your teammates forget so
 
 ### Compiler enforces exhaustive case analysis
 
-(image)
+<img alt="exhaustion" src="img/asleep.jpg" width="75%" height="75%">
+
+
+> https://c1.staticflickr.com/4/3369/3261721276_d427db7b6a_b.jpg
 
 !!!
 
@@ -700,8 +705,9 @@ case qr(String)
 ### Bad case: Not capturing
 
 ```swift
-func tableNode(/*...*/, nodeBlockForRowAt indexPath: IndexPath)
-      -> ASCellNodeBlock {
+func tableView(/*...*/,
+    cellFactoryForRowAtIndexPath indexPath: IndexPath)
+      -> (() -> Cell) {
 ```
 
 ```swift
@@ -712,13 +718,21 @@ func tableNode(/*...*/, nodeBlockForRowAt indexPath: IndexPath)
 ```swift
     if indexPath.row == 0 {
       return getCellForHeader()
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
     } else if indexPath.row < 5 {
       return getCellForMid(self.middleItems[indexPath.row-1])
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
     } else {
       return getCellForLast(self.lastItems[indexPath.row-5])
     }
 ```
-<!-- .element: class="fragment" data-fragment-index="2" -->
+<!-- .element: class="fragment" data-fragment-index="4" -->
 
 ```swift
   }
@@ -731,11 +745,37 @@ func tableNode(/*...*/, nodeBlockForRowAt indexPath: IndexPath)
 
 !!!
 
+### Why is this bad? (Diagram)
+
+![stale indexpath diagram](img/stale-indexpath.png)
+
+!!!
+
+### Why is this bad? (Code)
+
+```swift
+func tableView(/*...*/,
+    cellFactoryForRowAtIndexPath indexPath: IndexPath)
+      -> (() -> Cell) {
+
+  return {
+    if indexPath.row == 0 {
+      return getCellForHeader()
+    } else if indexPath.row < 5 {
+      return getCellForMid(self.middleItems[indexPath.row-1])
+    } else {
+      return getCellForLast(self.lastItems[indexPath.row-5])
+    }
+  }
+}
+```
+
+!!!
+
 ### Good case: Capturing the data associated with an indexPath
 
 ```swift
-func tableNode(/*...*/, nodeBlockForRowAt indexPath: IndexPath)
-      -> ASCellNodeBlock {
+func tableView(/*...*/) -> (() -> Cell) {
 ```
 
 ```swift
@@ -763,8 +803,6 @@ func tableNode(/*...*/, nodeBlockForRowAt indexPath: IndexPath)
 ```swift
 }
 ```
-
-Note: In ASDK, we need to extract the model on the UI thread but we don't create the underlying view holder until the background; ADTs let us capture the conditionals so we don't need to check the same things twice
 
 !!!
 
