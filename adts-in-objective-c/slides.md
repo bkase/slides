@@ -451,9 +451,14 @@ ONE_OF(FeedItem,
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
 ```objc
--(instancetype)initWithUserData:(UserData *)userData;
+@property (nonatomic, readonly) UserData *userData;
 ```
 <!-- .element: class="fragment" data-fragment-index="4" -->
+
+```objc
+-(instancetype)initWithUserData:(UserData *)userData;
+```
+<!-- .element: class="fragment" data-fragment-index="5" -->
 
 ```objc
 @end
@@ -464,7 +469,7 @@ ONE_OF(FeedItem,
 @interface FeedItemPin : FeedItem
 // etc
 ```
-<!-- .element: class="fragment" data-fragment-index="5" -->
+<!-- .element: class="fragment" data-fragment-index="6" -->
 
 Note: inheritance, Omitting namespace for clarity
 
@@ -505,7 +510,7 @@ Note: inheritance, Omitting namespace for clarity
 ### Constructor: Macro view
 
 ```objc
-CASE(User, UserData *, user)
+CASE(User, UserData *, userData)
 
 // -->
 ```
@@ -609,9 +614,9 @@ FeedItem<ValueType>
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```objc
-  case UserFeedItemTag:
+  case FeedItemUserTag:
     return caseUser((FeedItemUser *)item);
-  case PinFeedItemTag:
+  case FeedItemPinTag:
     return casePin((FeedItemPin *)item);
   /* … */
 ```
@@ -628,7 +633,16 @@ FeedItem<ValueType>
 
 !!!
 
+### Why a macro and not codgen?
+
+Less friction
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
 ## Open Sourced
+
+See [BKOneOf header and tests](https://gist.github.com/bkase/3da9c46195961ed58bc8a7b1b05c1f87) for implementation and examples
 
 Note: We're using it in a few places, but is it perfect...
 
@@ -642,7 +656,7 @@ Note: We're using it in a few places, but is it perfect...
 
 ```objc
 // Macros can't capitalize
-[PinFeedItem initWithpinData:(PinData *)data]
+[FeedItemPin initWithpinData:(PinData *)data]
 ```
 
 !!!
