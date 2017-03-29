@@ -676,8 +676,6 @@ Note: We're using it in a few places, but is it perfect...
 * Algebraic Data Types (or ADTs)
 * Sum type (or sum of products)
 
-Note: See appendix for more information
-
 !!!
 
 ### Case 1: Data is inheritantly mutually exclusive
@@ -843,5 +841,5 @@ and you should use them.
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
-Slide Deck: TODO
+Slide Deck: [https://is.gd/KzVKWh](https://is.gd/KzVKWh)
 
