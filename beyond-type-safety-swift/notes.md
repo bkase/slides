@@ -1,3 +1,4 @@
+25-35min
 
 1. What in common question?
 
@@ -27,7 +28,41 @@ They are all examples of closed binary operations
 16. Takeaways: Type safety is important. Laws are the next step. Just as type safety improves correctness so do laws
 
 
-Law is an equivalence between two programs that should always be true
+Consider using "Average" example throughout
+make sure to mention that there are many examples that are just Semigroups, just monoid, just commutative monoids etc. Since "Average" is many things.
+Average is:
+  Magma
+  Semigroup
+  Monoid
+  Cummutative Monoid
+
+Sum is a monoid
+Count is a monoid
+SumAndCount is a monoid because any two monoids tupled are monoid. Unfortunately this is hard to express in Swift automatically, see appendix for a hack to do it, but there are tradeoffs (show the struct thing in the appendix)
+SumAndCount means an Average
+
+
+Abstract Motivation for this operator:
+
+Optimal API design.
+Composable-first design.
+Minimize necessary types?
+Once you have the composition. Law it up.
+Now you have expressive power.
+Examples that are (T,T) -> T
+* Caching (see my other talk)
+* Cancellation tokens of async work are idempotent monoids
+* See a future talk/blog post/library/or paper about Animations as Algebraic Rings
+What's a ring?
+two monoids stuck together with some more laws about the interaction between them.
+
+Example that isn't this (T,T) -> T operation:
+* Futures/Promises better than callbacks for fire-once responses?
+  * I think this audience doesn't need convincing of this (and I don't have time)
+  * Why are they better?
+      Composasable!
+      I can take a future and transform it and I get back a future
+      Thus I can lift the code out into a temp variable
 
 
 

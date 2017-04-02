@@ -136,6 +136,12 @@ Note: We're going to enrich our magma with some laws
 
 !!!
 
+## Laws?
+
+A law is an _equivalence_ between two programs that should _always be true_
+
+!!!
+
 ## Associativity
 
 ```
@@ -193,14 +199,14 @@ Note: split into pieces and use the empty case for off-by-one
 ```swift
 extension Semigroup {
   func foldPar(empty: Self, work: [Self], q: DispatchQueue) {
-    // split into pairs, use baseCase if odd number
+    // split into pairs, use empty if odd number
     // dispatchAsync all the work
     // recurse
   }
 }
 ```
 
-Note: You could probably do this more generically without arrays
+Note: You could probably do this more generically with sequences
 
 !!!
 
@@ -243,7 +249,29 @@ extension Monoid {
 
 !!!
 
+## Monoid lets us lift that empty out
+
+Now what was the _empty_ parameter of the `foldPar` function is 
+
+
+!!!
+
 ## Monoids are powerful
+
+!!!
+
+## Move over ParFold -- DistFold
+
+```swift
+extension Monoid {
+  func distFold(rest: [Self], ips: [IpAddress]) {
+    // distribute work across all ips
+    // every device does some work
+    // put it back together
+    /* … */
+  }
+}
+```
 
 !!!
 
@@ -272,6 +300,22 @@ protocol CommutativeMonoid: Monoid {}
 
 !!!
 
+## DistFold with current progress!
+
+```swift
+extension Monoid {
+  func distFold(rest: [Self], ips: [IpAddress]) {
+    // distribute work across all ips
+    // every device does some work
+    // put it back together
+    // *** SHOW RESULTS INCREMTNALLY WHEN ANY DEVICE FINISHES ***
+    /* … */
+  }
+}
+```
+
+!!!
+
 ## Idempotence
 
 ```swift
@@ -289,6 +333,23 @@ extension BoundedSemilattice: CommutativeMonoid {}
 ```
 
 Note: Really good for distributed systems
+
+!!!
+
+## DistFold over UDP!
+
+```swift
+extension Monoid {
+  func distFold(rest: [Self], ips: [IpAddress]) {
+    // distribute work across all ips
+    // *** USE CUSTOM TRANSPORT PROTOCOL THAT DOESNT CARE ABOUT DUPLICATES ***
+    // every device does some work
+    // put it back together
+    // *** SHOW RESULTS INCREMTNALLY WHEN ANY DEVICE FINISHES ***
+    /* … */
+  }
+}
+```
 
 !!!
 
