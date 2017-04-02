@@ -11,3 +11,7 @@ https://bkase.github.io/slides/grokking-lazy-swift/
 
 Composable Caching in Swift:
 https://bkase.github.io/slides/composable-caching-swift/
+
+Bringing Swift Enums to Objective-C:
+https://bkase.github.io/slides/adts-in-objective-c/
+
