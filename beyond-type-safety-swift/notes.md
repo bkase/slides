@@ -65,6 +65,12 @@ Example that isn't this (T,T) -> T operation:
       Thus I can lift the code out into a temp variable
 
 
+Do you want to learn more?
+I do!
+Basic abstract algebra and category theory will help.
+
+For a really low core intro read "How to Bake a Pi"
+
 
 Beyond Type Safety in Swift -- The Virtues of following the Law
 
