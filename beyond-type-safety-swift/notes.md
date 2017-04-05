@@ -42,6 +42,11 @@ SumAndCount is a monoid because any two monoids tupled are monoid. Unfortunately
 SumAndCount means an Average
 
 
+* Cut magmas a lot to a few slides
+* How to get from associativity to a semigroup
+* Combine chunk work example with multithreading
+* The diamond operation can be really heavy so it's advantageous, to make it easy to picture I'm going to use this example of averaging.
+
 Abstract Motivation for this operator:
 
 Optimal API design.

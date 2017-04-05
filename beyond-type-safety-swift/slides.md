@@ -10,26 +10,24 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
-## Uncontroversial Goals
+### Uncontroversial Goals
 
 1. Simple
 2. Expressive
 
 !!!
 
-## Simple
+### Simple
 
-TODO: Lookup the slide by john-de-goes and cite it
+_Simplicity increases_ as _primitive count decreases_
 
-_More simple_ as I have _fewer and fewer primitives_
-
-Note: Thing means a parameters to a function, a new type in the library. A very simple library has one type and one method with one parameter for example. Yes this can actually be useful, we'll see later.
+Note: Primitive means a parameters to a function, a new type in the library. A very simple library has one type and one method with one parameter for example. Yes this can actually be useful, we'll see later.
 
 !!!
 
-## Expressive
+### Expressive
 
-_More expressive_ as I can _solve more problems_
+_Expressivity increases_ as _solvable problems increase_
 
 Note: But it's hard to do more things with fewer things...
 
@@ -39,11 +37,43 @@ Note: But it's hard to do more things with fewer things...
 
 (image)
 
-Note: Tradeoff, we want to impact simplicity very trivially and extremely raise expressivity
+Note: Tradeoff, we want to impact simplicity very trivially and extremely raise expressivity. We can also be complex and not expressive by having lots of types and methods and all of them do nonsensical things.
 
 !!!
 
-### Compositional APIs
+### Complex API for adding numbers
+
+```swift
+struct Ones {
+  func addOnes(ones: Ones) -> Either<Ones, Tens>
+  func addTens(tens: Tens) -> Either<Tens, Hundreds>
+  /* ... */
+}
+struct Tens { /*...*/ }
+struct Hundreds { /*...*/ }
+/* ... */
+```
+
+!!!
+
+### Simple API for adding numbers
+
+```swift
+// on Ints
+func +(other: Int) -> Int
+
+1 + 1
+```
+
+!!!
+
+### Why composibility is better
+
+I can combine numbers into something that is also a number
+
+!!!
+
+### Composable APIs
 
 ```swift
 struct Future<V> {
@@ -56,73 +86,26 @@ Note: Futures simplify callbacks, I don't have to convince this audience
 
 !!!
 
-### Compositional APIs 2
+TODO: Consider doing a series of examples here?
+
+!!!
+
+### Composable APIs (more)
+
+The local maxima for expressiveness you can squeeze out of one type
+
+Note: In other words, a way to increase expressiveness without harming simplicity as much
+
+!!!
+
+## This talk: All about one flavor of composable method
+
+!!!
+
+### Closed Binary Operation
 
 ```swift
-??
-```
-
-Note: See my composable caching talk for more details??
-
-!!!
-
-Consider doing a series of examples here?
-
-!!!
-
-### Compositional APIs (more)
-
-The local maxima for power you can squeeze out of one type
-
-!!!
-
-### This talk: All about one instance of this composition
-
-```
-struct Foo {
-  func op(other: Foo) -> Foo
-}
-// image or diagran of this?
-```
-
-Note: Take two of something and combine it to make one thing
-
-!!!
-
-## Closed binary operations
-
-(image)
-
-!!!
-
-## Closed
-
-(image)
-
-Note: The thing we're doing yields us the same type
-
-!!!
-
-## Binary
-
-(image)
-
-Note: Takes two inputs
-
-!!!
-
-## Operation
-
-(image)
-
-Note: a function
-
-!!!
-
-## Closed binary operation
-
-```swift
-protocol Something {
+protocol Magma {
   func op(other: Self) -> Self
 }
 ```
@@ -131,18 +114,17 @@ Note: We can talk about all instances of these operations by talking at the leve
 
 !!!
 
-## Closed binary operations
+### Magma: The name
 
-```swift
-// assume we don't crash
-protocol Magma {
-  func op(other: Self) -> Self
-}
-```
+![Brandt](img/brandt.jpg)
+
+> Heinrich Brandt (1926) and Hausmann & Ore (1937)
+
+Note: Naming is hard. We're talking about something so general that we have to reach for scary sounding names. But mathemticians deal with these general things so they have names for them. Instead of making up a name, let's use the ones the mathematicians gave us. I'll speak more to that later.
 
 !!!
 
-## Simple Example (definition)
+### Magma: Simple Example (definition)
 
 ```swift
 struct Sum{ let value: Int }
@@ -157,68 +139,36 @@ Note: We wrap the int in a struct so we can implement multiple different instanc
 
 !!!
 
-## Simple Example (usage)
+### Magma: Simple Example (usage)
 
 ```swift
 let s = Sum(value: 1).op(Sum(value: 1))
 print(s.value) // 2
 ```
 
-Note: This example shouldn't be used in real code though, right? This is because we decreased simplicity (added a type) at no benefit to expressivity(we already have a way to sum integers). But when could it be useful?...
+Note: This example shouldn't be used in real code though, right? This is because we decreased simplicity (added a type) at no benefit to expressivity(we already have a way to sum integers). But when could doing this be useful?...
 
 !!!
 
-## What are some magmas?
-
-* summing integers
-* subtracting floating point numbers
-* dividing doubles
-...
-* cache composition
-* animation composition
-* cancel-token composition?
-
-Note: What's not a magma! We haven't constrained ourselves sufficiently -- this is why it's not very useful.
-
-!!!
-
-## Closed binary operations
+### An operator
 
 ```swift
 // TODO: Does swift have infixl?
-infixl operator <>: MultiplicationPrecedence
+infix operator <>: MultiplicationPrecedence {
+  associativity: left
+}
 func <><M: Magma>(lhs: M, rhs: M) -> M {
   return lhs.op(rhs);
 }
 
-// Usage: `x <> y`
+// Usage: `x <> y <> z`
 ```
 
 Note: We can define an operator to make our lives better
 
 !!!
 
-## Magma?
-
-(image)
-
-> Heinrich Brandt (1926) and Hausmann & Ore (1937)
-
-Note: Naming is hard. We're talking about something so general that we have to reach for scary sounding names. But mathemticians deal with these general things so they have names for them. Instead of making up a name, let's use the ones the mathematicians gave us. I'll speak more to that later.
-
-!!!
-
-## Magma
-
-```
-∀ a, b ∈ M: a.op(b) ∈ M
-```
-
-Note: That's it
-
-!!!
-
-### Not expressive enough
+### Magma: Not expressive enough
 
 (image)
 
@@ -228,13 +178,11 @@ Note: How can we increase expressive power without needing to introduce more typ
 
 ## Laws: The Journey
 
-(image)
-
 Note: Laws! We're going to enrich our magma with some laws
 
 !!!
 
-## Laws?
+### Laws?
 
 A law is an _equivalence_ between two programs that should _always be true_
 
@@ -246,7 +194,7 @@ A law is an _equivalence_ between two programs that should _always be true_
 
 !!!
 
-## Review from high-school: Associativity
+### Review from high-school: Associativity
 
 ```
 (x + y) + z = x + (y + z)
@@ -257,7 +205,7 @@ Note: These are equivalent for any x,y,z for integer addition
 
 !!!
 
-## Associativity
+### Associativity
 
 ```
 (x <> y) <> z = x <> (y <> z)
@@ -267,7 +215,7 @@ Note: On our closed binary operation, we can reason about associativity with thi
 
 !!!
 
-## Associativity
+### Associativity
 
 ```
 /// Law: (x <> y) <> z = x <> (y <> z)
@@ -277,15 +225,18 @@ protocol Semigroup: Magma {}
 
 !!!
 
-## Aside: Equatable: example of ascribing laws to protocols
+### Aside: Equatable: example of ascribing laws to protocols
 
-(Screenshot from docs of equatable)
+> Since equality between instances of Equatable types is an equivalence relation, any of your custom types that conform to Equatable must satisfy three conditions, for any values a, b, and c:
+> a == a is always true (Reflexivity)
+> a == b implies b == a (Symmetry)
+> a == b and b == c implies a == c (Transitivity)
 
 Note: In Swift, we can ascribe laws to protocols. See the equatable
 
 !!!
 
-## Associativity
+### Associativity
 
 ```swift
 extension Sum: Semigroup {}
@@ -296,7 +247,7 @@ Note: Sure but why do I care?
 
 !!!
 
-## Associativity implies parentheses don't matter
+### Associativity power: Parentheses don't matter
 
 ```swift
 let foo = x <> y <> z <> w
@@ -306,7 +257,7 @@ Note: No need for parentheses. My code is cleaner!
 
 !!!
 
-## Associativity means I can chunk up code into tmp variables
+### Associativity power: Freedom to chunk work
 
 ```swift
 let xy = x <> y
@@ -319,7 +270,7 @@ Note: It's up to the consumers of the API. They get more expressive power!
 
 !!!
 
-## Associativity implies paralellization
+### Associativity power: Paralellization is safe
 
 ```swift
 // work I need to do: x <> y <> z <> w
@@ -330,7 +281,7 @@ return a <> b
 
 !!!
 
-## ParReduce
+### FoldPar definition
 
 (image of execution trace tree)
 
@@ -338,7 +289,7 @@ Note: split into pieces and use the empty case for off-by-one
 
 !!!
 
-## ParReduce
+### FoldPar code
 
 ```swift
 extension Semigroup {
@@ -354,11 +305,11 @@ Note: You could probably do this more generically with sequences
 
 !!!
 
-## Why don't we just make everything associative!
+### Why don't we just make everything associative!
 
 !!!
 
-## Counterexample: Magma but not semigroup
+### Counterexample: Magma but not semigroup
 
 ```
 // subtraction over integers
@@ -381,7 +332,7 @@ TODO: Name of "left right identity"?
 
 !!!
 
-## Identity
+### Identity
 
 ```
 empty <> x = x
@@ -394,7 +345,7 @@ Note: Some element that when combined on the left or right is the same
 
 !!!
 
-## Expressive power: Inline conditionals
+### Identity power: Inline conditionals
 
 ```swift
 func annoyinglyNeedOptional() -> Foo? {
@@ -411,7 +362,7 @@ Note: Again this is up to the client to decide if the inlining will make the cod
 
 !!!
 
-## Monoid
+## Idenity + Semigroup = Monoid
 
 ```swift
 /// Law: empty <> x = x <> empty = x
@@ -425,13 +376,7 @@ Note: Just extending semigroup with the identity constant
 
 !!!
 
-## Monoid history?
-
-TODO
-
-!!!
-
-## Exmaple: Sum
+### Monoid Example: Sum
 
 ```swift
 struct Sum{ let value: Int }
@@ -445,7 +390,7 @@ Note: We already saw that though, let's see something a bit more interesting
 
 !!!
 
-## Example: TwoSums
+### Monoid Example: TwoSums
 
 ```swift
 struct TwoSums{
@@ -467,13 +412,13 @@ Note: In fact, any two monoids tupled form a monoid by applying the operations t
 
 !!!
 
-## Show foldmap; Foldmap is mapreduce?
+### Show foldmap; Foldmap is mapreduce?
 
 TODO
 
 !!!
 
-## ParFold better
+### Monoid: FoldPar better
 
 ```swift
 extension Monoid {
@@ -543,7 +488,7 @@ Note: Non-empty-lists is probably another talk, but hopefully you at least have 
 
 !!!
 
-## Monoids are powerful
+### Monoids are powerful
 
 (image)
 
@@ -551,13 +496,15 @@ Note: Once you have a monoid, I've found that you have a SICK API. If you think 
 
 !!!
 
+TODO do inverses here??
 
+!!!
 
 ## Law 3: Commutativity
 
 !!!
 
-## Commutativity
+### Commutativity
 
 ```swift
 x <> y = y <> x
@@ -565,13 +512,13 @@ x <> y = y <> x
 
 !!!
 
-## Expressive Power: Operations can be moved around
+### Comutativity Power: Operations can be moved around
 
 TODO
 
 !!!
 
-## Commutative Monoid
+### Commutative Monoid
 
 ```swift
 /// Law: x <> y = y <> x
@@ -581,7 +528,7 @@ protocol CommutativeMonoid: Monoid {}
 
 !!!
 
-## Example: Average
+### Example: Average
 
 ```swift
 // a = totalSum
@@ -593,17 +540,16 @@ extension TwoSums: CommutativeMonoid {
   }
 }
 // already a monoid, so we don't have to do anything else
-
 ```
 
 Note: A bit cooler
 
 !!!
 
-## DistFold with current progress!
+### DistFold with current progress!
 
 ```swift
-extension Monoid {
+extension CommutativeMonoid {
   func distFold(rest: [Self], ips: [IpAddress]) {
     // distribute work across all ips
     // every device does some work
@@ -634,6 +580,10 @@ extension Array: Monoid {
 
 ## Law 4: Idempotence
 
+!!!
+
+### Idempotence
+
 ```swift
 x <> x <> y = x <> y
 ```
@@ -642,7 +592,7 @@ Note: Doing something twice is the same as once
 
 !!!
 
-## Bounded Semilattice
+### Bounded Semilattice
 
 ```swift
 /// Law: x <> x <> y = x <> y
@@ -654,7 +604,7 @@ Note: Really good for distributed systems
 
 !!!
 
-## Example: Max
+### Bounded Semilattice Example: Max
 
 ```swift
 struct Max{ let v: Int }
@@ -668,7 +618,7 @@ extension Max: BoundedSemilattice {
 
 !!!
 
-## DistFold over UDP!
+### DistFold over UDP!
 
 ```swift
 extension Monoid {
@@ -693,7 +643,7 @@ Note: Let's say we want to make our "future" or something cancelable
 
 !!!
 
-## Approach 1: Cancel is a method on futures
+### Approach 1: Cancel is a method on futures
 
 ```swift
 extension Future {
@@ -956,11 +906,15 @@ TODO: Read pan and fran
 
 !!!
 
-### Aside: Names
+## Names
+
+!!!
+
+### Names matter
 
 Names matter. Many people may dismiss this stuff because they are afraid to learn the names. Don't be one of those people. <-- less agressive
 
-It's important that we have consistent names for these abstractions across programming languages and disciplines (mathmatics). Then we can all be on the same playing field. The names already exist -- mathamticians have been using them for a hundred years. Don't be so arrogant that you can make up a different name. If we all learn the same names for things we can solve more problems together across disciplines.
+Important that we have consistent names for these abstractions across programming languages and disciplines (mathmatics). Then we can all be on the same playing field. The names already exist -- mathamticians have been using them for a hundred years. Don't be so arrogant that you can make up a different name. If we all learn the same names for things we can solve more problems together across disciplines.
 
 TODO: Make that less ranty
 
@@ -968,11 +922,16 @@ TODO: Make that less ranty
 
 ### Take-away
 
-* Optimal API design is about maximizing simplicity and expressivity
-* Compositional APIs maximize these properties
-* Don't stop at composition. More laws = More expressivity
-* This stuff is actually useful in real life!
-* Learn the names! And teach your coworkers and friends!
+* <!-- .element: class="fragment" data-fragment-index="1" --> Optimal API design is about maximizing simplicity and expressivity 
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Compositional APIs maximize these properties
+<!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Don't stop at composition. More laws = More expressivity
+<!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" --> This stuff is actually useful in real life!
+<!-- .element: class="fragment" data-fragment-index="4" -->
+* <!-- .element: class="fragment" data-fragment-index="5" --> Learn the names! And teach your coworkers and friends!
+<!-- .element: class="fragment" data-fragment-index="5" -->
 
 !!!
 
