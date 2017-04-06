@@ -41,6 +41,14 @@ Count is a monoid
 SumAndCount is a monoid because any two monoids tupled are monoid. Unfortunately this is hard to express in Swift automatically, see appendix for a hack to do it, but there are tradeoffs (show the struct thing in the appendix)
 SumAndCount means an Average
 
+* Explain why arrive at least once
+* Motivate why obvious cancel implementation can be improved
+* Remove specialization ... you will converge on this if you do a good job. But you get there for free by thinking about what things apply to it from the beginning.
+* Not talk about execution context
+* Types in the _public interface_ of the library
+* Omit the ones digit crap in the beginning
+* Rephrase introduction to magma, we can call it x y or z, we might as well call it Magma
+
 
 * Cut magmas a lot to a few slides
 * How to get from associativity to a semigroup

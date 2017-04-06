@@ -10,6 +10,24 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
+### Async Work Cancellation
+
+(image)
+
+!!!
+
+### Approach 1: Cancel is a method on our work
+
+```swift
+extension Work {
+  func cancel(ctx: ExecutionContext) -> Void { /*...*/ }
+}
+```
+
+Note: Simple but not expressive
+
+!!!
+
 ### Uncontroversial Goals
 
 1. Simple
@@ -60,37 +78,35 @@ struct Hundreds { /*...*/ }
 
 ```swift
 // on Ints
-func +(other: Int) -> Int
+func +(lhs: Int, rhs: Int) -> Int
 
 1 + 1
 ```
 
+Note: Think about this, what makes `+` operator expressive enough to add all integers?
+
 !!!
 
-### Why composibility is better
+### Plus is composable
 
 I can combine numbers into something that is also a number
 
 !!!
 
-### Composable APIs
+### Approach 2: Composable Cancellation
 
 ```swift
-struct Future<V> {
-  /*...*/
-  func flatMap<U>(f: (V) -> Future<U>) -> Future<U>
+struct Canceller {
+  let ctx: ExecutionContext
+  let cancel: () -> Void
 }
 ```
 
-Note: Futures simplify callbacks, I don't have to convince this audience
+Note: Still pretty simple, not expressive yet
 
 !!!
 
-TODO: Consider doing a series of examples here?
-
-!!!
-
-### Composable APIs (more)
+### Composable APIs: Expressive and Simple
 
 The local maxima for expressiveness you can squeeze out of one type
 
@@ -111,6 +127,24 @@ protocol Magma {
 ```
 
 Note: We can talk about all instances of these operations by talking at the level of protocols. I'll make sure to stick lots of examples in throughout the talk as well. But keep in mind, these work for all sorts of types!
+
+!!!
+
+### An operator
+
+```swift
+// TODO: Does swift have infixl?
+infix operator <>: MultiplicationPrecedence {
+  associativity: left
+}
+func <><M: Magma>(lhs: M, rhs: M) -> M {
+  return lhs.op(rhs);
+}
+
+// Usage: `x <> y <> z`
+```
+
+Note: We can define an operator to make our lives better
 
 !!!
 
@@ -142,7 +176,7 @@ Note: We wrap the int in a struct so we can implement multiple different instanc
 ### Magma: Simple Example (usage)
 
 ```swift
-let s = Sum(value: 1).op(Sum(value: 1))
+let s = Sum(value: 1) <> Sum(value: 1)
 print(s.value) // 2
 ```
 
@@ -150,29 +184,22 @@ Note: This example shouldn't be used in real code though, right? This is because
 
 !!!
 
-### An operator
+### Canceller combining forms a magma
 
 ```swift
-// TODO: Does swift have infixl?
-infix operator <>: MultiplicationPrecedence {
-  associativity: left
+extension Canceller: Magma {
+  func op(other: Canceller) -> Canceller {
+    return Canceller(
+      cancel: {
+        self.cancel()
+        other.cancel()
+      })
+      // mem cycles here so make sure you weak properly in production
+  }
 }
-func <><M: Magma>(lhs: M, rhs: M) -> M {
-  return lhs.op(rhs);
-}
-
-// Usage: `x <> y <> z`
 ```
 
-Note: We can define an operator to make our lives better
-
-!!!
-
-### Magma: Not expressive enough
-
-(image)
-
-Note: How can we increase expressive power without needing to introduce more types?
+Note: Don't stop here!
 
 !!!
 
@@ -222,15 +249,11 @@ Note: On our closed binary operation, we can reason about associativity with thi
 protocol Semigroup: Magma {}
 ```
 
-
 !!!
 
 ### Aside: Equatable: example of ascribing laws to protocols
 
-> Since equality between instances of Equatable types is an equivalence relation, any of your custom types that conform to Equatable must satisfy three conditions, for any values a, b, and c:
-> a == a is always true (Reflexivity)
-> a == b implies b == a (Symmetry)
-> a == b and b == c implies a == c (Transitivity)
+![equatable definition](img/equatable.png)
 
 Note: In Swift, we can ascribe laws to protocols. See the equatable
 
@@ -239,21 +262,11 @@ Note: In Swift, we can ascribe laws to protocols. See the equatable
 ### Associativity
 
 ```swift
-extension Sum: Semigroup {}
+struct Sum: Semigroup {}
 // We get the op definition from magma
 ```
 
 Note: Sure but why do I care?
-
-!!!
-
-### Associativity power: Parentheses don't matter
-
-```swift
-let foo = x <> y <> z <> w
-```
-
-Note: No need for parentheses. My code is cleaner!
 
 !!!
 
@@ -305,22 +318,74 @@ Note: You could probably do this more generically with sequences
 
 !!!
 
-### Why don't we just make everything associative!
+### Why don't we just make everything semigroups!
 
 !!!
 
 ### Counterexample: Magma but not semigroup
 
-```
+```swift
 // subtraction over integers
 (x - y) - z = x - (y - z)
-// TODO: animation this part
-// ex: (1 - 2) - 3 = 1 - (2 - 3)
-//      -1 - 3     = -1 + 3
-//      4          = 2  (counterexample)
 ```
 
+```swift
+// ex: (1 - 2) - 3 = 1 - (2 - 3)
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+//      -1 - 3     = -1 + 3
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+//      4          = 2  (contradiction)
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
 Note: Subtraction over integers is a binary operation that's closed, but not a semigroup because operatoin is not associative.
+
+!!!
+
+### Is Canceller a Semigroup?
+
+```swift
+(c1 <> c2) <> c3 = c1 <> (c2 <> c3)
+```
+
+Note: As long as your cancel functions are well-behaved (expand on this)
+
+!!!
+
+### Counterexample
+
+```swift
+var doCancel2 = true
+let cancel1 = { doCancel2 = false }
+let cancel2 = { if (doCancel2) { cancelWork() } }
+```
+
+Note: For example, setting a global variable that would cause a cancel to misbehave. Globals are bad. Why would that break associativity? We could set a global if one operation runs first and then check the global in the next operation (which would be unse if ...)
+
+!!!
+
+### Custom Law: Cancels must not be coupled
+
+```swift
+/// Cancelling something can't have side-effects that affect other cancellations in any way
+/// Law: c1.cancel() /* doesn't affect */ c2.cancel()
+```
+
+!!!
+
+### Canceller is a semigroup now!
+
+```swift
+extension Canceller: Semigroup {}
+```
+
+Note: Parens don't matter! Moving on to the next law...
 
 !!!
 
@@ -412,12 +477,6 @@ Note: In fact, any two monoids tupled form a monoid by applying the operations t
 
 !!!
 
-### Show foldmap; Foldmap is mapreduce?
-
-TODO
-
-!!!
-
 ### Monoid: FoldPar better
 
 ```swift
@@ -447,44 +506,29 @@ extension Monoid {
 
 !!!
 
-### But not every semigroup is a monoid
+### Does Canceller have an identity?
 
 (image)
 
 !!!
 
-### Counterexample: Semigroup but not Monoid
+### Canceller is a Monoid
 
 ```swift
-// linked list with at least one element
-indirect enum Nel<T> {
-  case one(T)
-  case more(T, Nel<T>)
-}
-// let a = .one('a')
-// let abc = .more('a', .more('b', .one('c')))
-```
-
-!!!
-
-### Counterexample: Nel concattenation not monoid
-
-```swift
-extension Nel: Semigroup {
-  func op(other: Self) -> Self {
-    // concatenation
-  }
-  // I have no identity!
+extension Canceller: Monoid {
+  static var empty = Canceller(
+    ctx: .immediate,
+    _cancel: { } // no-op
+  )
+  // already a semigroup
 }
 ```
 
 !!!
 
-### Counterexample: Nel concat associative
+### Identity well-behaved proof
 
 (diagram)
-
-Note: Non-empty-lists is probably another talk, but hopefully you at least have an inution
 
 !!!
 
@@ -493,10 +537,6 @@ Note: Non-empty-lists is probably another talk, but hopefully you at least have 
 (image)
 
 Note: Once you have a monoid, I've found that you have a SICK API. If you think about a solution to your problem and it's monoid. Be happy. Your API is clean. But why stop there...
-
-!!!
-
-TODO do inverses here??
 
 !!!
 
@@ -578,6 +618,27 @@ extension Array: Monoid {
 
 !!!
 
+### Canceller combining is commutative!
+
+(diagram)
+
+Note: So canceller is a CommutativeMonoid
+
+!!!
+
+### Canceller cancels are threadsafe without extra locking!
+
+```swift
+// random work spawning in a threadpool
+func onSpawn(c: Canceller) {
+  combined = c <> combined
+}
+```
+
+Note: Order that this is executed doesn't matter!
+
+!!!
+
 ## Law 4: Idempotence
 
 !!!
@@ -635,86 +696,13 @@ extension Monoid {
 
 !!!
 
-## Case Study: Async Work Cancellation
-
-(image)
-
-Note: Let's say we want to make our "future" or something cancelable
-
-!!!
-
-### Approach 1: Cancel is a method on futures
+### Canceller: Is it idempotent?
 
 ```swift
-extension Future {
-  func cancel(ctx: ExecutionContext) -> Void { /*...*/ }
-}
+c1 <> c1 <> c2 = c1 <> c2
 ```
 
-Note: Simple but not expressive
-
-!!!
-
-### Approach 2: A Canceller is a value with a cancel method
-
-```swift
-struct Canceller {
-  let ctx: ExecutionContext
-  let cancel: () -> Void
-}
-```
-
-Note: Still pretty simple, not expressive yet
-
-!!!
-
-### Canceller what does it mean to combine them?
-
-```swift
-// for a,b,c: Canceller
-let c = a <> b
-```
-
-Note: How about the new cancel cancels both the inner ones
-
-!!!
-
-### Canceller cancels both
-
-(diagram of cancelling both)
-
-!!!
-
-### Canceller cancels both
-
-```swift
-extension Canceller: Magma {
-  func op(other: Magma) {
-    return Canceller(
-      cancel: {
-        self.cancel()
-        other.cancel()
-      })
-      // mem cycles here so make sure you weak properly in production
-  }
-}
-```
-
-Note: okay cool that works
-
-!!!
-
-### But don't stop here!
-
-!!!
-
-### Canceller associative?
-
-```
-(c1 <> c2) <> c3 = c1 <> (c2 <> c3)
-```
-
-Note: Not necessarilly, but we really want this, can we change our op to support this?
+Note: No! We can make it idempotent though
 
 !!!
 
@@ -733,125 +721,42 @@ struct Canceller {
 }
 ```
 
-Note: This also made our API simpler! We don't have to remember if we've already cancelled something
+Note: Now it's idempotent! Because of the dispatch_once, we can always just apply the same cancellation again!
 
 !!!
 
-### Canceller is associative now?
+### Canceller: Idempotence
 
-```swift
-(c1 <> c2) <> c3 = c1 <> (c2 <> c3)
-```
+We don't need to *remember* if we've cancelled something
 
-Note: Kind of, as long as your cancel functions are well-behaved (expand on this)
+Note: You may say that this is obvious from the dipatch_onces, was this a waste of time? No!
 
 !!!
 
-### Custom Law: Cancels must not be coupled
+### Canceller API discovered
 
-```swift
-/// Cancelling something can't have side-effects that affect other cancellations in any way
-/// c1.cancel() /* doesn't affect */ c2.cancel()
-```
-
-Note: For example, setting a global variable that would cause a cancel to misbehave. Globals are bad. Why would that break associativity? We could set a global if one operation runs first and then check the global in the next operation (which would be unse if ...)
-
-!!!
-
-### Example of breaking the no coupling law
-
-```swift
-var doCancel2 = true
-let cancel1 = { doCancel2 = false }
-let cancel2 = { if (doCancel2) { cancelWork() } }
-```
-
-!!!
-
-### Can we think of an identity?
-
-(image)
-
-!!!
-
-### Canceller is a Monoid
-
-```swift
-extension Canceller: Monoid {
-  static var empty = Canceller(
-    ctx: .immediate,
-    _cancel: { } // no-op
-  )
-  // already a semigroup
-}
-```
-
-!!!
-
-### Identity well-behaved proof
-
-(diagram)
-
-!!!
-
-### Does it commute?
-
-```swift
-c1 <> c2 = c2 <> c1
-```
-
-Note: Yes! Commutative Monoid
-
-!!!
-
-### Is it idempotent?
-
-```swift
-c1 <> c1 <> c2 = c1 <> c2
-```
-
-Note: Yes! Because of the dispatch_once, we can always just apply the same cancellation again!
-
-!!!
-
-### Canceller is a BoundedSemilattice
-
-```
-extension Canceller: BoundedSemilattice
-```
-
-!!!
-
-### Why do we care about this?
-
-Note: Was that a waste of time? No!
-
-!!!
-
-### Formal semantics of Canceller
-
-* Our docs our extremely precise
-* We can use _property based testing_ tools like quickcheck for correctness tests
+We *discovered* a *simple* and *expressive* API for work cancellation
 
 !!!
 
 ### That's not all
 
-(image)
+* Our docs our extremely precise
+* We can use _property based testing_ tools like quickcheck for correctness tests
 
-Note: There is real value. We discovered a clean API just by thinking about composition and laws. What can we do with this API?
+Note: And that's not all all, here's what we can clean up now...
 
 !!!
 
-### Scenario 1: (Future.cancel) I want to cancel all async work for a thing that does a lot of stuff
+### Scenario 1: (Work.cancel) I want to cancel all async work for a thing that does a lot of stuff
 
 ```swift
 class LotsOfAsyncWork {
   // manually remove futures here that are finished or I cancelled already
-  var manyFutures: [Future] = []
+  var manyWorks: [Work] = []
 
   func cleanup() {
-    manyFutures.forEach{ $0.cancel() }
+    manyWorks.forEach{ $0.cancel() }
   }
 }
 ```
@@ -876,9 +781,9 @@ Note: There is no cleanup function. Just do `self.canceller.cancel()`. Semantica
 ### Scenario 2: Automatically cancel on view controller deinit
 
 ```swift
-struct AutoCanceller {
+class AutoCanceller {
   let canceller: Canceller
-  // TODO: Look this up and make sure it works
+
   deinit {
     canceller.cancel()
   }
@@ -886,23 +791,22 @@ struct AutoCanceller {
 extension AutoCanceller: BoundedSemilattice
 ```
 
-Note: I'm not even going to attempt to write the messy code that would be required with the first implementation. Plus this is coupled to this view controller. Look how easy this is!! We just wrap the canceller with auto-canceller and we're done.
+Note: Look how easy this is!! We just wrap the canceller with auto-canceller and we're done.
 
 !!!
 
 ### Even more useful real example
 
-TODO: Link to talk here...
+![Caches are monoids 1]()
+![Caches are monoids 2]()
 
-Caches are monoids
+Note: Plus I go over it slowly
 
 !!!
 
 ### Animations!
 
-I'm working on treating animations in this manner. Please ask me about it and we can discuss. Not ready to share this just yet.
-
-TODO: Read pan and fran
+I'm working on a formalization of animations. Please ask me about it and we can discuss. Not ready to share more publicly just yet.
 
 !!!
 
@@ -950,4 +854,42 @@ Slide Deck: [https://is.gd/KzVKWh](https://is.gd/KzVKWh)
 !!!
 
 Put bit defining stuff here.
+
+!!!
+
+### Counterexample: Semigroup but not Monoid
+
+```swift
+// linked list with at least one element
+indirect enum Nel<T> {
+  case one(T)
+  case more(T, Nel<T>)
+}
+// let a = .one('a')
+// let abc = .more('a', .more('b', .one('c')))
+```
+
+!!!
+
+### Counterexample: Nel concattenation not monoid
+
+```swift
+extension Nel: Semigroup {
+  func op(other: Self) -> Self {
+    // concatenation
+  }
+  // I have no identity!
+}
+```
+
+!!!
+
+### Counterexample: Nel concat associative
+
+(diagram)
+
+Note: Non-empty-lists is probably another talk, but hopefully you at least have an inution
+
+!!!
+
 
