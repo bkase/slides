@@ -20,34 +20,34 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 ```swift
 extension Work {
-  func cancel(ctx: ExecutionContext) -> Void { /*...*/ }
+  func cancel(q: DispatchQueue) -> Void { /*...*/ }
 }
 ```
 
-Note: Simple but not expressive
+Note: Go through this process... to make it better, what is better?
 
 !!!
 
 ### Uncontroversial Goals
 
-1. Simple
-2. Expressive
+1. Minimize Complexity (Simple)
+2. Maximize Expressivity
 
 !!!
 
-### Simple
+### Complexity: How to measure
 
-_Simplicity increases_ as _primitive count decreases_
+Complexity increases as public interface _primitive count_ increases
 
 Note: Primitive means a parameters to a function, a new type in the library. A very simple library has one type and one method with one parameter for example. Yes this can actually be useful, we'll see later.
 
 !!!
 
-### Expressive
+### Expressivity: How to measure
 
-_Expressivity increases_ as _solvable problems increase_
+Expressivity increases as _solvable problems_ increase
 
-Note: But it's hard to do more things with fewer things...
+Note: Empower to write clean code in applications. But it's hard to do more things with fewer things...
 
 !!!
 
@@ -55,41 +55,33 @@ Note: But it's hard to do more things with fewer things...
 
 (image)
 
-Note: Tradeoff, we want to impact simplicity very trivially and extremely raise expressivity. We can also be complex and not expressive by having lots of types and methods and all of them do nonsensical things.
+Note: Tradeoff, we want to impact simplicity very trivially and extremely raise expressivity.
 
 !!!
 
-### Complex API for adding numbers
+### Approach 1: Cancel is a method on our work
 
 ```swift
-struct Ones {
-  func addOnes(ones: Ones) -> Either<Ones, Tens>
-  func addTens(tens: Tens) -> Either<Tens, Hundreds>
-  /* ... */
+extension Work {
+  func cancel(q: DispatchQueue) -> Void { /*...*/ }
 }
-struct Tens { /*...*/ }
-struct Hundreds { /*...*/ }
-/* ... */
 ```
+
+Note: Simple but not expressive
 
 !!!
 
-### Simple API for adding numbers
+### Not expressive enough
 
-```swift
-// on Ints
-func +(lhs: Int, rhs: Int) -> Int
+* Cancelling something twice should be okay
+* Invoke cancel on many pieces
+* Automatically cancel work on deinit
 
-1 + 1
-```
-
-Note: Think about this, what makes `+` operator expressive enough to add all integers?
+Note: We could go through and ... Let's discover this functionality
 
 !!!
 
-### Plus is composable
-
-I can combine numbers into something that is also a number
+## Emergent expressivity
 
 !!!
 
@@ -121,28 +113,35 @@ Note: In other words, a way to increase expressiveness without harming simplicit
 ### Closed Binary Operation
 
 ```swift
+infix operator <>: MultiplicationPrecedence {
+  associativity: left
+}
+func <>(lhs: A, rhs: A) -> A {
+  // implement this for some A
+}
+
+// Usage: `x <> y <> z`
+```
+
+Note: This is so general, We could call it a frog, or a car...
+
+!!!
+
+### Magma
+
+```swift
 protocol Magma {
   func op(other: Self) -> Self
 }
 ```
 
-Note: We can talk about all instances of these operations by talking at the level of protocols. I'll make sure to stick lots of examples in throughout the talk as well. But keep in mind, these work for all sorts of types!
-
-!!!
-
-### An operator
-
 ```swift
-// TODO: Does swift have infixl?
-infix operator <>: MultiplicationPrecedence {
-  associativity: left
-}
 func <><M: Magma>(lhs: M, rhs: M) -> M {
   return lhs.op(rhs);
 }
-
-// Usage: `x <> y <> z`
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
 
 Note: We can define an operator to make our lives better
 
