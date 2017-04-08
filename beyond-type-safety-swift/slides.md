@@ -28,6 +28,16 @@ Note: Go through this process... to make it better, what is better?
 
 !!!
 
+### Can't express easily
+
+* Cancelling something twice should be okay
+* Invoke cancel on many pieces
+* Automatically cancel work on deinit
+
+Note: We could go through and ... Let's discover this functionality
+
+!!!
+
 ### Uncontroversial Goals
 
 1. Minimize Complexity (Simple)
@@ -51,7 +61,7 @@ Note: Empower to write clean code in applications. But it's hard to do more thin
 
 !!!
 
-### Simple vs Expressive
+### Tradeoff: Simple vs Expressive
 
 (image)
 
@@ -71,17 +81,7 @@ Note: Simple but not expressive
 
 !!!
 
-### Not expressive enough
-
-* Cancelling something twice should be okay
-* Invoke cancel on many pieces
-* Automatically cancel work on deinit
-
-Note: We could go through and ... Let's discover this functionality
-
-!!!
-
-## Emergent expressivity
+## Emergent expressivity without complexity
 
 !!!
 
@@ -603,20 +603,6 @@ Note: Imagine doing averages across many machines. Super computer vs smartphone
 
 !!!
 
-### Counterexample: Monoid but not commutative monoid
-
-```swift
-extension Array: Monoid {
-  static var empty = []
-  func op(other: Self) -> Self {
-    return self + other
-  }
-}
-// [1] + [2] != [2] + [1]
-```
-
-!!!
-
 ### Canceller combining is commutative!
 
 (diagram)
@@ -888,6 +874,20 @@ extension Nel: Semigroup {
 (diagram)
 
 Note: Non-empty-lists is probably another talk, but hopefully you at least have an inution
+
+!!!
+
+### Counterexample: Monoid but not commutative monoid
+
+```swift
+extension Array: Monoid {
+  static var empty = []
+  func op(other: Self) -> Self {
+    return self + other
+  }
+}
+// [1] + [2] != [2] + [1]
+```
 
 !!!
 
