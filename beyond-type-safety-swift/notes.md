@@ -55,6 +55,15 @@ SumAndCount means an Average
 * Combine chunk work example with multithreading
 * The diamond operation can be really heavy so it's advantageous, to make it easy to picture I'm going to use this example of averaging.
 
+* Why making composable APIs increases goodness... (simplicity and complexity)
+* How about what this looks like in the real world...
+* Try replacing cancelling with caching
+* Confused about a magma at first -- make this better. Make it less of a joke
+* Too many trains of thought
+* Make the 3 threads clearer (parallel -> distributed)
+* Forgot the terms -- everytime it's introduced show the full expansion
+* Mention TCP vs UDP
+
 Abstract Motivation for this operator:
 
 Optimal API design.
