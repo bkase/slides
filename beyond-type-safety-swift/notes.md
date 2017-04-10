@@ -64,6 +64,21 @@ SumAndCount means an Average
 * Forgot the terms -- everytime it's introduced show the full expansion
 * Mention TCP vs UDP
 
+* During the intro -- used a lot of ums
+* Use a graph to explain primitive count
+* Say the problem with async work before jumping to the solutions
+* Throw the animations in at the end not in the beginning
+* Make slides for the problems (start with the fold example) 80 billion integers
+* Parallelization is the aha moment -- need it earlier
+* Skip the middle of derivation of subtraction counterexample
+* Identity power is weak (move the other stuff earlier)
+* Parens aroung the name of the laws everywhere
+* Incrementally spelled wrong
+* Call out the improved performance too in `what did we get`
+* Make the type
+* Talk about example of the backend of speciallizing
+
+
 Abstract Motivation for this operator:
 
 Optimal API design.

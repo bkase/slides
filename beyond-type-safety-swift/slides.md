@@ -57,13 +57,15 @@ Note: In other words, a way to increase expressiveness without harming simplicit
 
 Simple, expressive API supporting:
 
-* Opt-in auto-cancellation on deinit
-* At-least-once cancellation
-* Aggregating cancels
+* <!-- .element: class="fragment" data-fragment-index="1" --> Opt-in auto-cancellation on deinit
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> At-least-once cancellation
+<!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Aggregating cancels
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
-TODO: Link to Walkthrough derivation in Appendix
-
-Note: I walkthrough my derivation of this API in the appendix
+[Walkthrough in appendix](/#/50)
+<!-- .element: class="fragment" data-fragment-index="4" -->
 
 !!!
 
@@ -71,12 +73,15 @@ Note: I walkthrough my derivation of this API in the appendix
 
 Simple, expressive API supporting:
 
-* Reuse code across memory, disk, and network for image, video, model caches
-* Defining cache-agnostic operators
+* <!-- .element: class="fragment" data-fragment-index="1" --> Reuse code across memory, disk, and network for image, video, model caches
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Defining cache-agnostic operators
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 [Caches are monoids 1](https://www.youtube.com/watch?v=8uqXuEZLyUU)
-
+<!-- .element: class="fragment" data-fragment-index="3" -->
 [Caches are monoids 2](https://skillsmatter.com/skillscasts/9559-composable-caching-in-swift) (make a free account)
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 Note: Plus I go over it slowly
 
@@ -86,11 +91,15 @@ Note: Plus I go over it slowly
 
 Simple, expressive API supporting:
 
-* Compose animation chunks in parallel or in sequence
-* Animation cancellation
-* Reuse across partial-animations
+* <!-- .element: class="fragment" data-fragment-index="1" --> Compose animation chunks in parallel or in sequence
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Animation cancellation
+<!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Reuse across partial-animations
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
-Thinking about this now! Come talk to me!
+Come talk to me after!
+<!-- .element: class="fragment" data-fragment-index="4" -->
 
 Note: But today I'm going to talk about...
 
@@ -102,7 +111,16 @@ Note: But today I'm going to talk about...
 
 !!!
 
-### Folding things 
+### Folding things
+
+Simple, expressive API for:
+
+* <!-- .element: class="fragment" data-fragment-index="1" --> Taking a lot of things and summarizing
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Not specialized to one kind of thing
+<!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> And is fast
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
@@ -153,7 +171,7 @@ Note: Naming is hard. We're talking about something so general that we have to r
 
 !!!
 
-### Magma: Simple Example (definition)
+### Magma: Example (definition)
 
 ```swift
 struct Sum{ let value: Int }
@@ -168,7 +186,7 @@ Note: We wrap the int in a struct so we can implement multiple different instanc
 
 !!!
 
-### Magma: Simple Example (usage)
+### Magma: Example (usage)
 
 ```swift
 let s = Sum(value: 1) <> Sum(value: 1)
@@ -179,7 +197,17 @@ Note: This example shouldn't be used in real code though, right? This is because
 
 !!!
 
-### TODO show combining things magma
+### Fold
+
+```swift
+extension Magma {
+  func fold(empty: Self, work: [Self]) -> Self {
+    return work.reduce(empty, { acc, x in acc.op(x) })
+  }
+}
+```
+
+Note: Not fast and we can be simpler
 
 !!!
 
@@ -286,7 +314,7 @@ Note: split into pieces and use the empty case for off-by-one
 
 ```swift
 extension Semigroup {
-  func foldPar(empty: Self, work: [Self], ctx: ExecutionContext) {
+  func foldPar(empty: Self, work: [Self], q: DispatchQueue) {
     // split into pairs, use empty if odd number
     // dispatchAsync all the work
     // recurse
@@ -438,11 +466,11 @@ Note: Now what was the _empty_ parameter of the `foldPar` function is implicit. 
 
 !!!
 
-## Move over ParFold -- DistFold
+## Move over FoldPar -- DistFold
 
 ```swift
 extension Monoid {
-  func distFold(rest: [Self], ips: [IpAddress]) {
+  func foldDist(rest: [Self], ips: [IpAddress]) {
     // distribute work across all ips
     // every device does some work
     // put it back together
@@ -511,15 +539,15 @@ extension TwoSums: CommutativeMonoid {
 // already a monoid, so we don't have to do anything else
 ```
 
-Note: A bit cooler. It's commutative because adding integers is commutative
+Note: A bit cooler. It's commutative because adding integers is commutative.
 
 !!!
 
-### DistFold with current progress!
+### FoldDist with current progress!
 
 ```swift
 extension CommutativeMonoid {
-  func distFold(rest: [Self], ips: [IpAddress]) {
+  func foldDist(rest: [Self], ips: [IpAddress]) {
     // distribute work across all ips
     // every device does some work
     // put it back together
@@ -587,10 +615,18 @@ extension Max: BoundedSemilattice {
 
 !!!
 
-### DistFold over UDP!
+### FoldDist with a faster transport protocol
+
+(image tcp vs. udp)
+
+Note: TCP requires that messages are in order and are delivered exactly once. We can build a custom protocol on top of UDP with neither of those guarantees, we just need at-least-once now
+
+!!!
+
+### FoldDist over UDP!
 
 ```swift
-extension Monoid {
+extension BoundedSemilattice {
   func distFold(rest: [Self], ips: [IpAddress]) {
     // distribute work across all ips
     // *** USE CUSTOM TRANSPORT PROTOCOL THAT DOESNT CARE ABOUT DUPLICATES ***
@@ -609,7 +645,20 @@ extension Monoid {
 * Our constraints are laws baked into our types
 * We can use _property based testing_ tools like quickcheck for correctness tests
 
-Note: What else 
+!!!
+
+### The process is general
+
+The same process we went through today can be used to derive
+
+* <!-- .element: class="fragment" data-fragment-index="1" --> A caching library
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Animation choreograph library
+<!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Async work cancellation library
+<!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" --> ...and whatever you can come up with
+<!-- .element: class="fragment" data-fragment-index="4" -->
 
 !!!
 
@@ -618,6 +667,16 @@ Note: What else
 (image)
 
 Note: Please don't dismiss this as useless, because you don't want to memorize a few vocab words. Please tell your friends and coworkers to please not dismiss this as useless because they don't want to memorize a few vocab words. Important that we have consistent names for these abstractions across programming languages and disciplines (mathmatics). Then we can all be on the same playing field. The names already exist -- mathamticians have been using them for a hundred years. If we all learn the same names for things we can solve more problems together across disciplines.
+
+!!!
+
+### Glossary
+
+* Magma = closed binary operation
+* Semigroup = Magma with associativity
+* Monoid = Semigroup with identity
+* CommutativeMonoid = Monoid with commutativity
+* BoundedSemilattice = CommutativeMonoid with idempotence
 
 !!!
 
@@ -647,10 +706,6 @@ Slide Deck: [https://is.gd/KzVKWh](https://is.gd/KzVKWh)
 !!!
 
 ## Appendix
-
-!!!
-
-Put bit defining stuff here.
 
 !!!
 
