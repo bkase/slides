@@ -10,34 +10,6 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
-### Async Work Cancellation
-
-(image)
-
-!!!
-
-### Approach 1: Cancel is a method on our work
-
-```swift
-extension Work {
-  func cancel(q: DispatchQueue) -> Void { /*...*/ }
-}
-```
-
-Note: Go through this process... to make it better, what is better?
-
-!!!
-
-### Can't express easily
-
-* Cancelling something twice should be okay
-* Invoke cancel on many pieces
-* Automatically cancel work on deinit
-
-Note: We could go through and ... Let's discover this functionality
-
-!!!
-
 ### Uncontroversial Goals
 
 1. Minimize Complexity (Simple)
@@ -69,32 +41,7 @@ Note: Tradeoff, we want to impact simplicity very trivially and extremely raise 
 
 !!!
 
-### Approach 1: Cancel is a method on our work
-
-```swift
-extension Work {
-  func cancel(q: DispatchQueue) -> Void { /*...*/ }
-}
-```
-
-Note: Simple but not expressive
-
-!!!
-
 ## Emergent expressivity without complexity
-
-!!!
-
-### Approach 2: Composable Cancellation
-
-```swift
-struct Canceller {
-  let ctx: ExecutionContext
-  let cancel: () -> Void
-}
-```
-
-Note: Still pretty simple, not expressive yet
 
 !!!
 
@@ -106,7 +53,56 @@ Note: In other words, a way to increase expressiveness without harming simplicit
 
 !!!
 
-## This talk: All about one flavor of composable method
+### Async Work Cancellation!
+
+Simple, expressive API supporting:
+
+* Opt-in auto-cancellation on deinit
+* At-least-once cancellation
+* Aggregating cancels
+
+TODO: Link to Walkthrough derivation in Appendix
+
+Note: I walkthrough my derivation of this API in the appendix
+
+!!!
+
+### Caches!
+
+Simple, expressive API supporting:
+
+* Reuse code across memory, disk, and network for image, video, model caches
+* Defining cache-agnostic operators
+
+[Caches are monoids 1](https://www.youtube.com/watch?v=8uqXuEZLyUU)
+
+[Caches are monoids 2](https://skillsmatter.com/skillscasts/9559-composable-caching-in-swift) (make a free account)
+
+Note: Plus I go over it slowly
+
+!!!
+
+### Animation Choreographs!
+
+Simple, expressive API supporting:
+
+* Compose animation chunks in parallel or in sequence
+* Animation cancellation
+* Reuse across partial-animations
+
+Thinking about this now! Come talk to me!
+
+Note: But today I'm going to talk about...
+
+!!!
+
+### Folding things
+
+(image)
+
+!!!
+
+### Folding things 
 
 !!!
 
@@ -183,22 +179,7 @@ Note: This example shouldn't be used in real code though, right? This is because
 
 !!!
 
-### Canceller combining forms a magma
-
-```swift
-extension Canceller: Magma {
-  func op(other: Canceller) -> Canceller {
-    return Canceller(
-      cancel: {
-        self.cancel()
-        other.cancel()
-      })
-      // mem cycles here so make sure you weak properly in production
-  }
-}
-```
-
-Note: Don't stop here!
+### TODO show combining things magma
 
 !!!
 
@@ -347,47 +328,6 @@ Note: Subtraction over integers is a binary operation that's closed, but not a s
 
 !!!
 
-### Is Canceller a Semigroup?
-
-```swift
-(c1 <> c2) <> c3 = c1 <> (c2 <> c3)
-```
-
-Note: As long as your cancel functions are well-behaved (expand on this)
-
-!!!
-
-### Counterexample
-
-```swift
-var doCancel2 = true
-let cancel1 = { doCancel2 = false }
-let cancel2 = { if (doCancel2) { cancelWork() } }
-```
-
-Note: For example, setting a global variable that would cause a cancel to misbehave. Globals are bad. Why would that break associativity? We could set a global if one operation runs first and then check the global in the next operation (which would be unse if ...)
-
-!!!
-
-### Custom Law: Cancels must not be coupled
-
-```swift
-/// Cancelling something can't have side-effects that affect other cancellations in any way
-/// Law: c1.cancel() /* doesn't affect */ c2.cancel()
-```
-
-!!!
-
-### Canceller is a semigroup now!
-
-```swift
-extension Canceller: Semigroup {}
-```
-
-Note: Parens don't matter! Moving on to the next law...
-
-!!!
-
 ## Law 2: Left-right identity
 
 (image)
@@ -409,7 +349,7 @@ Note: Some element that when combined on the left or right is the same
 
 !!!
 
-### Identity power: Inline conditionals
+### Identity power: Drop the optional
 
 ```swift
 func annoyinglyNeedOptional() -> Foo? {
@@ -430,9 +370,11 @@ Note: Again this is up to the client to decide if the inlining will make the cod
 
 ```swift
 /// Law: empty <> x = x <> empty = x
-/// and Semigroup laws
+/// Semigroup Law: (x <> y) <> z = x <> (y <> z)
 protocol Monoid: Semigroup {
   static var empty: Self { get }
+  // func op(other: Self) -> Self
+  // (from Magma)
 }
 ```
 
@@ -476,6 +418,12 @@ Note: In fact, any two monoids tupled form a monoid by applying the operations t
 
 !!!
 
+### Identity well-behaved proof
+
+(diagram)
+
+!!!
+
 ### Monoid: FoldPar better
 
 ```swift
@@ -505,32 +453,6 @@ extension Monoid {
 
 !!!
 
-### Does Canceller have an identity?
-
-(image)
-
-!!!
-
-### Canceller is a Monoid
-
-```swift
-extension Canceller: Monoid {
-  static var empty = Canceller(
-    ctx: .immediate,
-    _cancel: { } // no-op
-  )
-  // already a semigroup
-}
-```
-
-!!!
-
-### Identity well-behaved proof
-
-(diagram)
-
-!!!
-
 ### Monoids are powerful
 
 (image)
@@ -551,9 +473,15 @@ x <> y = y <> x
 
 !!!
 
-### Comutativity Power: Operations can be moved around
+### Comutativity Power: Operations can be reordered
 
-TODO
+```swift
+var combined = Sum.empty
+/* ... */
+func onNewInt(v: Int) {
+  combined = Sum(value: v) <> combined
+}
+```
 
 !!!
 
@@ -561,7 +489,9 @@ TODO
 
 ```swift
 /// Law: x <> y = y <> x
-/// and Monoid laws
+/// and the Monoid laws:
+/// empty <> x = x <> empty = x (identity)
+/// (x <> y) <> z = x <> (y <> z) (asociativity)
 protocol CommutativeMonoid: Monoid {}
 ```
 
@@ -581,7 +511,7 @@ extension TwoSums: CommutativeMonoid {
 // already a monoid, so we don't have to do anything else
 ```
 
-Note: A bit cooler
+Note: A bit cooler. It's commutative because adding integers is commutative
 
 !!!
 
@@ -603,27 +533,6 @@ Note: Imagine doing averages across many machines. Super computer vs smartphone
 
 !!!
 
-### Canceller combining is commutative!
-
-(diagram)
-
-Note: So canceller is a CommutativeMonoid
-
-!!!
-
-### Canceller cancels are threadsafe without extra locking!
-
-```swift
-// random work spawning in a threadpool
-func onSpawn(c: Canceller) {
-  combined = c <> combined
-}
-```
-
-Note: Order that this is executed doesn't matter!
-
-!!!
-
 ## Law 4: Idempotence
 
 !!!
@@ -638,15 +547,29 @@ Note: Doing something twice is the same as once
 
 !!!
 
+### Idempotence Power: No remembering
+
+```swift
+combined = x <> combined
+/* later ... */
+combined = x <> combined
+```
+
+!!!
+
 ### Bounded Semilattice
 
 ```swift
 /// Law: x <> x <> y = x <> y
 /// and CommutativeMonoid laws
+/// x <> y = y <> x (commutativity)
+/// empty <> x = x <> empty = x (identity)
+/// (x <> y) <> z = x <> (y <> z) (asociativity)
+
 protocol BoundedSemilattice: CommutativeMonoid {}
 ```
 
-Note: Really good for distributed systems
+Note: Really really good for distributed systems
 
 !!!
 
@@ -681,131 +604,20 @@ extension Monoid {
 
 !!!
 
-### Canceller: Is it idempotent?
+### What did we get?
 
-```swift
-c1 <> c1 <> c2 = c1 <> c2
-```
-
-Note: No! We can make it idempotent though
-
-!!!
-
-### Canceller where cancel only runs once
-
-```swift
-struct Canceller {
-  let ctx: ExecutionContext
-  private let _cancel: () -> Void
-  func cancel() -> Void {
-    dispatch_once {
-      self.ctx.dispatch { self._cancel() }
-    }
-  }
-  // mem cycle here
-}
-```
-
-Note: Now it's idempotent! Because of the dispatch_once, we can always just apply the same cancellation again!
-
-!!!
-
-### Canceller: Idempotence
-
-We don't need to *remember* if we've cancelled something
-
-Note: You may say that this is obvious from the dipatch_onces, was this a waste of time? No!
-
-!!!
-
-### Canceller API discovered
-
-We *discovered* a *simple* and *expressive* API for work cancellation
-
-!!!
-
-### That's not all
-
-* Our docs our extremely precise
+* Our constraints are laws baked into our types
 * We can use _property based testing_ tools like quickcheck for correctness tests
 
-Note: And that's not all all, here's what we can clean up now...
+Note: What else 
 
 !!!
 
-### Scenario 1: (Work.cancel) I want to cancel all async work for a thing that does a lot of stuff
+## Names matter
 
-```swift
-class LotsOfAsyncWork {
-  // manually remove futures here that are finished or I cancelled already
-  var manyWorks: [Work] = []
+(image)
 
-  func cleanup() {
-    manyWorks.forEach{ $0.cancel() }
-  }
-}
-```
-
-Note: This sucks. I need to care about cancel remembering that I've already called it. Plus the future could be loading something big like a bitmap, and I can leak it easily.
-
-!!!
-
-### Scenario 1: (Canceller) I want to cancel all async work for a thing that does a lot of stuff
-
-```swift
-class LotsOfAsyncWork {
-  var canceller: Canceller = Canceller.empty
-  // add new cancellers by <>ing them
-}
-```
-
-Note: There is no cleanup function. Just do `self.canceller.cancel()`. Semantically clean. Readable code.
-
-!!!
-
-### Scenario 2: Automatically cancel on view controller deinit
-
-```swift
-class AutoCanceller {
-  let canceller: Canceller
-
-  deinit {
-    canceller.cancel()
-  }
-}
-extension AutoCanceller: BoundedSemilattice
-```
-
-Note: Look how easy this is!! We just wrap the canceller with auto-canceller and we're done.
-
-!!!
-
-### Even more useful real example
-
-![Caches are monoids 1]()
-![Caches are monoids 2]()
-
-Note: Plus I go over it slowly
-
-!!!
-
-### Animations!
-
-I'm working on a formalization of animations. Please ask me about it and we can discuss. Not ready to share more publicly just yet.
-
-!!!
-
-## Names
-
-!!!
-
-### Names matter
-
-Names matter. Many people may dismiss this stuff because they are afraid to learn the names. Don't be one of those people. <-- less agressive
-
-Important that we have consistent names for these abstractions across programming languages and disciplines (mathmatics). Then we can all be on the same playing field. The names already exist -- mathamticians have been using them for a hundred years. Don't be so arrogant that you can make up a different name. If we all learn the same names for things we can solve more problems together across disciplines.
-
-TODO: Make that less ranty
+Note: Please don't dismiss this as useless, because you don't want to memorize a few vocab words. Please tell your friends and coworkers to please not dismiss this as useless because they don't want to memorize a few vocab words. Important that we have consistent names for these abstractions across programming languages and disciplines (mathmatics). Then we can all be on the same playing field. The names already exist -- mathamticians have been using them for a hundred years. If we all learn the same names for things we can solve more problems together across disciplines.
 
 !!!
 
@@ -890,5 +702,238 @@ extension Array: Monoid {
 ```
 
 !!!
+
+### Async Work Cancellation
+
+(image)
+
+!!!
+
+### Approach 1: Cancel is a method on our work
+
+```swift
+extension Work {
+  func cancel(q: DispatchQueue) -> Void { /*...*/ }
+}
+```
+
+Note: Go through this process... to make it better, what is better?
+
+!!!
+
+### Can't express easily
+
+* Cancelling something twice should be okay
+* Invoke cancel on many pieces
+* Automatically cancel work on deinit
+
+Note: We could go through and ... Let's discover this functionality
+
+!!!
+
+### Approach 2: Composable Cancellation
+
+```swift
+struct Canceller {
+  let ctx: ExecutionContext
+  let cancel: () -> Void
+}
+```
+
+Note: Still pretty simple, not expressive yet
+
+!!!
+
+### Canceller combining forms a magma
+
+```swift
+extension Canceller: Magma {
+  func op(other: Canceller) -> Canceller {
+    return Canceller(
+      cancel: {
+        self.cancel()
+        other.cancel()
+      })
+      // mem cycles here so make sure you weak properly in production
+  }
+}
+```
+
+Note: Don't stop here!
+
+!!!
+
+### Is Canceller a Semigroup?
+
+```swift
+(c1 <> c2) <> c3 = c1 <> (c2 <> c3)
+```
+
+Note: As long as your cancel functions are well-behaved (expand on this)
+
+!!!
+
+### Counterexample
+
+```swift
+var doCancel2 = true
+let cancel1 = { doCancel2 = false }
+let cancel2 = { if (doCancel2) { cancelWork() } }
+```
+
+Note: For example, setting a global variable that would cause a cancel to misbehave. Globals are bad. Why would that break associativity? We could set a global if one operation runs first and then check the global in the next operation (which would be unse if ...)
+
+!!!
+
+### Custom Law: Cancels must not be coupled
+
+```swift
+/// Cancelling something can't have side-effects that affect other cancellations in any way
+/// Law: c1.cancel() /* doesn't affect */ c2.cancel()
+```
+
+!!!
+
+### Canceller is a semigroup now!
+
+```swift
+extension Canceller: Semigroup {}
+```
+
+Note: Parens don't matter! Moving on to the next law...
+
+!!!
+
+### Does Canceller have an identity?
+
+(image)
+
+!!!
+
+### Canceller is a Monoid
+
+```swift
+extension Canceller: Monoid {
+  static var empty = Canceller(
+    ctx: .immediate,
+    _cancel: { } // no-op
+  )
+  // already a semigroup
+}
+```
+
+!!!
+
+### Canceller combining is commutative!
+
+(diagram)
+
+Note: So canceller is a CommutativeMonoid
+
+!!!
+
+### Canceller cancels are threadsafe without extra locking!
+
+```swift
+// random work spawning in a threadpool
+func onSpawn(c: Canceller) {
+  combined = c <> combined
+}
+```
+
+Note: Order that this is executed doesn't matter!
+
+!!!
+
+### Canceller: Is it idempotent?
+
+```swift
+c1 <> c1 <> c2 = c1 <> c2
+```
+
+Note: No! We can make it idempotent though
+
+!!!
+
+### Canceller where cancel only runs once
+
+```swift
+struct Canceller {
+  let ctx: ExecutionContext
+  private let _cancel: () -> Void
+  func cancel() -> Void {
+    dispatch_once {
+      self.ctx.dispatch { self._cancel() }
+    }
+  }
+  // mem cycle here
+}
+```
+
+Note: Now it's idempotent! Because of the dispatch_once, we can always just apply the same cancellation again!
+
+!!!
+
+### Canceller: Idempotence
+
+We don't need to *remember* if we've cancelled something
+
+Note: You may say that this is obvious from the dipatch_onces, was this a waste of time? No!
+
+!!!
+
+### Canceller API discovered
+
+We *discovered* a *simple* and *expressive* API for work cancellation
+
+!!!
+
+### Scenario 1: (Work.cancel) I want to cancel all async work for a thing that does a lot of stuff
+
+```swift
+class LotsOfAsyncWork {
+  // manually remove futures here that are finished or I cancelled already
+  var manyWorks: [Work] = []
+
+  func cleanup() {
+    manyWorks.forEach{ $0.cancel() }
+  }
+}
+```
+
+Note: This sucks. I need to care about cancel remembering that I've already called it. Plus the future could be loading something big like a bitmap, and I can leak it easily.
+
+!!!
+
+### Scenario 1: (Canceller) I want to cancel all async work for a thing that does a lot of stuff
+
+```swift
+class LotsOfAsyncWork {
+  var canceller: Canceller = Canceller.empty
+  // add new cancellers by <>ing them
+}
+```
+
+Note: There is no cleanup function. Just do `self.canceller.cancel()`. Semantically clean. Readable code.
+
+!!!
+
+### Scenario 2: Automatically cancel on view controller deinit
+
+```swift
+class AutoCanceller {
+  let canceller: Canceller
+
+  deinit {
+    canceller.cancel()
+  }
+}
+extension AutoCanceller: BoundedSemilattice
+```
+
+Note: Look how easy this is!! We just wrap the canceller with auto-canceller and we're done.
+
+!!!
+
 
 
