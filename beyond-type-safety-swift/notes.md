@@ -76,7 +76,12 @@ SumAndCount means an Average
 * Incrementally spelled wrong
 * Call out the improved performance too in `what did we get`
 * Make the type
-* Talk about example of the backend of speciallizing
+* Talk about example of the backend of speciallizing 
+
+* Make it clear that this is learn once for all domains for protocols
+* Try to invert the distributed fold thing and distill it to the properties necessary (just for associative)
+* Laws transcend types
+* Beyond Types in Swift
 
 
 Abstract Motivation for this operator:

@@ -1,6 +1,6 @@
 <!-- .slide: data-background="#2aa198" -->
 <!-- .slide: data-state="terminal" -->
-# Beyond Type Safety in Swift 
+# Beyond Types in Swift
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
@@ -19,7 +19,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 ### Complexity: How to measure
 
-Complexity increases as public interface _primitive count_ increases
+Complexity increases as public interface primitive count increases
 
 Note: Primitive means a parameters to a function, a new type in the library. A very simple library has one type and one method with one parameter for example. Yes this can actually be useful, we'll see later.
 
@@ -27,27 +27,25 @@ Note: Primitive means a parameters to a function, a new type in the library. A v
 
 ### Expressivity: How to measure
 
-Expressivity increases as _solvable problems_ increase
+Expressivity increases as problem solutions increase
 
 Note: Empower to write clean code in applications. But it's hard to do more things with fewer things...
 
 !!!
 
-### Tradeoff: Simple vs Expressive
+### Tradeoff
 
-(image)
+<img alt="expressivity vs complexity" src="img/graph.png" width="80%" height="80%"/>
+
+> created with https://jakevdp.github.io/blog/2012/10/07/xkcd-style-plots-in-matplotlib/
 
 Note: Tradeoff, we want to impact simplicity very trivially and extremely raise expressivity.
 
 !!!
 
-## Emergent expressivity without complexity
-
-!!!
-
 ### Composable APIs: Expressive and Simple
 
-The local maxima for expressiveness you can squeeze out of one type
+The local maxima for expressiveness squeezed from one type
 
 Note: In other words, a way to increase expressiveness without harming simplicity as much
 
@@ -64,7 +62,7 @@ Simple, expressive API supporting:
 * <!-- .element: class="fragment" data-fragment-index="3" --> Aggregating cancels
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
-[Walkthrough in appendix](/#/50)
+[Walkthrough in appendix](/#/67)
 <!-- .element: class="fragment" data-fragment-index="4" -->
 
 !!!
@@ -78,36 +76,36 @@ Simple, expressive API supporting:
 * <!-- .element: class="fragment" data-fragment-index="2" --> Defining cache-agnostic operators
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
-[Caches are monoids 1](https://www.youtube.com/watch?v=8uqXuEZLyUU)
+[(Caches are monoids 1)](https://www.youtube.com/watch?v=8uqXuEZLyUU)
 <!-- .element: class="fragment" data-fragment-index="3" -->
-[Caches are monoids 2](https://skillsmatter.com/skillscasts/9559-composable-caching-in-swift) (make a free account)
+[(Caches are monoids 2 - make a free account)](https://skillsmatter.com/skillscasts/9559-composable-caching-in-swift)
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
 Note: Plus I go over it slowly
 
 !!!
 
-### Animation Choreographs!
-
-Simple, expressive API supporting:
-
-* <!-- .element: class="fragment" data-fragment-index="1" --> Compose animation chunks in parallel or in sequence
-<!-- .element: class="fragment" data-fragment-index="1" -->
-* <!-- .element: class="fragment" data-fragment-index="2" --> Animation cancellation
-<!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> Reuse across partial-animations
-<!-- .element: class="fragment" data-fragment-index="3" -->
-
-Come talk to me after!
-<!-- .element: class="fragment" data-fragment-index="4" -->
-
-Note: But today I'm going to talk about...
-
-!!!
-
 ### Folding things
 
 (image)
+
+!!!
+
+### Summing integers
+
+```swift
+func sumInts(ints: [Int]) -> Int
+```
+
+!!!
+
+### Summing integers in parallel
+
+```swift
+x = onThread1 { sumInts(ints[0..<ints.count/2]) }
+y = onThread2 { sumInts(ints[ints.count/2..<ints.count]) }
+wait(x, y) { $0 + $1 }
+```
 
 !!!
 
@@ -119,7 +117,7 @@ Simple, expressive API for:
 <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Not specialized to one kind of thing
 <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> And is fast
+* <!-- .element: class="fragment" data-fragment-index="3" --> And is performant
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
@@ -201,7 +199,7 @@ Note: This example shouldn't be used in real code though, right? This is because
 
 ```swift
 extension Magma {
-  func fold(empty: Self, work: [Self]) -> Self {
+  static func fold(empty: Self, work: [Self]) -> Self {
     return work.reduce(empty, { acc, x in acc.op(x) })
   }
 }
@@ -302,19 +300,11 @@ return a <> b
 
 !!!
 
-### FoldPar definition
-
-(image of execution trace tree)
-
-Note: split into pieces and use the empty case for off-by-one
-
-!!!
-
 ### FoldPar code
 
 ```swift
 extension Semigroup {
-  func foldPar(empty: Self, work: [Self], q: DispatchQueue) {
+  static func foldPar(empty: Self, work: [Self], q: DispatchQueue) -> Self {
     // split into pairs, use empty if odd number
     // dispatchAsync all the work
     // recurse
@@ -341,16 +331,10 @@ Note: You could probably do this more generically with sequences
 // ex: (1 - 2) - 3 = 1 - (2 - 3)
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-//      -1 - 3     = -1 + 3
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
 ```swift
 //      4          = 2  (contradiction)
 ```
-<!-- .element: class="fragment" data-fragment-index="3" -->
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 Note: Subtraction over integers is a binary operation that's closed, but not a semigroup because operatoin is not associative.
 
@@ -456,7 +440,7 @@ Note: In fact, any two monoids tupled form a monoid by applying the operations t
 
 ```swift
 extension Monoid {
-  func foldPar(rest: [Self], ctx: ExecutionContext) {
+  static func foldPar(rest: [Self], q: DispatchQueue) -> Self {
     /* … */
   }
 }
@@ -470,7 +454,7 @@ Note: Now what was the _empty_ parameter of the `foldPar` function is implicit. 
 
 ```swift
 extension Monoid {
-  func foldDist(rest: [Self], ips: [IpAddress]) {
+  static func foldDist(rest: [Self], ips: [IpAddress]) -> Self {
     // distribute work across all ips
     // every device does some work
     // put it back together
@@ -547,7 +531,7 @@ Note: A bit cooler. It's commutative because adding integers is commutative.
 
 ```swift
 extension CommutativeMonoid {
-  func foldDist(rest: [Self], ips: [IpAddress]) {
+  static func foldDist(rest: [Self], ips: [IpAddress]) -> Self {
     // distribute work across all ips
     // every device does some work
     // put it back together
@@ -627,7 +611,7 @@ Note: TCP requires that messages are in order and are delivered exactly once. We
 
 ```swift
 extension BoundedSemilattice {
-  func distFold(rest: [Self], ips: [IpAddress]) {
+  static func distFold(rest: [Self], ips: [IpAddress]) -> Self {
     // distribute work across all ips
     // *** USE CUSTOM TRANSPORT PROTOCOL THAT DOESNT CARE ABOUT DUPLICATES ***
     // every device does some work
@@ -640,10 +624,24 @@ extension BoundedSemilattice {
 
 !!!
 
-### What did we get?
+### Optimized Fold / FoldPar / FoldDist
 
-* Our constraints are laws baked into our types
-* We can use _property based testing_ tools like quickcheck for correctness tests
+*Optimize* a fold based on problem constraints *baked into laws*
+
+Note: Constraints are encoded in extension methods; protocol inheritance applies most optimized fold based on type. Like std library
+
+!!!
+
+### Bonus: Property based testing
+
+```swift
+property("Sum combining is commutative") <-
+    forAll { (x : Sum, y: Sum) in
+        return x <> y == y <> x
+}
+```
+
+Note: SwiftCheck by CodaFi for correctness tests
 
 !!!
 
@@ -655,28 +653,28 @@ The same process we went through today can be used to derive
 <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Animation choreograph library
 <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> Async work cancellation library
+* <!-- .element: class="fragment" data-fragment-index="3" --> Evented servers
 <!-- .element: class="fragment" data-fragment-index="3" -->
-* <!-- .element: class="fragment" data-fragment-index="4" --> ...and whatever you can come up with
+* <!-- .element: class="fragment" data-fragment-index="4" --> Async work cancellation library
 <!-- .element: class="fragment" data-fragment-index="4" -->
+* <!-- .element: class="fragment" data-fragment-index="5" --> ...and whatever you can come up with
+<!-- .element: class="fragment" data-fragment-index="5" -->
 
 !!!
 
 ## Names matter
 
-(image)
+<img alt="word cloud" src="img/wordcloud.png" width="50%" height="50%"/>
 
-Note: Please don't dismiss this as useless, because you don't want to memorize a few vocab words. Please tell your friends and coworkers to please not dismiss this as useless because they don't want to memorize a few vocab words. Important that we have consistent names for these abstractions across programming languages and disciplines (mathmatics). Then we can all be on the same playing field. The names already exist -- mathamticians have been using them for a hundred years. If we all learn the same names for things we can solve more problems together across disciplines.
+> https://upload.wikimedia.org/wikipedia/commons/5/53/Leipzig-Jakarta-List_Word_Cloud.png
+
+Note: Important that we have consistent names for these abstractions across programming languages and disciplines (mathmatics). Then we can all be on the same playing field. The names already exist -- mathamticians have been using them for a hundred years. If we all learn the same names for things we can solve more problems together across disciplines.
 
 !!!
 
 ### Glossary
 
-* Magma = closed binary operation
-* Semigroup = Magma with associativity
-* Monoid = Semigroup with identity
-* CommutativeMonoid = Monoid with commutativity
-* BoundedSemilattice = CommutativeMonoid with idempotence
+![Magma = closed binary operation; Semigroup = Magma with associativity; Monoid = Semigroup with identity; CommutativeMonoid = Monoid with commutativity; BoundedSemilattice = CommutativeMonoid with idempotence](img/glossary.png)
 
 !!!
 
@@ -684,7 +682,7 @@ Note: Please don't dismiss this as useless, because you don't want to memorize a
 
 * <!-- .element: class="fragment" data-fragment-index="1" --> Optimal API design is about maximizing simplicity and expressivity 
 <!-- .element: class="fragment" data-fragment-index="1" -->
-* <!-- .element: class="fragment" data-fragment-index="2" --> Compositional APIs maximize these properties
+* <!-- .element: class="fragment" data-fragment-index="2" --> Composable APIs maximize these properties
 <!-- .element: class="fragment" data-fragment-index="2" -->
 * <!-- .element: class="fragment" data-fragment-index="3" --> Don't stop at composition. More laws = More expressivity
 <!-- .element: class="fragment" data-fragment-index="3" -->
