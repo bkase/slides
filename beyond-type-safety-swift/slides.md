@@ -87,7 +87,9 @@ Note: Plus I go over it slowly
 
 ### Folding things
 
-(image)
+<img alt="fold" src="img/fold.png" width="80%" height="80%"/>
+
+> https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Mountain-fold.svg/2000px-Mountain-fold.svg.png
 
 !!!
 
@@ -223,8 +225,6 @@ A law is an _equivalence_ between two programs that should _always be true_
 
 ## Law 1: Associativity
 
-(image)
-
 !!!
 
 ### Review from high-school: Associativity
@@ -251,7 +251,7 @@ Note: On our closed binary operation, we can reason about associativity with thi
 ### Associativity
 
 ```
-/// Law: (x <> y) <> z = x <> (y <> z)
+/// Law: (x <> y) <> z = x <> (y <> z) (associativity)
 protocol Semigroup: Magma {}
 ```
 
@@ -342,10 +342,6 @@ Note: Subtraction over integers is a binary operation that's closed, but not a s
 
 ## Law 2: Left-right identity
 
-(image)
-
-TODO: Name of "left right identity"?
-
 !!!
 
 ### Identity
@@ -381,8 +377,9 @@ Note: Again this is up to the client to decide if the inlining will make the cod
 ## Idenity + Semigroup = Monoid
 
 ```swift
-/// Law: empty <> x = x <> empty = x
-/// Semigroup Law: (x <> y) <> z = x <> (y <> z)
+/// Law: empty <> x = x <> empty = x (identity)
+/// and is a Semigroup
+/// (x <> y) <> z = x <> (y <> z) (associativity)
 protocol Monoid: Semigroup {
   static var empty: Self { get }
   // func op(other: Self) -> Self
@@ -416,7 +413,8 @@ struct TwoSums{
   let b: Sum
 }
 extension TwoSums: Monoid {
-  static var empty: TwoSums = { return TwoSums(a: Sum.empty, b: Sum.empty) }
+  static var empty: TwoSums = {
+    return TwoSums(a: Sum.empty, b: Sum.empty) }
   func op(other: TwoSums) -> TwoSums {
     return TwoSums(
       a: self.a <> other.a
@@ -427,12 +425,6 @@ extension TwoSums: Monoid {
 ```
 
 Note: In fact, any two monoids tupled form a monoid by applying the operations to the two pieces. Unfortunately this is hard to express in Swift automatically for any tuple of two monoids, see appendix for a hack to do it, but there are tradeoffs (show the struct thing in the appendix)
-
-!!!
-
-### Identity well-behaved proof
-
-(diagram)
 
 !!!
 
@@ -500,7 +492,7 @@ func onNewInt(v: Int) {
 ### Commutative Monoid
 
 ```swift
-/// Law: x <> y = y <> x
+/// Law: x <> y = y <> x (commutativity)
 /// and the Monoid laws:
 /// empty <> x = x <> empty = x (identity)
 /// (x <> y) <> z = x <> (y <> z) (asociativity)
@@ -572,7 +564,7 @@ combined = x <> combined
 ### Bounded Semilattice
 
 ```swift
-/// Law: x <> x <> y = x <> y
+/// Law: x <> x <> y = x <> y (idempotence)
 /// and CommutativeMonoid laws
 /// x <> y = y <> x (commutativity)
 /// empty <> x = x <> empty = x (identity)
@@ -592,7 +584,7 @@ struct Max{ let v: Int }
 extension Max: BoundedSemilattice {
   static var empty = Int.min
   func op(other: Max) -> Max {
-    return max(self.v, other.v)
+    return Max(v: max(self.v, other.v))
   }
 }
 ```
