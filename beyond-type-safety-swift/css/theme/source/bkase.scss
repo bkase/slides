@@ -47,12 +47,16 @@ $heading4Size: 1.0em;
 .reveal {
     // extra fixes to text styles
   p, ul, ol, td {
-    font-weight: 200;
+    font-weight: 400;
   }
 
   blockquote {
     box-shadow: none;
-    line-height: 1.8;
+    line-height: 0;
+    font-size: small;
+    text-align: center;
+    margin-top: -20px;
+    margin-bottom: -20px;
   }
 
   p, ul, ol {
@@ -149,6 +153,7 @@ $heading4Size: 1.0em;
   }
   a {
     background-color: $lightgrey;
+    font-weight: 500;
   }
 }
 .terminal .reveal .progress span {
@@ -207,7 +212,7 @@ $heading4Size: 1.0em;
 .hljs-variable,
 .apache .hljs-sqbracket,
 .hljs-name {
-  color: #efdcbc;
+  color: $darkgrey;
 }
 
 .dos .hljs-flow,
@@ -216,7 +221,7 @@ $heading4Size: 1.0em;
 .python .hljs-built_in,
 .hljs-literal,
 .tex .hljs-special {
-  color: #efefaf;
+  color: $accentalt;
 }
 
 .diff .hljs-chunk,

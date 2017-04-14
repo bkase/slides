@@ -83,6 +83,15 @@ SumAndCount means an Average
 * Laws transcend types
 * Beyond Types in Swift
 
+* Get rid of cache and async cancellation in the beginning [x]
+* Sum?
+* Put the zero in the middle of the graph
+* Maybe move the average to here
+* As you get more constraints, gain expressive power (make the mirrored graph with expressive before takeaway)
+* Center the notes with text-align: center and width:100% on the parent
+* <br> the title
+* <br> between programs and that should be true on Laws? slide
+
 
 Abstract Motivation for this operator:
 
