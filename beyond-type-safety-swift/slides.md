@@ -430,7 +430,7 @@ extension TwoSums: Monoid {
 
 ```swift
 extension Monoid {
-  static func foldPar(rest: [Self], q: DispatchQueue) -> Self {
+  static func foldPar(work: [Self], q: DispatchQueue) -> Self {
     /* … */
   }
 }
@@ -444,7 +444,7 @@ Note: Now what was the _empty_ parameter of the `foldPar` function is implicit. 
 
 ```swift
 extension Monoid {
-  static func foldDist(rest: [Self], ips: [IpAddress]) -> Self {
+  static func foldDist(work: [Self], ips: [IpAddress]) -> Self {
     // distribute work across all ips
     // every device does some work
     // put it back together
@@ -458,12 +458,6 @@ Note: Let's not stop there. Another law...
 !!!
 
 ## Law 3: Commutativity
-
-!!!
-
-### CommutativeMonoid: Diagram view
-
-![commutativemonoid diagram](img/commutativemonoid-diagram.png)
 
 !!!
 
@@ -499,6 +493,12 @@ protocol CommutativeMonoid: Monoid {}
 
 !!!
 
+### CommutativeMonoid: Diagram view
+
+![commutativemonoid diagram](img/commutativemonoid-diagram.png)
+
+!!!
+
 ### CommutativeMonoid Example: TwoSums
 
 ```swift
@@ -511,7 +511,7 @@ extension TwoSums: CommutativeMonoid {}
 
 ```swift
 extension CommutativeMonoid {
-  static func foldDist(rest: [Self], ips: [IpAddress]) -> Self {
+  static func foldDist(work: [Self], ips: [IpAddress]) -> Self {
     // distribute work across all ips
     // every device does some work
     // put it back together
@@ -599,7 +599,7 @@ Note: TCP requires that messages are in order and are delivered exactly once. UD
 
 ```swift
 extension BoundedSemilattice {
-  static func foldDist(rest: [Self], ips: [IpAddress]) -> Self {
+  static func foldDist(work: [Self], ips: [IpAddress]) -> Self {
     // distribute work across all ips
     // *** USE CUSTOM TRANSPORT PROTOCOL ON UDP ***
     // every device does some work
@@ -617,19 +617,6 @@ extension BoundedSemilattice {
 *Optimize* a fold based on problem constraints *baked into laws*
 
 Note: Constraints are encoded in extension methods; protocol inheritance applies most optimized fold based on type. Like std library
-
-!!!
-
-### Bonus: Property based testing
-
-```swift
-property("Sum combining is commutative") <-
-    forAll { (x : Sum, y: Sum) in
-        return x <> y == y <> x
-}
-```
-
-Note: SwiftCheck by CodaFi for correctness tests
 
 !!!
 
