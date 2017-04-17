@@ -713,7 +713,7 @@ Note: Important that we have consistent names for these abstractions across prog
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
-Slide Deck: [https://is.gd/KzVKWh](https://is.gd/KzVKWh)
+Slide Deck: [https://is.gd/bWsLhD](https://is.gd/bWsLhD)
 
 !!!
 
