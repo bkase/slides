@@ -15,3 +15,6 @@ https://bkase.github.io/slides/composable-caching-swift/
 Bringing Swift Enums to Objective-C:
 https://bkase.github.io/slides/adts-in-objective-c/
 
+Beyond Types in Swift:
+https://bkase.github.io/slides/beyond-type-safety-swift/
+
