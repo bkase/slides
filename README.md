@@ -1,4 +1,4 @@
-Here are slides I've made in markdown
+Here lie slide decks for presentations I have given:
 
 Don't Block:
 https://bkase.github.io/slides/dont-block-async-swift/
