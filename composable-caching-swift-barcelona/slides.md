@@ -181,7 +181,7 @@ Note: Consider A on-top-of B
 
 !!!
 
-### Cache layering
+### Cache Layering
 
 ```swift
 extension Cache {
@@ -219,7 +219,7 @@ extension Cache {
 
 !!!
 
-### Cache layering
+### Cache Layering
 
 ```swift
 let c = a.compose(b)
@@ -228,7 +228,7 @@ let c = a.compose(b)
 
 !!!
 
-### Cache layering
+### Cache Layering
 
 ```swift
 let c = a.compose(b).compose(x)
@@ -251,7 +251,7 @@ class NetworkCache<K>: Cache where K: URLConvertible {
 
 !!!
 
-### Associative -- Cache layering
+### Associative -- Cache Layering
 
 ```swift
 let c1 = (ram.compose(disk))
@@ -280,7 +280,7 @@ Note: Cache that always misses
 
 !!!
 
-### Cache layering
+### Cache Layering
 
 _Associative binary_ operator + an _identity_ element = _Monoid_
 
