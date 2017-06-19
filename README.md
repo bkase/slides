@@ -18,3 +18,6 @@ https://bkase.github.io/slides/adts-in-objective-c/
 Beyond Types in Swift:
 https://bkase.github.io/slides/beyond-type-safety-swift/
 
+Composable Caching in Swift (Barcelona):
+https://bkase.github.io/slides/composable-caching-swift-barcelona/
+

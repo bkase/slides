@@ -426,7 +426,7 @@ extension Cache {
 
 !!!
 
-### Functor-ish
+### Which Functor?
 
 * <!-- .element: class="fragment" data-fragment-index="1" --> Invariant functor w.r.t <!-- .element: class="fragment" data-fragment-index="1" --> `Value` <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Profunctor w.r.t. <!-- .element: class="fragment" data-fragment-index="2" --> `Value` <!-- .element: class="fragment" data-fragment-index="2" --> and a phantom <!-- .element: class="fragment" data-fragment-index="2" --> `W` <!-- .element: class="fragment" data-fragment-index="2" -->
@@ -484,7 +484,7 @@ let urlCache = diskCache.mapKeys(urlToString)
 
 !!!
 
-### Functor-ish
+### Which Functor?
 
 * <!-- .element: class="fragment" data-fragment-index="1" --> Contravariant functor w.r.t <!-- .element: class="fragment" data-fragment-index="1" --> `Key` <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -624,7 +624,7 @@ Note: Monad and Profunctor and Contravariant functor
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
-Slide Deck: [https://is.gd/edLKW7](https://is.gd/edLKW7)
+Slide Deck: [https://is.gd/mjJamZ](https://is.gd/mjJamZ)
 
 Thanks to [Vittorio Monaco](https://twitter.com/Vittorio_Monaco) for making the [Carlos](https://github.com/WeltN24/Carlos) library
 
