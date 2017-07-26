@@ -1,6 +1,6 @@
 <!-- .slide: data-background="#2aa198" -->
 <!-- .slide: data-state="terminal" -->
-# Beyond Types<br>in Swift
+# Optimal API Design<br>in Swift
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
@@ -576,7 +576,7 @@ Note: Really really good for distributed systems
 ```swift
 struct Max{ let v: Int }
 extension Max: BoundedSemilattice {
-  static var empty = Int.min
+  static var empty = Max(v: Int.min)
   func op(other: Max) -> Max {
     return Max(v: max(self.v, other.v))
   }
@@ -628,6 +628,8 @@ The same process we went through today can be used to derive
 [(Caches are monoids 1)](https://www.youtube.com/watch?v=8uqXuEZLyUU)
 <!-- .element: class="fragment" data-fragment-index="1" -->
 [(Caches are monoids 2 - make a free account)](https://skillsmatter.com/skillscasts/9559-composable-caching-in-swift)
+<!-- .element: class="fragment" data-fragment-index="1" -->
+[(Caches are monoids 3)](https://www.youtube.com/watch?v=4oyauqLfIcM)
 <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Animation choreograph library
 <!-- .element: class="fragment" data-fragment-index="2" -->
@@ -689,6 +691,13 @@ Note: Important that we have consistent names for these abstractions across prog
 ### Glossary -- Powers
 
 ![Magma = composable operation; Semigroup = Magma and parallelization; Monoid = Semigroup and drop the option; CommutativeMonoid = Monoid and reorder operations; BoundedSemilattice = CommutativeMonoid and no need to remember things](img/glossary2.png)
+
+!!!
+
+### Use it!
+
+Check out [Typelift Abstract](https://github.com/typelift/Abstract)
+by Elviro Rocca
 
 !!!
 
