@@ -1,0 +1,290 @@
+@import "../template/mixins";
+@import "../template/settings";
+
+$base: #2aa198;
+$baselight: #3AC9BF;
+
+$baselight0: #78d3cc;
+$baselight1: #4ab8b0;
+$basedark1: #0d978d;
+$basedark0: #04746c;
+
+$brightblue: #268bd2;
+$brighterblue: #73b5e4;
+
+$accent: #FF7943;
+$accentalt: #b58900;
+$accentred: #b730a2;
+$lightgrey: #f0f6f5;
+$darkgrey: #5f6665;
+
+$backgroundColor: $lightgrey;
+$selectionBackgroundColor: $base;
+
+$mainColor: $darkgrey;
+$mainFontSize: 31px;
+$mainFont: 'Avenir Next', 'Helvetica Neue', Helvetica, sans-serif;
+
+$headingMargin: 0 0 50px 0;
+$headingColor: $base;
+$headingFont: 'Avenir Next', 'Helvetica Neue', Helvetica, sans-serif;
+$headingLineHeight: 1.3;
+$headingTextShadow: none;
+$headingLetterSpacing: 5px;
+$headingTextTransform: uppercase;
+$headingFontWeight: 400;
+
+$linkColor: $brightblue;
+$linkColorHover: $brighterblue;
+
+$heading1Size: 2.5em;
+$heading2Size: 2.0em;
+$heading3Size: 1.3em;
+$heading4Size: 1.0em;
+
+@import "../template/theme";
+
+.reveal {
+    // extra fixes to text styles
+  p, ul, ol, td {
+    font-weight: 400;
+  }
+
+  blockquote {
+    box-shadow: none;
+    line-height: 0;
+    font-size: small;
+    margin-top: -20px;
+    margin-bottom: -20px;
+  }
+
+  p, ul, ol {
+    line-height: 1.8;
+  }
+
+  table, th {
+    font-weight: 400;
+  }
+
+  .slides {
+    text-align: left;
+  }
+
+  // emphasis means use accent
+  em {
+    font-style: normal;
+    font-weight: 400;
+    color: $accent;
+  }
+
+  section img {
+    display: block;
+    margin: 15px auto;
+    border: 0px;
+  }
+
+  table {
+    margin: 0px;
+  }
+}
+
+::selection {
+  background: $base;
+  color: $lightgrey;
+}
+::-moz-selection {
+  background: $base;
+  color: $lightgrey;
+}
+
+// terminal slide
+
+// controls
+.terminal .reveal .controls {
+  .navigate-down, .navigate-down.enabled {
+    border-top-color: $lightgrey;
+  }
+  .navigate-right, .navigate-right.enabled {
+    border-left-color: $lightgrey;
+  }
+  .navigate-up, .navigate-up.enabled {
+    border-bottom-color: $lightgrey;
+  }
+  .navigate-left, .navigate-left.enabled {
+    border-right-color: $lightgrey;
+  }
+}
+.reveal .controls {
+  .navigate-down, .navigate-down.enabled {
+    border-top-color: $base;
+    &:hover {
+      border-top-color: $baselight;
+    }
+    transition: border-top-color 0.5s, opacity 0.5s;
+  }
+  .navigate-right, .navigate-right.enabled {
+    border-left-color: $base;
+    &:hover {
+      border-left-color: $baselight;
+    }
+    transition: border-left-color 0.5s, opacity 0.5s;
+  }
+  .navigate-up, .navigate-up.enabled {
+    border-bottom-color: $base;
+    &:hover {
+      border-bottom-color: $baselight;
+    }
+    transition: border-bottom-color 0.5s, opacity 0.5s;
+  }
+  .navigate-left, .navigate-left.enabled {
+    border-right-color: $base;
+    &:hover {
+      border-right-color: $baselight;
+    }
+    transition: border-right-color 0.5s, opacity 0.5s;
+  }
+}
+
+// colors
+.terminal .reveal .slides section {
+  p, h1, h2, h3, h4, h5, h6 {
+    color: $lightgrey;
+  }
+  a {
+    background-color: $lightgrey;
+    font-weight: 500;
+  }
+}
+.terminal .reveal .progress span {
+  background-color: $lightgrey;
+  transition: background-color 0.5s;
+}
+
+// code
+.reveal pre {
+  box-shadow: none;
+  font-size: 1em;
+  font-family: "Monaco", "Consolas", monospace;
+  margin: 0px;
+
+  code {
+    overflow: visible;
+    border: 0px;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+  }
+}
+
+.hljs {
+  display: block;
+  padding: 0.5em;
+  color: $darkgrey;
+  -webkit-text-size-adjust: none;
+}
+
+.hljs-keyword,
+.hljs-tag,
+.css .hljs-class,
+.css .hljs-id,
+.lisp .hljs-title,
+.nginx .hljs-title,
+.hljs-request,
+.hljs-status,
+.clojure .hljs-attribute {
+  color: $accentalt;
+}
+
+.django .hljs-template_tag,
+.django .hljs-variable,
+.django .hljs-filter .hljs-argument {
+  color: #dcdcdc;
+}
+
+.hljs-number,
+.hljs-date {
+  color: $base;
+}
+
+.dos .hljs-envvar,
+.dos .hljs-stream,
+.hljs-variable,
+.apache .hljs-sqbracket,
+.hljs-name {
+  color: $darkgrey;
+}
+
+.dos .hljs-flow,
+.diff .hljs-change,
+.python .exception,
+.python .hljs-built_in,
+.hljs-literal,
+.tex .hljs-special {
+  color: $accentalt;
+}
+
+.diff .hljs-chunk,
+.hljs-subst {
+  color: #8f8f8f;
+}
+
+.dos .hljs-keyword,
+.hljs-decorator,
+.hljs-title,
+.diff .hljs-header,
+.ruby .hljs-class .hljs-parent,
+.apache .hljs-tag,
+.nginx .hljs-built_in,
+.tex .hljs-command,
+.hljs-prompt {
+  color: $base;
+}
+
+.hljs-type {
+  color: $accentred;
+}
+
+.dos .hljs-winutils,
+.ruby .hljs-symbol,
+.ruby .hljs-symbol .hljs-string,
+.ruby .hljs-string {
+  color: $accentalt;
+}
+
+.diff .hljs-deletion,
+.hljs-string,
+.hljs-tag .hljs-value,
+.hljs-preprocessor,
+.hljs-pragma,
+.hljs-built_in,
+.smalltalk .hljs-class,
+.smalltalk .hljs-localvars,
+.smalltalk .hljs-array,
+.css .hljs-rule .hljs-value,
+.hljs-attr_selector,
+.hljs-pseudo,
+.apache .hljs-cbracket,
+.tex .hljs-formula,
+.coffeescript .hljs-attribute {
+  color: $accentalt;
+}
+
+.hljs-shebang,
+.diff .hljs-addition,
+.hljs-comment,
+.hljs-annotation,
+.hljs-pi,
+.hljs-doctype {
+  color: #7f9f7f;
+}
+
+.coffeescript .javascript,
+.javascript .xml,
+.tex .hljs-formula,
+.xml .javascript,
+.xml .vbscript,
+.xml .css,
+.xml .hljs-cdata {
+  opacity: 0.5;
+}
+
