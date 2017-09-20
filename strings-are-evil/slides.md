@@ -8,13 +8,23 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
-## Strings are sneaky and omnipotent
+### Strings are sneaky and omnipotent
 
 (picture)
 
 !!!
 
-## Conquer the evil strings!
+### Why?
+
+1. <!-- .element: class="fragment" data-fragment-index="1" --> (Sneaky) Too many distinct possible domain representations <!-- .element: class="fragment" data-fragment-index="1" -->
+
+2. <!-- .element: class="fragment" data-fragment-index="2" --> (Omnipotent) There are methods for these distinct things to interact with themselves or each other in strange ways <!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: (1) too many contexts; database columns, user names, etc (2) We don't want to concatenate database column names, why is that even possible?
+
+!!!
+
+### Conquer the evil strings!
 
 ![explorer kid in jungle](img/explorer-kid.jpg)
 
@@ -24,7 +34,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
-## What does this function do?
+### What does this do?
 
 ```swift
 func mystery(p1: String, p2: String) -> String
@@ -32,7 +42,7 @@ func mystery(p1: String, p2: String) -> String
 
 !!!
 
-## Now what does it do?
+### Now what does it do?
 
 ```swift
 func joinPaths(p1: String, p2: String) -> String
@@ -42,7 +52,7 @@ Note: Why was this better? We exposed more information with names
 
 !!!
 
-## Now what does it do?
+### Now what does it do?
 
 ```swift
 func joinPaths(p1: String, p2: String) -> String {
@@ -52,7 +62,21 @@ func joinPaths(p1: String, p2: String) -> String {
 
 !!!
 
-## Unveil the sneaky String
+### The example: Joining FilePaths
+
+(picture)
+
+Note: I'm going to focus on file paths throughout this talk as we can cover lots of different options for dealing with strings and it will fit in slides. These same ideas should transfer to other use-cases.
+
+!!!
+
+### How safe are we?
+
+Unsafe
+
+!!!
+
+### Unveil the sneaky String
 
 ![sneaky monkey](img/sneaky-monkey.jpg)
 
@@ -60,7 +84,24 @@ func joinPaths(p1: String, p2: String) -> String {
 
 !!!
 
-## Names provide context
+### Give it a type
+
+```swift
+struct FilePath {
+  let s: String
+  init(_ s: String) {
+    self.s = s
+  }
+}
+
+func joinPaths(p1: FilePath, p2: FilePath) -> FilePath
+```
+
+Note: A sufficiently smart compiler should optimize away the wrapper. Unfortunately, Swift isn't sufficiently smart yet; but it is smart enough to catch the simple mistakes
+
+!!!
+
+### Names not enough
 
 ```swift
 typealias FilePath = String
@@ -68,41 +109,28 @@ typealias FilePath = String
 func joinPaths(p1: FilePath, p2: FilePath) -> FilePath
 ```
 
-!!!
-
-## Parameters can have names
-
 ```swift
 func join(
     filePathChunk: String,
     otherFilePathChunk: String
 ) -> String
 ```
-
-Note: But in Swift, we can name our parameters!
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
-## Problem: Names don't provide safety
+### Names are unsafe
 
 ```swift
+let x = user.name
+// ... (lots of code and control flow later)
+let p = joinPaths(p1: x, p2: "/Hello.swift")
 // oops
-let p = joinPaths(p1: user.name, p2: user.password)
 ```
 
 !!!
 
-## Structually typed typealias
-
-```swift
-typealias FilePath = String
-```
-
-Note: These "FilePath" and "String" can be interchanged
-
-!!!
-
-## Wrong things should be hard
+### Make bad things hard
 
 ![A scary rubik's-type toy; mixed up](img/magic-cube.jpg)
 
@@ -112,44 +140,53 @@ Note: Make it hard to do the wrong thing
 
 !!!
 
-## Make it hard by making Path different from String
+### Path not a string
 
 ```swift
-struct Path {
+struct FilePath {
   let s: String
   init(_ s: String) {
     self.s = s
   }
 }
 
-func joinPaths(p1: Path, p2: Path) -> Path
+func joinPaths(p1: FilePath, p2: FilePath) -> FilePath
 ```
-
-Note: A sufficiently smart compiler should optimize away the wrapper. Unfortunately, Swift isn't sufficiently smart yet; but it is smart enough to catch the simple mistakes
 
 !!!
 
-## Compiler saves you from simple mistakes
+### Compiler saves you from mistakes
 
 ```swift
 // Compile error!
-// cannot convert value of type 'Username' to expected argument type 'FilePath'
+// cannot convert value of type 'Username' to
+// expected argument type 'FilePath'
 let p = joinPaths(p1: user.name, p2: user.password)
 ```
 
 !!!
 
-## Nominal typing
+### Nominal vs Structural typing
 
 ```swift
-struct FilePath
+// nominal
+struct FilePath { /* ... */ }
 ```
 
-Note: String and FilePath are different now
+```swift
+// structural
+typealias FilePath = String
+```
 
 !!!
 
-## Bonus: Nominal types give us a method namespace
+### But that's not all!
+
+(picture)
+
+!!!
+
+### We get a nice method namespace
 
 ```swift
 extension FilePath {
@@ -163,7 +200,7 @@ Note: We get a space to put domain specific functionality
 
 !!!
 
-## Bonus: Struct wrapper is ergonomically good
+### Struct wrapper ergonomics
 
 ```swift
 extension FilePath:
@@ -174,59 +211,289 @@ let p: FilePath = "Sources/Hello.swift"
 
 !!!
 
-## We still have a problem...
+### How safe are we?
+
+* Struct wrappers (nominal typing) prevents mixing up inputs
+
+Note: ... But ...
+
+!!!
+
+### Improper file path
 
 ```swift
-let p = FilePath("Sources/Hello.swift")
-    .join("/Users/bkase/project")
+let p: FilePath = "//Foo//💩/a//.swift"
+```
+
+Note: Nothing is stopping the strings from being malformed paths! What about windows style folder slashes?
+
+!!!
+
+### More structured FilePath
+
+(picture)
+
+!!!
+
+### Enums to the rescue
+
+```swift
+struct FileName { /* ... */ }
+struct DirName { /* ... */ }
+```
+
+```swift
+indirect enum FilePath {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+  case root // /
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+  case current // .
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
+  case dirIn(FilePath, DirName)
+```
+<!-- .element: class="fragment" data-fragment-index="4" -->
+
+```swift
+  case fileIn(FilePath, FileName)
+```
+<!-- .element: class="fragment" data-fragment-index="5" -->
+
+```swift
+  // parentIn for ..
+}
+```
+<!-- .element: class="fragment" data-fragment-index="6" -->
+
+Note: This is kind of like a linked list, but there are two base cases and two recursive cases.. it's awkward to deal with these in our programs though
+
+!!!
+
+### Morally, private enum constructors
+
+```swift
+struct FileName: ExpressibleByStringLiteral { }
+struct DirName: ExpressibleByStringLiteral { }
+```
+
+```swift
+indirect enum FilePath {
+  case _root // /
+  case _current // .
+  case _dirIn(FilePath, DirName)
+  case _fileIn(FilePath, FileName)
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
+### The public "constructors"
+
+```swift
+func file(_ name: FileName) -> FilePath {
+  return ._fileIn(._current, escape(name))
+}
+```
+
+```swift
+func dir(_ name: DirName) -> FilePath {
+  return ._dirIn(._current, escape(name))
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+let root: FilePath = ._root
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+let current: FilePath = ._current
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+Note: We can make a nice DSL for file paths for each chunk
+
+!!!
+
+### Then we need to join them
+
+```swift
+extension FilePath {
+  func join(other: FilePath) -> FilePath {
+    switch (self, other) {
+    /* ... */
+    }
+  }
+}
+```
+
+!!!
+
+### The first join cases
+
+```swift
+    case (._current, ._current):
+      return ._current
+```
+
+```swift
+    case (._root, ._current):
+      return ._root
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    case let (._fileIn(p1, f1), ._current):
+      return ._fileIn(p1.join(._current), f1)
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+    case let (._dirIn(p1, d1), ._current):
+      return ._dirIn(p1.join(._current), d1)
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
+    case let (p1, ._fileIn(p2, f2)):
+      return ._fileIn(p1.join(p2), f2)
+```
+<!-- .element: class="fragment" data-fragment-index="4" -->
+
+```swift
+    case let (p1, ._dirIn(p2, d2)):
+      return ._dirIn(p1.join(p2), d2)
+```
+<!-- .element: class="fragment" data-fragment-index="5" -->
+
+Note: and there's a few more cases (I'll come back to later)
+
+!!!
+
+### Join on FilePaths: a Semigroup
+
+```swift
+// associative (we don't need parentheses)
+// closed, binary operation
+extension FilePath: Semigroup {
+```
+
+```swift
+  static func <>(lhs: FilePath, rhs: FilePath) -> FilePath {
+    return lhs.join(rhs)
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: You don't need to know what this means (but you should go watch my last functional swift talk)
+
+!!!
+
+### Finally we can render a path
+
+```swift
+extension FilePath {
+  func render(pathSeparator: Character = "/") -> String {
+    switch self {
+      /* recursively go through and render the path */
+    }
+  }
+}
+```
+
+!!!
+
+### Enjoy our nice DSL
+
+```swift
+let fooPath = dir("Sources") <>
+  dir("Models") <>
+  file("Foo.swift")
+
+// Sources/Models/Foo.swift
+print(fooPath.render())
+```
+
+Note: Look at the beauty
+
+!!!
+
+### How safe are we?
+
+* Struct wrappers (nominal typing) prevent mixing up inputs
+* Enums prevent invalid states at construction
+
+Note: ... But...
+
+!!!
+
+### Joining bad path combinations
+
+```swift
+let p = file("Hello.swift") <> dir("/Users/bkase/project")
 ```
 
 Note: Nothing stops us from joining an absolute path on the right; or a file on the left
 
 !!!
 
-## Phantoms can vanquish our foe
+### Unsatisfactory solution
+
+```swift
+    case (._current, ._root),
+      (._root, ._root),
+      (._fileIn(_), ._root),
+      (._dirIn(_), ._root):
+      // there are a few more cases needed
+      // to catch all mismatches
+
+      fatalError("You are appending paths that don't make sense")
+    }
+  }
+}
+```
+
+Note: We can runtime fail, but this kind of sucks. We don't want our app to crash. Also, what if I make a mistake and forget some cases?
+
+!!!
+
+### Phantoms can vanquish our foe
 
 (image of a phantom fighting the evil string)
 
 !!!
 
-## Make it hard(er) to do the wrong thing
+### Make it hard(er) to do the wrong thing
 
 * You can't join with an absolute path on the right
 * You can't join with a file on the left
 
-!!!
-
-## Whip out the enums
-
-```swift
-struct FileName { /* ... */ }
-struct DirName { /* ... */ }
-indirect enum Path {
-  case root // /
-  case current // .
-  case dirIn(Path, DirName)
-  case fileIn(Path, FileName)
-  // you'll also want `parentIn` for ..
-}
-```
-
-Note: This doesn't guarantee us the safety we wanted above
+Note: The fundamental problem
 
 !!!
 
-## Phantom Path
+### Phantom Path
 
 ```swift
 indirect enum Path<K: PathKind, T: FileType> {
 ```
 
 ```swift
-  case root // /
-  case current // .
-  case dirIn(Path<K, T>, DirName)
-  case fileIn(Path<K, T>, FileName)
+  case _root // /
+  case _current // .
+  case _dirIn(Path<K, T>, DirName)
+  case _fileIn(Path<K, T>, FileName)
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -235,7 +502,7 @@ Note: Path is now a phantom type because we don't use K and T in any cases
 
 !!!
 
-## Constrain our K and T
+### Constrain our K and T
 
 ```swift
 protocol PathKind {}
@@ -265,36 +532,7 @@ Note: You cannot instantiate any PathKind or FileType!
 
 !!!
 
-## We need "private" Path enum constructors
-
-```swift
-indirect enum Path<K: PathKind, T: FileType> {
-```
-
-```swift
-  case _root // /
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-  case _current // .
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```swift
-  case _dirIn(Path, DirName)
-```
-<!-- .element: class="fragment" data-fragment-index="3" -->
-
-```swift
-  case _fileIn(Path, FileName)
-}
-```
-<!-- .element: class="fragment" data-fragment-index="4" -->
-
-!!!
-
-## We expose constructors that specialize the generics
+### Specialize generic type paremeters
 
 ```swift
 func file(_ name: FileName) -> Path<Relative, File> {
@@ -321,7 +559,7 @@ let current: Path<Relative, Directory> = ._current
 
 !!!
 
-## Phantom Parameters for Constructors
+### Phantom Parameters for Constructors
 
 ![phantom parameter table](img/phantomtable.png)
 
@@ -329,7 +567,7 @@ Note: Fixed Values for our Phantom Parameters
 
 !!!
 
-## Safe join
+### Safe join
 
 ```swift
 extension Path where T == Directory {
@@ -338,51 +576,18 @@ extension Path where T == Directory {
 ```swift
   func join<T2>(_ other: Path<Relative, T2>) -> Path<K, T2> {
     switch (self, other) {
-      /* ... */
+      /* same as before */
     }
   }
 ```
 
 !!!
 
-## Safe join
+### Safe join (the rest)
 
 ```swift
-    case (._current, ._current):
-      return ._current
-```
-
-```swift
-    case (._root, ._current):
-      return ._root
-```
-
-```swift
-    case let (._fileIn(p1, f1), ._current):
-      return ._fileIn(p1 <%> ._current, f1)
-```
-
-```swift
-    case let (._dirIn(p1, d1), ._current):
-      return ._dirIn(p1 <%> ._current, d1)
-```
-
-```swift
-    case let (p1, ._fileIn(p2, f2)):
-      return ._fileIn(p1 <%> p2, f2)
-```
-
-```swift
-    case let (p1, ._dirIn(p2, d2)):
-      return ._dirIn(p1 <%> p2, d2)
-```
-
-!!!
-
-## Safe join (the rest)
-
-```swift
-    // nonsense (assuming you don't use private constructors)
+    // now this is UNREACHABLE
+    // assuming no one touches our private cases
     case (._current, ._root),
       (._root, ._root),
       (._fileIn(_), ._root),
@@ -395,9 +600,11 @@ extension Path where T == Directory {
 
 !!!
 
-## Operator for join
+### New operator
 
 ```swift
+// no longer closed
+// is this a semigroupoid?
 infix operator <%>: TernaryPrecedence
 func <%><K, T>(lhs: Path<K, Directory>, rhs: Path<Relative, T2>) -> Path<K, T2> {
   return lhs.join(rhs)
@@ -406,38 +613,66 @@ func <%><K, T>(lhs: Path<K, Directory>, rhs: Path<Relative, T2>) -> Path<K, T2> 
 
 !!!
 
-## Typesafe Paths
+### Typesafe Paths
 
 ```swift
 let p = root <%>
     dir("Users") <%>
     dir("bkase") <%>
     file("Hello.swift")
+
+// Path<Absolute, File>
+print(type(of: p))
 ```
 
 !!!
 
-## Typesafe Paths
+### Typesafe Paths
 
 ```swift
 // Compile Error!
 file("Hello.swift") <%> dir("Sources")
+```
 
+```swift
 // Compile Error!
 dir("Sources") <%> root <%> dir("Hello.swift")
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 Note: Invariants of file on the left, or absoute on the right unbroken!
 
 !!!
 
-## Vanquished
+### Typesafe Canonicalization
+
+```swift
+extension Path where K == Relative {
+  var canonicalize: Path<Absolute, T> {
+    /* recursively fixup `..`s */
+  }
+}
+```
+
+!!!
+
+### How safe are we?
+
+* Struct wrappers (nominal typing) prevent mixing up inputs
+* Enums prevent invalid states at construction
+* Phantom types prevent invalid combinations in operations
+
+Note: ... you could say we've
+
+!!!
+
+### Vanquished the evil
 
 (picture of explorer again)
 
 !!!
 
-## Shout-out
+### Shout-out
 
 [Purescript pathy library](https://github.com/slamdata/purescript-pathy) invented this representation of file paths
 
@@ -445,12 +680,13 @@ Note: I just succeeded in porting the ideas to Swift
 
 !!!
 
-## What did we explore?
+### What did we explore?
 
 * Raw strings are sneaky and too powerful
-* Typealiases (structural typing) makes them less sneaky
-* Struct wrappers (nominal typing) weakens them
-* Phantom types can restrict operations on certain states
+* Names/Typealiases (structural typing) are inneficient
+* Struct wrappers (nominal typing) prevent mixing up inputs
+* Enums prevents invalid states at construction
+* Phantom types prevent invalid combinations in operations
 
 !!!
 

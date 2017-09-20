@@ -36,3 +36,23 @@ Three anecdotes that show why you should think twice before using a string:
 3. By the way for rendering strings I made a doctor pretty
 
 
+
+Paths:
+* Explain why strings are sneaky and omnipotent
+  * People know that strings are a bad example; relying on strings for things is bad if you make typos
+* Not understanding what the strings mean isn't as important
+* Important thing is using strings to build things causes unpredictable behavior
+* typealiases deprioritize
+* Make the bonuses less asides -- the struct gives you a namespace for method behavior
+    * the join method in it's own class
+* Need the transition between strings are evil; and paths for the rest of the talk
+* Introduce the problem (we want to look at how to compose a file path; I'm going to walk you through a type safe thing)
+    * Show all the possible ways to mess things up
+* Spend more time talking about swift language features (expressible; k and t in phantom type; explain the expression; add another canonicalizing paths)
+
+* Levels of safety
+   * Use a typealias (no safety, just understanding of strings)
+   * Use a struct wrapper (safe mixing up various string types)
+   * Enums (safe construction)
+   * Use phantom types (impossible to xxx) (safe operations)
+
