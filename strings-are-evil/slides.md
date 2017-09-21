@@ -238,8 +238,8 @@ Note: Nothing is stopping the strings from being malformed paths! What about win
 ### Enums to the rescue
 
 ```swift
-struct FileName { /* ... */ }
-struct DirName { /* ... */ }
+struct FileName: ExpressibleByStringLiteral { }
+struct DirName: ExpressibleByStringLiteral { }
 ```
 
 ```swift
@@ -448,7 +448,17 @@ Note: Nothing stops us from joining an absolute path on the right; or a file on 
 
 !!!
 
-### Unsatisfactory solution
+
+### Make it hard(er) to do the wrong thing
+
+* You can't join with an absolute path on the right
+* You can't join with a file on the left
+
+Note: The fundamental problem
+
+!!!
+
+### Unsatisfactory Solution 1
 
 ```swift
     case (._current, ._root),
@@ -468,18 +478,25 @@ Note: We can runtime fail, but this kind of sucks. We don't want our app to cras
 
 !!!
 
-### Phantoms can vanquish our foe
+### Unsatisfactory Solution 2
 
-(image of a phantom fighting the evil string)
+```swift
+enum AbsolutePathToFile { /* ... */ }
+enum AbsolutePathToDirectory { /* ... */ }
+enum RelativePathToFile { /* ... */ }
+enum RelativePathToDirectory { /* ... */ }
+
+// 16 overloads
+func join(/* ... */)
+```
+
+Note: Combinatoric explosion of cases to get the safety
 
 !!!
 
-### Make it hard(er) to do the wrong thing
+### Phantoms can vanquish our foe
 
-* You can't join with an absolute path on the right
-* You can't join with a file on the left
-
-Note: The fundamental problem
+(image of a phantom fighting the evil string)
 
 !!!
 
@@ -636,7 +653,7 @@ file("Hello.swift") <%> dir("Sources")
 
 ```swift
 // Compile Error!
-dir("Sources") <%> root <%> dir("Hello.swift")
+dir("Sources") <%> root <%> file("Hello.swift")
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
