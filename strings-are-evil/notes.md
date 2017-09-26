@@ -56,3 +56,40 @@ Paths:
    * Enums (safe construction)
    * Use phantom types (impossible to xxx) (safe operations)
 
+=====
+
+* Speed the beginning, slow down the end
+* Examples of sneaky strings on the slide
+* Text for omnipotent is confusing, show an example
+* WindowsXP files floating across
+* Nominal vs Structural: make sure it's
+* Liked the expressiblebystringliteral
+* Constrain our K and T slide. Keep the example `Path<K, T>` at the top
+* Do a markdown table
+* Bring up all the problems in the beginning
+
+=====
+
+* Use google maps
+* Too build a correct filepath we need all of that
+* Do a slide on why it would be impossible to do that with strings
+* Always refer back to the strings (nods back)
+* This is what we need to build what the user wants
+* Pull two english language strings, if it showed up on a perscription
+* The context the string lives, and you don't want to have to read the code around where you're reading
+    * Strings get meaning from their context
+* Be prepared to answer, "This is not overarchitected..."; don't assume everyone sees the value
+
+====
+
+* Bring the example earlier
+* How are we safe keep track (note what changed)
+* Show applications (generics without an initializable runtime value)
+* Phantom types coming from so-and-so
+    * A bit more about what phantom types before showing the construction
+* Cut slides
+* Show the code snippets where it doesn't work
+* Spend longer at the breaker slides (let's think about this...)
+* Show the phantom example before the shout-out
+* Just say "phantom types"
+

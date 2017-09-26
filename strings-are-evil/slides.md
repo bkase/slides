@@ -2,7 +2,7 @@
 <!-- .slide: data-state="terminal" -->
 # Strings Are Evil
 
-An exploration through structural, nominal, and phantom types
+A motivation for Phantom Types
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
@@ -16,9 +16,13 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 ### Why?
 
-1. <!-- .element: class="fragment" data-fragment-index="1" --> (Sneaky) Too many distinct possible domain representations <!-- .element: class="fragment" data-fragment-index="1" -->
+1. <!-- .element: class="fragment" data-fragment-index="1" --> (Sneaky) <!-- .element: class="fragment" data-fragment-index="1" -->
+  * <!-- .element: class="fragment" data-fragment-index="1" --> String could be a DB column name? <!-- .element: class="fragment" data-fragment-index="1" -->
+  * <!-- .element: class="fragment" data-fragment-index="1" --> String could be a user's name? <!-- .element: class="fragment" data-fragment-index="1" -->
 
 2. <!-- .element: class="fragment" data-fragment-index="2" --> (Omnipotent) There are methods for these distinct things to interact with themselves or each other in strange ways <!-- .element: class="fragment" data-fragment-index="2" -->
+  * <!-- .element: class="fragment" data-fragment-index="2" -->Doesn't make sense to concatenate DB column names <!-- .element: class="fragment" data-fragment-index="2" -->
+  * <!-- .element: class="fragment" data-fragment-index="2" -->Doesn't make sense to <!-- .element: class="fragment" data-fragment-index="2" -->
 
 Note: (1) too many contexts; database columns, user names, etc (2) We don't want to concatenate database column names, why is that even possible?
 
@@ -56,7 +60,7 @@ Note: Why was this better? We exposed more information with names
 
 ```swift
 func joinPaths(p1: String, p2: String) -> String {
-  return p1 + "/" + p2
+  return "<svg>\(p1)\(p2)</svg>"
 }
 ```
 
@@ -64,7 +68,9 @@ func joinPaths(p1: String, p2: String) -> String {
 
 ### The example: Joining FilePaths
 
-(picture)
+```swift
+func joinPath(p1: String, p2: String) -> String
+```
 
 Note: I'm going to focus on file paths throughout this talk as we can cover lots of different options for dealing with strings and it will fit in slides. These same ideas should transfer to other use-cases.
 
@@ -72,7 +78,11 @@ Note: I'm going to focus on file paths throughout this talk as we can cover lots
 
 ### How safe are we?
 
-Unsafe
+* Humans and compilers don't understand the file path context
+* <!-- .element: class="fragment" data-fragment-index="1" --> Invalid file paths can be constructed<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Invalid file path joins are permitted<!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: ... let's make it better
 
 !!!
 
@@ -213,9 +223,11 @@ let p: FilePath = "Sources/Hello.swift"
 
 ### How safe are we?
 
-* Struct wrappers (nominal typing) prevents mixing up inputs
+* <strike>Humans and compilers don't understand the file path context</strike>
+* <!-- .element: class="fragment" data-fragment-index="1" --> Invalid file paths can be constructed<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="1" --> Invalid file path joins are permitted<!-- .element: class="fragment" data-fragment-index="1" -->
 
-Note: ... But ...
+Note: ... let's make it better
 
 !!!
 
@@ -431,10 +443,11 @@ Note: Look at the beauty
 
 ### How safe are we?
 
-* Struct wrappers (nominal typing) prevent mixing up inputs
-* Enums prevent invalid states at construction
+* <strike>Humans and compilers don't understand the file path context</strike>
+* <strike>Invalid file paths can be constructed</strike>
+* <!-- .element: class="fragment" data-fragment-index="1" --> Invalid file path joins are permitted<!-- .element: class="fragment" data-fragment-index="1" -->
 
-Note: ... But...
+Note: Struct wrappers; enums; ... Here's an example of a bad join
 
 !!!
 
@@ -519,29 +532,45 @@ Note: Path is now a phantom type because we don't use K and T in any cases
 
 !!!
 
+### Typesafe Paths
+
+```swift
+let p = root <%>
+    dir("Users") <%>
+    dir("bkase") <%>
+    file("Hello.swift")
+
+// Path<Absolute, File>
+print(type(of: p))
+```
+
+Note: We're going to build up to this
+
+!!!
+
 ### Constrain our K and T
+
+```swift
+indirect enum Path<K: PathKind, T: FileType>
+```
 
 ```swift
 protocol PathKind {}
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
 enum Absolute: PathKind {}
 enum Relative: PathKind {}
 
 ```
-<!-- .element: class="fragment" data-fragment-index="1" -->
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
 protocol FileType {}
 enum Directory: FileType {}
 enum File: FileType {}
 
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```swift
-indirect enum Path<K: PathKind, T: FileType>
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
@@ -620,13 +649,14 @@ extension Path where T == Directory {
 ### New operator
 
 ```swift
-// no longer closed
-// is this a semigroupoid?
+// for math reasons
 infix operator <%>: TernaryPrecedence
 func <%><K, T>(lhs: Path<K, Directory>, rhs: Path<Relative, T2>) -> Path<K, T2> {
   return lhs.join(rhs)
 }
 ```
+
+Note: `<>` is defined on all values within a type
 
 !!!
 
@@ -675,17 +705,34 @@ extension Path where K == Relative {
 
 ### How safe are we?
 
-* Struct wrappers (nominal typing) prevent mixing up inputs
-* Enums prevent invalid states at construction
-* Phantom types prevent invalid combinations in operations
+* <!-- .element: class="fragment" data-fragment-index="1" --> <strike>Humans and compilers don't understand the file path context</strike> <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="1" --> <strike>Invalid file paths can be constructed</strike> <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="1" --> <strike>Invalid file path joins are permitted</strike> <!-- .element: class="fragment" data-fragment-index="1" -->
 
-Note: ... you could say we've
+Note: struct wrappers, enums, phantoms ... you could say we've
 
 !!!
 
 ### Vanquished the evil
 
 (picture of explorer again)
+
+!!!
+
+### Phantoms are powerful
+
+```swift
+struct Distance<A> { let v: Int }
+let d = Distance<Meters>(4)
+let x = Distance<Inches>(3)
+```
+
+```swift
+struct Tagged<A, B> { let b: B }
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: (1) Annotate values with metadata to refine the data, (2) add tags to to things
 
 !!!
 
@@ -704,6 +751,14 @@ Note: I just succeeded in porting the ideas to Swift
 * Struct wrappers (nominal typing) prevent mixing up inputs
 * Enums prevents invalid states at construction
 * Phantom types prevent invalid combinations in operations
+
+!!!
+
+### Strings are evil
+
+(picture)
+
+Note: Strings open us up to preventable logic errors
 
 !!!
 
