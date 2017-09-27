@@ -93,3 +93,19 @@ Paths:
 * Show the phantom example before the shout-out
 * Just say "phantom types"
 
+===
+
+* Call Phantom types out more
+* Slide on the final implementation
+* Need to mention why
+* Uses URL fails
+* Phantom types
+* Why and what phantom types are (more slides)
+* This is a phantom type (definition)
+* What is a phantom type at a high level
+* Move the lets before the function and use those
+* Keep track of which FilePath we're using
+* Don't animate the "How Safe Are We"
+* Unreachable directive in swift
+
+
