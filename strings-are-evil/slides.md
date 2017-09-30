@@ -169,7 +169,7 @@ let p = joinPaths(p1: user.name, p2: user.password)
 
 !!!
 
-### Nominal vs Structural equivalence
+### Nominal vs Structural
 
 ```swift
 // nominal
@@ -292,7 +292,7 @@ Note: This is kind of like a linked list, but there are two base cases and two r
 
 !!!
 
-### Morally, private enum constructors
+### "Private" enum constructors
 
 ```swift
 struct FileName: ExpressibleByStringLiteral { }
@@ -300,38 +300,48 @@ struct DirName: ExpressibleByStringLiteral { }
 ```
 
 ```swift
-indirect enum FilePath {
+private indirect enum _FilePath {
   case _root // /
   case _current // .
-  case _dirIn(FilePath, DirName)
-  case _fileIn(FilePath, FileName)
+  case _dirIn(_FilePath, DirName)
+  case _fileIn(_FilePath, FileName)
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+public struct FilePath {
+  fileprivate let path: _FilePath
+  init(_ path: _FilePath) {
+    self.path = path
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
 ### The public "constructors"
 
 ```swift
-let root: FilePath = ._root
+let root: FilePath = FilePath(._root)
 ```
 
 ```swift
-let current: FilePath = ._current
+let current: FilePath = FilePath(._current)
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
 func file(_ name: FileName) -> FilePath {
-  return ._fileIn(current, escape(name))
+  return FilePath(._fileIn(current, escape(name)))
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
 func dir(_ name: DirName) -> FilePath {
-  return ._dirIn(current, escape(name))
+  return FilePath(._dirIn(current, escape(name)))
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
@@ -343,11 +353,11 @@ Note: We can make a nice DSL for file paths for each chunk
 ### Then we need to join them
 
 ```swift
-indirect enum FilePath { /* ... */ }
+indirect enum _FilePath { /* ... */ }
 // ...
 extension FilePath {
   func join(other: FilePath) -> FilePath {
-    switch (self, other) {
+    switch (self.path, other.path) {
     /* ... */
     }
   }
@@ -400,7 +410,7 @@ Note: and there's a few more cases (I'll come back to later)
 ### Join on FilePaths: a Semigroup
 
 ```swift
-indirect enum FilePath { /* ... */ }
+indirect enum _FilePath { /* ... */ }
 // ...
 
 // associative (we don't need parentheses)
@@ -423,7 +433,7 @@ Note: You don't need to know what this means (but you should go watch my last fu
 ### Finally we can render a path
 
 ```swift
-indirect enum FilePath { /* ... */ }
+indirect enum _FilePath { /* ... */ }
 // ...
 extension FilePath {
   func render(pathSeparator: Character = "/") -> String {
@@ -464,7 +474,7 @@ Note: Struct wrappers; enums; ... Here's an example of a bad join
 ### Joining bad path combinations
 
 ```swift
-let p = file("Hello.swift") <> dir("/Users/bkase/project")
+let p = file("Hello.swift") <> root
 ```
 
 Note: Nothing stops us from joining an absolute path on the right; or a file on the left
@@ -565,7 +575,7 @@ indirect enum Path<K: PathKind, T: FileType> {
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
-Note: Path is now a phantom type because we don't use K and T in any cases
+Note: ... I'm going to skip the public wrapper struct to make things simpler
 
 !!!
 
@@ -672,7 +682,7 @@ extension Path where T == Directory {
 
 ```swift
     // now this is UNREACHABLE
-    // assuming no one touches our private cases
+    // assuming we behave within our library
     case (._current, ._root),
       (._root, ._root),
       (._fileIn(_), ._root),
