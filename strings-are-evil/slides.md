@@ -10,7 +10,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 ### Strings are sneaky and omnipotent
 
-![scary eyes](img/scary-eyes.jpg)
+![scary eyes](img/scary-eyes2.jpg)
 
 > http://maxpixel.freegreatpicture.com/Dark-Bad-Black-Luck-Eyes-Halloween-Animal-Cat-218185
 
@@ -88,7 +88,7 @@ Note: ... let's make it better
 
 ### Unveil the sneaky String
 
-![sneaky monkey](img/sneaky-monkey.jpg)
+![sneaky monkey](img/sneaky-monkey2.jpg)
 
 > https://www.flickr.com/photos/mctrent/4279043790
 
@@ -142,7 +142,7 @@ let p = joinPaths(p1: x, p2: "/Hello.swift")
 
 ### Make bad things hard
 
-![A scary rubik's-type toy; mixed up](img/magic-cube.jpg)
+![A scary rubik's-type toy; mixed up](img/magic-cube2.jpg)
 
 > https://pixabay.com/p-2399883/?no_redirect
 
@@ -195,7 +195,7 @@ typealias FilePath = String
 
 ### But that's not all!
 
-![that's not all rabbit](img/thats-not-all.jpg)
+![that's not all rabbit](img/thats-not-all2.jpg)
 
 > https://c2.staticflickr.com/4/3065/2972169979_9a6fae46cf_b.jpg
 
@@ -254,7 +254,7 @@ Note: Nothing is stopping the strings from being malformed paths! What about win
 
 ### More structured FilePath
 
-![structured building](img/structure.jpg)
+![structured building](img/structure2.jpg)
 
 > https://upload.wikimedia.org/wikipedia/commons/7/7f/Structure_Paris_les_Halles.jpg
 
@@ -529,7 +529,7 @@ Note: Combinatoric explosion of cases to get the safety
 
 ### Phantoms can vanquish our foe
 
-![danny phantom on an elevator](https://c2.staticflickr.com/4/3344/3262174012_c00df398b6_b.jpg)
+![danny phantom on an elevator](img/phantom2.jpg)
 
 > https://c2.staticflickr.com/4/3344/3262174012_c00df398b6_b.jpg
 
@@ -538,9 +538,10 @@ Note: Combinatoric explosion of cases to get the safety
 ### Phantom Type
 
 ```swift
-struct PhantomInt<A> {
-  let i: Int
-}
+// A Phantom Type is one that doesn't use
+// one of it's generic type parameters
+
+struct PhantomInt<A> { let i: Int }
 ```
 
 !!!
@@ -697,9 +698,12 @@ extension Path where T == Directory {
 ### New operator
 
 ```swift
-// for math reasons
+// semigroupoid, not a semigroup
 infix operator <%>: TernaryPrecedence
-func <%><K, T>(lhs: Path<K, Directory>, rhs: Path<Relative, T2>) -> Path<K, T2> {
+func <%><K, T>(
+    lhs: Path<K, Directory>,
+    rhs: Path<Relative, T2>
+) -> Path<K, T2> {
   return lhs.join(rhs)
 }
 ```
@@ -765,16 +769,17 @@ Note: struct wrappers, enums, phantoms ... you could say we've
 
 ### Vanquished the evil
 
-(picture of explorer again)
+![danny phantom on an elevator](img/phantom2.jpg)
+
+> https://c2.staticflickr.com/4/3344/3262174012_c00df398b6_b.jpg
 
 !!!
 
 ### Phantoms are powerful
 
 ```swift
-struct Distance<S: States> { /*...*/ }
-let d = Distance<State1>(/*...*/)
-let x = Distance<State2>(/*...*/)
+struct Machine<S: States> { /*...*/ }
+func insertCoin(Machine<NoCoin>) -> Machine<WithCoin>
 ```
 
 ```swift
@@ -806,7 +811,9 @@ Note: I just succeeded in porting the ideas to Swift
 
 ### Strings are evil
 
-(picture)
+![chaos](img/chaos2.jpg)
+
+> https://pixabay.com/p-724096
 
 Note: Strings open us up to preventable logic errors
 
