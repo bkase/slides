@@ -38,21 +38,11 @@ Note: (1) too many contexts; database columns, user names, etc (2) We don't want
 
 !!!
 
-### What does this do?
-
-```swift
-func mystery(p1: String, p2: String) -> String
-```
-
-!!!
-
-### Now what does it do?
+### What does it do?
 
 ```swift
 func joinPaths(p1: String, p2: String) -> String
 ```
-
-Note: Why was this better? We exposed more information with names
 
 !!!
 
@@ -628,25 +618,25 @@ Note: You cannot instantiate any PathKind or FileType!
 ### Specialize generic type paremeters
 
 ```swift
-func file(_ name: FileName) -> Path<Relative, File> {
-  return ._fileIn(._current, name)
-}
+let root: Path<Absolute, Directory> = ._root
 ```
 
 ```swift
-func dir(_ name: DirName) -> Path<Relative, Directory> {
-  return ._dirIn(._current, name)
-}
+let current: Path<Relative, Directory> = ._current
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-let root: Path<Absolute, Directory> = ._root
+func file(_ name: FileName) -> Path<Relative, File> {
+  return ._fileIn(current, escape(name))
+}
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-let current: Path<Relative, Directory> = ._current
+func dir(_ name: DirName) -> Path<Relative, Directory> {
+  return ._dirIn(current, escape(name))
+}
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
