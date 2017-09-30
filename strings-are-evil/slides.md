@@ -779,7 +779,7 @@ Note: struct wrappers, enums, phantoms ... you could say we've
 
 ```swift
 struct Machine<S: States> { /*...*/ }
-func insertCoin(Machine<NoCoin>) -> Machine<WithCoin>
+func insertCoin(m: Machine<NoCoin>) -> Machine<WithCoin>
 ```
 
 ```swift
