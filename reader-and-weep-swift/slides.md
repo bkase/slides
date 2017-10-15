@@ -325,6 +325,24 @@ func increment(key: Key) -> Reader<Config, ()> {
 
 !!!
 
+### Great it works!
+
+(picture)
+
+!!!
+
+### It's composable!
+
+```swift
+func incrementTwice(key: Key) -> Reader<Config, ()> {
+  return increment(key: key).flatMap{ () in
+    increment(key: key)
+  }
+}
+```
+
+!!!
+
 # Thanks!
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
