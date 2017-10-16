@@ -10,7 +10,21 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 ### This Code Sucks
 
 ```swift
+class Cache {
+  func get(key: Key) -> Value {
+    return Data.readFile(key.name) ??
+      Network.sharedInstance.get("/key", key) ??
+      Value.default
+  }
+  func set(key: Key, value: Value) { /*...*/ }
+}
+```
 
+```swift
+func increment(key: Key) {
+  let value = Cache.sharedInstance.get(key: key)
+  Cache.sharedInstance.set(key: key, value: inc(value))
+}
 ```
 
 !!!
@@ -31,7 +45,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 ### Why is it bad to mock?
 
-* TODO
+* You could easily forget a nested dependency (accidentally hit network in unit tests)
 * Note: It's so bad, that Swift doesn't even allow it (really)
 
 !!!
@@ -55,6 +69,7 @@ What I want to do is show you that the state of the world is bad. We can do bett
 ### Depend only on that which you say
 
 ```swift
+// let's say disk and network are protocols
 class Cache {
   let disk: Disk
   let network: Network
@@ -66,7 +81,7 @@ class Cache {
 }
 ```
 
-Note: This is called dependency injection
+Note: This is called dependency injection (if you do it this way, you're already better than most people)
 
 !!!
 
@@ -384,7 +399,14 @@ struct TimeAndCache {
   let time: TimeConfig
   let cache: CacheConfig
 }
+```
+
+```swift
 func incTodaysKey() -> Reader<?, ()> {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
   return todaysKey().local{ both in both.time }
       .flatMap{ key in
         increment(key).local{ both in both.cache }
@@ -479,7 +501,7 @@ func get(key: Key) -> Reader<CacheConfig, Value?>
 func get(key: Key) -> OptionReader<CacheConfig, Value>
 ```
 
-Note: this same
+Note: We want to capture this so we flatMap once!
 
 !!!
 
@@ -695,6 +717,14 @@ Note: Lots of boilerplate, codegen necessary for use in Swift
 ### Swift DI Explorations
 
 [Swift DI Explorations](https://github.com/bkase/swift-di-explorations) has literate examples of Cake, Reader, and Free DI patterns
+
+!!!
+
+### Inspire
+
+(picture)
+
+Note: There is some elegance here. Maybe you can come up with a nice way to fit it in with Protocols!
 
 !!!
 
