@@ -1,3 +1,36 @@
+1. Problem slide: Addressed only 2 out of 3 points. Need to address compile time checking.
+2. Mock implicit deps -- you can't do it in Swift is a bad reason. You forgot to mock a nested dependency
+  * Accidentally transitively depend on stuff.
+  * Keeping mocks in sink with production code. Are mocks strict, to catch issues
+3. This is our current cache get and set, here's the curried version
+  * Use get and set on Cache in the example of currying
+4. Use long descriptive variables (everywhere)
+  * Play with the names of parameters
+5. Put comments or type annotations everywhere
+6. Not clear why we want option reader
+  * Hide the fact Value is option (let's show why this is better)
+7. You can just see flatMap
+
+8. `annotateWithServer` or something for `maybeReverse`
+9. Break up that loadReversedKeyIFSupported to more lines
+10. Put the footnote of the URLs
+11. Put the references at the end
+
+12. Excersize to the reader (look at coreader)
+
+13. Call out benefits of pure
+
+14. Add increment N slide
+
+15. FlatMap is a way to sequence two things. It's flatmap because this is what we call it.
+
+16. Break up do you need to understand monads to use reader. No
+
+17. Add really good summary slides (after inspire slide)
+
+
+
+
 Abstract:
 
 

@@ -1,7 +1,9 @@
 <!-- .slide: data-background="#2aa198" -->
 <!-- .slide: data-state="terminal" -->
 
-# Reader or Weep: Mock-free, Compile-time Checked, Dependency Injection with Reader
+# Reader or Weep
+
+## Mock-free, Compile-time Checked, Dependency Injection with Reader
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
@@ -26,27 +28,49 @@ func increment(key: Key) {
   Cache.sharedInstance.set(key: key, value: inc(value))
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
 ### Why does it suck?
 
-* Tight coupling to core modules
-* Requires mocking to test
+Singletons!
 
 !!!
 
-### Why is it bad to be coupled?
+### Hmm singletons
 
-* Can't reason about code in small pieces
-* Modularity is good for software (motivate this more)
+* A single instance that has mutable state or does side-effects
+* Accessed from anywhere via a static property
 
 !!!
 
-### Why is it bad to mock?
+### Global Variables
 
-* You could easily forget a nested dependency (accidentally hit network in unit tests)
-* Note: It's so bad, that Swift doesn't even allow it (really)
+Mutable state that can be accessed from anywhere
+
+Note: These are bad. You learn this early.
+
+!!!
+
+### Singletons are globals!
+
+(picture)
+
+!!!
+
+### But Singletons are different?
+
+No
+
+!!!
+
+### The problems:
+
+* Tight _implicit_ coupling to core modules
+* Requires reflection-esque mocking to test
+
+Note: Can't reason about code in small pieces, modularity good for software; You could easily forget a nested dependency and accidentally hit the network in unit tests
 
 !!!
 
@@ -55,14 +79,6 @@ func increment(key: Key) {
 (picture)
 
 Note: Instead of implicitly depending on our modules...
-
-!!!
-
-### What is this talk?
-
-I'm not pitching one particular library, I'm trying to teach you a different way to think about dependencies to hopefully inspire you to create patterns that work for your Swift app/program
-
-What I want to do is show you that the state of the world is bad. We can do better.
 
 !!!
 
@@ -95,11 +111,23 @@ Note: This is called dependency injection (if you do it this way, you're already
 
 ```swift
 let graph = Node()
+```
+
+```swift
 graph.register(Foo.self, { _ in Foo() })
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
 graph.register(Bar.self, { graph in Bar(foo: graph[Foo.self])})
 // ...
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
 let bar = graph[Bar.self]!
 ```
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 Note: This is definitely a step up, but see the problem?
 
@@ -111,13 +139,38 @@ Note: This is definitely a step up, but see the problem?
 let bar = graph[Bar.self]!
 ```
 
-Note: You can forget to register a type in your dependency graph and you won't know until runtime!
+Note: You can forget to register a type in your dependency graph and you won't know until runtime! This is not typesafe.
+
+!!!
+
+### What is this talk?
+
+(picture)
+
+Note: I'm not pitching one particular library, I'm trying to teach you a different way to think about dependencies to hopefully inspire you to create patterns that work for your Swift app/program. What I want to do is show you that the state of the world is bad. We can do better.
 
 !!!
 
 ### The solution
 
 Types!
+
+!!!
+
+### Typesafe, just unwieldly
+
+```swift
+// let's say disk and network are protocols
+class Cache {
+  let disk: Disk
+  let network: Network
+
+  init(disk: Disk, network: Network) {
+    self.disk = disk
+    self.network = network
+  }
+}
+```
 
 !!!
 
@@ -128,10 +181,15 @@ class Cache {
   // ...
   init(data: Data, network: Network)
   // ...
+```
+
+```swift
   get //...
   set //...
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
 
 !!!
 
@@ -140,7 +198,7 @@ class Cache {
 ```swift
 // this is what the cache does
 func get(data: Data, network: Network, key: Key) -> Value
-func set(data: Data, network: Network, key: Key, value: Value) -> Void
+func set(data: Data, network: Network, key: Key, value: Value)
 ```
 
 !!!
@@ -153,7 +211,7 @@ struct CacheConfig {
   let network: Network
 }
 func get(config: CacheConfig, key: Key) -> Value
-func set(config: CacheConfig, key: Key, value: Value) -> ()
+func set(config: CacheConfig, key: Key, value: Value)
 ```
 
 !!!
@@ -162,7 +220,7 @@ func set(config: CacheConfig, key: Key, value: Value) -> ()
 
 ```swift
 func get(key: Key, config: CacheConfig) -> Value
-func set(key: Key, value: Value, config: CacheConfig) -> ()
+func set(key: Key, value: Value, config: CacheConfig)
 ```
 
 !!!
@@ -173,46 +231,39 @@ func set(key: Key, value: Value, config: CacheConfig) -> ()
 
 !!!
 
-### What is currying?
+### Walkthrough of curried get
 
 ```swift
-func uncurriedFoo(a: Int, b: String) -> Int
-let x = uncurriedFoo(4, "a")
+// uncurried
+func get(key: Key, config: CacheConfig) -> Value
+let value = get(key: k, config: config)
 ```
 
 ```swift
-func curriedFoo(a: Int) -> (String) -> Int
+// curried
+func get(key: Key) -> (CacheConfig) -> Value
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-let x = curriedFoo(4)("a")
+let value = get(key: k)(config)
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-let partial = curriedFoo(4)
+let partialGet = get(key: k)
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
 ```swift
-let y = partial("b")
-let z = partial("c")
+let value1 = partialGet(config1)
+let value2 = partialGet(config2)
 ```
 <!-- .element: class="fragment" data-fragment-index="4" -->
 
 !!!
 
-### Take another look at our operations
-
-```swift
-func get(key: Key, config: CacheConfig) -> Value
-func set(key: Key, value: Value, config: CacheConfig) -> ()
-```
-
-!!!
-
-### We can curry them
+### Curried operations
 
 ```swift
 func get(key: Key) -> (CacheConfig) -> Value
@@ -237,8 +288,8 @@ func set(key: Key, value: Value) -> (CacheConfig) -> ()
 ### Capture the second part in a type
 
 ```swift
-struct Reader<In, Data> {
-    let run: (In) -> Data
+struct Reader<Deps, Data> {
+    let run: (Deps) -> Data
 }
 ```
 
@@ -279,7 +330,9 @@ func increment(key: Key) -> Reader<CacheConfig, ()>
 ### We need to combine two readers in sequence
 
 ```swift
-// get and then set
+// first get some value
+// increment the value
+// set the value back in the cache
 ```
 
 !!!
@@ -287,36 +340,37 @@ func increment(key: Key) -> Reader<CacheConfig, ()>
 ### Reader flatMap
 
 ```swift
-func flatMap<B>(
+// struct Reader<Deps, Data>
+func flatMap<NewData>(
 ```
 
 ```swift
-  _ f: @escaping (Data) -> Reader<In, B>
+  _ f: @escaping (Data) -> Reader<Deps, NewData>
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-) -> Reader<In, B> {
+) -> Reader<Deps, NewData> {
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-  return Reader<In, B> { i in
+  return Reader<Deps, NewData> { (deps: Deps) -> NewData in
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
 ```swift
-    let data = self.run(i)
+    let data: Data = self.run(deps)
 ```
 <!-- .element: class="fragment" data-fragment-index="4" -->
 
 ```swift
-    let newReader = f(data)
+    let newReader: Reader<Deps, NewData> = f(data)
 ```
 <!-- .element: class="fragment" data-fragment-index="5" -->
 
 ```swift
-    return newReader.run(i)
+    return newReader.run(deps)
   }
 }
 ```
@@ -332,7 +386,8 @@ func increment(key: Key) -> Reader<CacheConfig, ()> {
 
 ```swift
   return get(key: Key).flatMap{ value in
-    set(key: Key, value: inc(value))
+    let newValue = inc(value)
+    set(key: Key, value: newValue)
   }
 }
 ```
@@ -350,17 +405,68 @@ func increment(key: Key) -> Reader<CacheConfig, ()> {
 
 ```swift
 func incrementTwice(key: Key) -> Reader<CacheConfig, ()> {
+```
+
+```swift
   return increment(key: key).flatMap{ () in
     increment(key: key)
   }
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
+### It's composable!
+
+```swift
+func increment(key: Key, by n: Int) -> Reader<CacheConfig, ()> {
+```
+
+```swift
+  if n == 0 {
+    return Reader.pure( () )
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+  return increment(key: key).flatMap{ () in
+    increment(key: key, by: n-1)
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
+### Combine pure computations
+
+```swift
+// struct Reader<Deps, Data>
+extension Reader {
+```
+
+```swift
+  static func pure(a: Data) -> Reader<Deps, Data> {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    return Reader<Deps, Data> { _ in a }
+
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: If we truly depend on nothing, we can pretend to depend on something
 
 !!!
 
 ### Two different dependencies?
 
-(image of a circle and a triangle arrows)
+![two reader two deps](img/two-readers-two-deps.png)
 
 !!!
 
@@ -382,13 +488,13 @@ func incTodaysKey() -> Reader<?, ()> {
 
 ### Consider the union of the two
 
-(diagram of both)
+![one reader two deps](img/one-reader-two-deps.png)
 
 !!!
 
 ### Lift each one to the global context
 
-(diagram of lifting the little ones into the big)
+![project deps](img/project-deps.png)
 
 !!!
 
@@ -413,28 +519,30 @@ func incTodaysKey() -> Reader<?, ()> {
       }
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
 ### Local in Reader
 
 ```swift
-// struct Reader<In, Data>
+// struct Reader<Deps, Data>
 extension Reader {
 ```
 
 ```swift
-  func local<Global>(_ f: (Global) -> In) -> Reader<Global, Data> {
+  func local<Global>(_ f: (Global) -> Deps) -> Reader<Global, Data> {
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-    return Reader<Global, Data> { global in
+    return Reader<Global, Data> { (global: Global) -> Data in
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-      self.run(f(global))
+      let localDeps: Deps = f(global)
+      return self.run(localDeps)
     }
   }
 }
@@ -443,50 +551,11 @@ extension Reader {
 
 !!!
 
-### Combine pure computations
-
-```swift
-func reverseKeyGet() -> Reader<CacheConfig, ()> {
-  return Reader.pure(reverse(key))
-```
-
-```swift
-    .flatMap{ get(key: $0) }
-}
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-!!!
-
-### Combine pure computations
-
-```swift
-// struct Reader<In, Data>
-extension Reader {
-```
-
-```swift
-  static func pure(a: Data) -> Reader<In, Data> {
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-    return Reader<In, Data> { _ in a }
-
-  }
-}
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-Note: Just like we ignore the extra state with `local`, we can ignore all state with `pure`
-
-!!!
-
 ### More effects
 
 (picture)
 
-Note: Our cache maybe will fail to give us a value for example
+Note: We can view depending on something as an effect. We may want more effects: our cache maybe will fail to give us a value for example
 
 !!!
 
@@ -497,54 +566,120 @@ func get(key: Key) -> Reader<CacheConfig, Value?>
 ```
 
 ```swift
-// we want
+// capture the failure
 func get(key: Key) -> OptionReader<CacheConfig, Value>
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
-Note: We want to capture this so we flatMap once!
+Note: We want to capture this so we flatMap once! The benefits of this will become clear on the next few slides
 
 !!!
 
-### ReaderOption
+### OptionReader
 
 ```swift
-struct OptionReader<In, A> {
-  let reader: Reader<In, A?>
-  init(_ reader: Reader<In, A?>) { self.reader = reader }
+struct OptionReader<Deps, Data> {
+  let reader: Reader<Deps, Data?>
+  init(_ reader: Reader<Deps, Data?>) { self.reader = reader }
 }
 ```
 
 ```swift
 extension OptionReader {
-  static func pure(a: A) -> OptionReader<In, A> {
+  static func pure(data: Data) -> OptionReader<Deps, Data> {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    let someData: Data? = .some(data)
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
     return OptionReader(
-      Reader<In, A?>.pure(.some(a))
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
+      Reader<Deps, Data?>.pure( someData )
     )
   }
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="4" -->
+
+!!!
+
+### OptionReader map
 
 ```swift
 extension OptionReader {
-  func map<B>(_ f: (A) -> B) -> OptionReader<In, B> {
-    return OptionReader<In, B>(
-      reader.map{ $0.map(f) }
-    )
-  }
-}
+  func map<NewData>(_ f: (Data) -> NewData) -> OptionReader<Deps, Data> {
 ```
 
 ```swift
-extension OptionReader {
-  func flatMap<B>(_ f: (A) -> OptionReader<In, B>) -> OptionReader<In, B> {
-    return OptionReader<In, B>(
-      Reader<In, B?> { input in
-        self.reader.run(input).flatMap{ f($0).reader.run(input) }
+    return OptionReader<Deps, NewData>(
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+      reader.map{ (maybeData: Data?) -> NewData? in
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+        maybeData.map(f)
       }
     )
   }
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+!!!
+
+### OptionReader flatMap
+
+```swift
+  func flatMap<NewData>(
+    _ f: (Data) -> OptionReader<Deps, NewData>
+  ) -> OptionReader<Deps, NewData> {
+```
+
+```swift
+    return OptionReader<Deps, NewData>(
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+      Reader<Deps, NewData?> { (deps: Deps) -> NewData? in
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+        let maybeData: Data? = self.reader.run(input)
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
+        return maybeData.flatMap{ (data: Data) -> NewData?
+```
+<!-- .element: class="fragment" data-fragment-index="4" -->
+
+```swift
+          let newOptionReader: OptionReader<Deps, NewData> = f(data)
+```
+<!-- .element: class="fragment" data-fragment-index="5" -->
+
+```swift
+          return newOptionReader.reader.run(input)
+        }
+      }
+    )
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="6" -->
 
 !!!
 
@@ -556,18 +691,35 @@ func get(key: Key) -> OptionReader<CacheConfig, Value>
 // needs dep
 func cacheInfo() -> Reader<CacheConfig, Info>
 // can fail
-func maybeReverse(key: Key) -> Key?
+func withMetadata(key: Key) -> Key?
 ```
 
 ```swift
-typealias O<Value> = OptionReader<CacheConfig, Value>
 
-func loadReversedKeyIfSupported(key: Key) -> O<Value> {
+typealias O<Value> = OptionReader<CacheConfig, Value>
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+func loadWithMetadata(key: Key) -> O<Value> {
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
   O(cacheInfo().map{.some($0)}).flatMap{ info in
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
     O(Reader.pure(info.reversable ? maybeReverse(key: key) : nil))
+```
+<!-- .element: class="fragment" data-fragment-index="4" -->
+
+```swift
   }.flatMap(get)
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="5" -->
 
 Note: So noisy!
 
@@ -577,15 +729,26 @@ Note: So noisy!
 
 ```swift
 extension OptionReader {
-  static func lift(opt: A?) -> OptionReader {
+  static func lift(opt: Data?) -> OptionReader {
+```
+
+```swift
     return OptionReader(Reader.pure(opt))
   }
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
-  static func lift(reader: Reader<In, A>) -> OptionReader {
+```swift
+  static func lift(reader: Reader<Deps, Data>) -> OptionReader {
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
     return OptionReader(reader.map{.some($0)})
   }
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
@@ -594,26 +757,40 @@ extension OptionReader {
 ```swift
 typealias O<Value> = OptionReader<CacheConfig, Value>
 
-func loadReversedKeyIfSupported(key: Key) -> O<Value> {
+func loadWithMetadata(key: Key) -> O<Value> {
+```
+
+```swift
   O.liftReader(cacheInfo()).flatMap { info in
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
     O.liftOpt(info.reversable ? maybeReverse(key: key) : nil)
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
   }.flatMap(get)
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
 ### Effects stack
 
-(picture)
+(picture of Reader, Option, Future)
 
 Note: This works for any monad (Future, option, reader, nondeterminism, etc). Unfortunately, in Swift you do have to do this work for your bespoke effect stack in your program, we can't abstract it in a library (unless we codegen)
 
 !!!
 
-### Aside: Effect stack with codegen
+### Real life
 
-Check out [Monads](https://github.com/facile-it/Monads) by Elviro Rocca (@_logicist)
+(picture)
+
+Note: I used this for a script that needed to make 10 api requests to different services. It worked out really nice because everything just fit together.
 
 !!!
 
@@ -628,24 +805,6 @@ Note: I encourage everyone to try and learn as much as they can, so I don't like
 ### Real name: Reader Monad
 
 (by the way this thing I've been talking about the whole time is formally called a Reader Monad)
-
-!!!
-
-### Config me how?
-
-(picture)
-
-(maybe)
-
-Note: This is all great in theory, but how do I get all my dependencies in that neat package from my view controllers
-
-!!!
-
-### Co-readers!
-
-If you're interested, check out the [Corridor](https://github.com/symentis/Corridor) framework by Elmar Kretzer @elmkretzer
-
-Note: I don't have time to talk about it here
 
 !!!
 
@@ -722,9 +881,17 @@ Note: Lots of boilerplate, codegen necessary for use in Swift
 
 ### Inspire
 
-(picture)
+1. We write code wrong (Singletons)
+2. <!-- .element: class="fragment" data-fragment-index="1" --> Singletons are global variables<!-- .element: class="fragment" data-fragment-index="1" -->
+3. <!-- .element: class="fragment" data-fragment-index="2" --> Dependency Injection is good (in theory)<!-- .element: class="fragment" data-fragment-index="2" -->
+4. <!-- .element: class="fragment" data-fragment-index="3" --> Most DI libraries aren't typesafe<!-- .element: class="fragment" data-fragment-index="3" -->
+5. <!-- .element: class="fragment" data-fragment-index="4" --> New ideas!<!-- .element: class="fragment" data-fragment-index="4" -->
+6. <!-- .element: class="fragment" data-fragment-index="5" --> Reader provides typesafe DI<!-- .element: class="fragment" data-fragment-index="5" -->
+7. <!-- .element: class="fragment" data-fragment-index="6" --> Reader combines with other effects<!-- .element: class="fragment" data-fragment-index="6" -->
+8. <!-- .element: class="fragment" data-fragment-index="7" --> You can check out Cake and Free for more ideas<!-- .element: class="fragment" data-fragment-index="7" -->
+9. <!-- .element: class="fragment" data-fragment-index="8" --> Be inspired<!-- .element: class="fragment" data-fragment-index="8" -->
 
-Note: There is some elegance here. Maybe you can come up with a nice way to fit it in with Protocols!
+Note: There is some elegance in the math here. Maybe you can come up with a nice way to fit it in with Protocols!
 
 !!!
 
