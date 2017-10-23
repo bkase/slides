@@ -30,6 +30,17 @@
 
 
 
+1. Ignore some of the implementation detail
+2. Probably just show flatmap
+3. Do cake pattern
+4. Consider a better example (inc)
+5. 
+
+
+1. Singletons aren't gotten rid of it's the MANNER in which they are injected that we make explicit
+2. A single struct containing every dependency doesn't scale because you can't have separate compilation units. Reader is nice because any arbitrary sub-unit of computation can have all it's deps mocked and it's typesafe!!!
+
+
 
 Abstract:
 

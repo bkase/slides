@@ -59,16 +59,10 @@ Note: These are bad. You learn this early.
 
 !!!
 
-### But Singletons are different?
-
-No
-
-!!!
-
 ### The problems:
 
 * Tight _implicit_ coupling to core modules
-* Requires reflection-esque mocking to test
+* <!-- .element: class="fragment" data-fragment-index="1" --> Requires reflection-esque mocking to test (very hard in swift) <!-- .element: class="fragment" data-fragment-index="1" -->
 
 Note: Can't reason about code in small pieces, modularity good for software; You could easily forget a nested dependency and accidentally hit the network in unit tests
 
@@ -119,7 +113,7 @@ graph.register(Foo.self, { _ in Foo() })
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-graph.register(Bar.self, { graph in Bar(foo: graph[Foo.self])})
+graph.register(Bar.self, { graph in Bar(foo: graph[Foo.self]!)})
 // ...
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
@@ -190,10 +184,11 @@ class Cache {
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
+Note: Key-value cache/store
 
 !!!
 
-### This is morally the same as a collection of functions
+### Isomorphic to a collection of functions
 
 ```swift
 // this is what the cache does
@@ -385,9 +380,9 @@ func increment(key: Key) -> Reader<CacheConfig, ()> {
 ```
 
 ```swift
-  return get(key: Key).flatMap{ value in
+  return get(key: key).flatMap{ value in
     let newValue = inc(value)
-    set(key: Key, value: newValue)
+    return set(key: key, value: newValue)
   }
 }
 ```
@@ -508,7 +503,7 @@ struct TimeAndCache {
 ```
 
 ```swift
-func incTodaysKey() -> Reader<?, ()> {
+func incTodaysKey() -> Reader<TimeAndCache, ()> {
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -531,7 +526,8 @@ extension Reader {
 ```
 
 ```swift
-  func local<Global>(_ f: (Global) -> Deps) -> Reader<Global, Data> {
+  func local<Global>(
+    _ f: (Global) -> Deps) -> Reader<Global, Data> {
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -542,12 +538,20 @@ extension Reader {
 
 ```swift
       let localDeps: Deps = f(global)
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
       return self.run(localDeps)
     }
   }
 }
 ```
-<!-- .element: class="fragment" data-fragment-index="3" -->
+<!-- .element: class="fragment" data-fragment-index="4" -->
+
+!!!
+
+(add a slide about pureity)
 
 !!!
 
@@ -564,6 +568,23 @@ Note: We can view depending on something as an effect. We may want more effects:
 ```swift
 func get(key: Key) -> Reader<CacheConfig, Value?>
 ```
+
+!!!
+
+### How do we combine these?
+
+```swift
+// can fail and needs dep
+func get(key: Key) -> Reader<CacheConfig, Value?>
+// needs dep
+func cacheInfo() -> Reader<CacheConfig, Info>
+// can fail
+func withMetadata(key: Key) -> Key?
+```
+
+!!!
+
+### Capture all effects at once
 
 ```swift
 // capture the failure
@@ -610,76 +631,24 @@ extension OptionReader {
 
 !!!
 
-### OptionReader map
+### OptionReader map/flatMap
 
 ```swift
 extension OptionReader {
-  func map<NewData>(_ f: (Data) -> NewData) -> OptionReader<Deps, Data> {
-```
-
-```swift
-    return OptionReader<Deps, NewData>(
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-      reader.map{ (maybeData: Data?) -> NewData? in
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```swift
-        maybeData.map(f)
-      }
-    )
+  func map<NewData>(
+      _ f: (Data) -> NewData) -> OptionReader<Deps, Data> {
+    /* ... */
   }
-}
 ```
-<!-- .element: class="fragment" data-fragment-index="3" -->
-
-!!!
-
-### OptionReader flatMap
 
 ```swift
   func flatMap<NewData>(
     _ f: (Data) -> OptionReader<Deps, NewData>
   ) -> OptionReader<Deps, NewData> {
-```
-
-```swift
-    return OptionReader<Deps, NewData>(
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-      Reader<Deps, NewData?> { (deps: Deps) -> NewData? in
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```swift
-        let maybeData: Data? = self.reader.run(input)
-```
-<!-- .element: class="fragment" data-fragment-index="3" -->
-
-```swift
-        return maybeData.flatMap{ (data: Data) -> NewData?
-```
-<!-- .element: class="fragment" data-fragment-index="4" -->
-
-```swift
-          let newOptionReader: OptionReader<Deps, NewData> = f(data)
-```
-<!-- .element: class="fragment" data-fragment-index="5" -->
-
-```swift
-          return newOptionReader.reader.run(input)
-        }
-      }
-    )
+    /* ... */
   }
 }
 ```
-<!-- .element: class="fragment" data-fragment-index="6" -->
 
 !!!
 
@@ -711,7 +680,7 @@ func loadWithMetadata(key: Key) -> O<Value> {
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
 ```swift
-    O(Reader.pure(info.reversable ? maybeReverse(key: key) : nil))
+    O(Reader.pure(info.canHoldMeta ? withMetadata(key: key) : nil))
 ```
 <!-- .element: class="fragment" data-fragment-index="4" -->
 
@@ -761,12 +730,12 @@ func loadWithMetadata(key: Key) -> O<Value> {
 ```
 
 ```swift
-  O.liftReader(cacheInfo()).flatMap { info in
+  O.lift(reader: cacheInfo()).flatMap { info in
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-    O.liftOpt(info.reversable ? maybeReverse(key: key) : nil)
+    O.lift(opt: info.reversable ? maybeReverse(key: key) : nil)
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
@@ -788,9 +757,31 @@ Note: This works for any monad (Future, option, reader, nondeterminism, etc). Un
 
 ### Real life
 
+```swift
+// the boilerplate
+func foo() -> OptionReader<Config, String> {
+  return OptionReader(
+    Reader { config in makeFoo(config: config) }
+  )
+}
+```
+
+```swift
+private func makeFoo(config: Config) -> String? {
+  // your actual logic
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: Swift's type inference isn't great, and the compiler falls over with errors large closures, so this is a nice model that makes the type checker happy. I used this for a script that needed to make 10 api requests to different services. It worked out really nice because everything just fit together.
+
+!!!
+
+### Real name: Reader Monad
+
 (picture)
 
-Note: I used this for a script that needed to make 10 api requests to different services. It worked out really nice because everything just fit together.
+Note: bum bum buh
 
 !!!
 
@@ -798,13 +789,7 @@ Note: I used this for a script that needed to make 10 api requests to different 
 
 Do you need to "understand monads" to use Reader? No.
 
-Note: I encourage everyone to try and learn as much as they can, so I don't like the excuse of "monads are confusing, I won't talk about them", but even here you can use Reader without know monads
-
-!!!
-
-### Real name: Reader Monad
-
-(by the way this thing I've been talking about the whole time is formally called a Reader Monad)
+Note: I encourage everyone to try and learn as much as they can, so I don't like the excuse of "monads are confusing, I won't talk about them", but even here you can use Reader without know monads. The effects that stack in the way I showed above are all monads
 
 !!!
 
@@ -875,7 +860,9 @@ Note: Lots of boilerplate, codegen necessary for use in Swift
 
 ### Swift DI Explorations
 
-[Swift DI Explorations](https://github.com/bkase/swift-di-explorations) has literate examples of Cake, Reader, and Free DI patterns
+![screenshot of literate code](img/screenshot-di.png)
+
+> [Swift DI Explorations - https://github.com/bkase/swift-di-explorations ](https://github.com/bkase/swift-di-explorations) Cake, Reader (+ OptionReader), and Free DI patterns
 
 !!!
 
@@ -887,7 +874,7 @@ Note: Lots of boilerplate, codegen necessary for use in Swift
 4. <!-- .element: class="fragment" data-fragment-index="3" --> Most DI libraries aren't typesafe<!-- .element: class="fragment" data-fragment-index="3" -->
 5. <!-- .element: class="fragment" data-fragment-index="4" --> New ideas!<!-- .element: class="fragment" data-fragment-index="4" -->
 6. <!-- .element: class="fragment" data-fragment-index="5" --> Reader provides typesafe DI<!-- .element: class="fragment" data-fragment-index="5" -->
-7. <!-- .element: class="fragment" data-fragment-index="6" --> Reader combines with other effects<!-- .element: class="fragment" data-fragment-index="6" -->
+7. <!-- .element: class="fragment" data-fragment-index="6" --> Reader combines with other effects (any monads)<!-- .element: class="fragment" data-fragment-index="6" -->
 8. <!-- .element: class="fragment" data-fragment-index="7" --> You can check out Cake and Free for more ideas<!-- .element: class="fragment" data-fragment-index="7" -->
 9. <!-- .element: class="fragment" data-fragment-index="8" --> Be inspired<!-- .element: class="fragment" data-fragment-index="8" -->
 
