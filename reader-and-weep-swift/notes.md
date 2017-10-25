@@ -40,6 +40,20 @@
 1. Singletons aren't gotten rid of it's the MANNER in which they are injected that we make explicit
 2. A single struct containing every dependency doesn't scale because you can't have separate compilation units. Reader is nice because any arbitrary sub-unit of computation can have all it's deps mocked and it's typesafe!!!
 
+1. Nit: Make the route different from the variable
+2. Change sucks to bad
+3. Remove hmm maybe
+4. Mention dependency injection definition before the code example (right before)
+5. Remove the graph.register bodies (...)ify the params
+6. Change "What is this Talk" slide title
+7. Show the implementations of `get` function for currying
+8. Change "CAPTURE THE SECOND PART IN A TYPE"
+9. Overflows on "Capture second part in type slide"
+10. Flatmap slide. The code looks complex, but really it's just saying run the first, and then run a second one
+11. inc should be a computed property
+12. Don't use $0 use key on calendar slide
+13. Lift each into global code, line by line
+
 
 
 Abstract:

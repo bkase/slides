@@ -9,13 +9,13 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 
 !!!
 
-### This Code Sucks
+### This Code is Bad
 
 ```swift
 class Cache {
   func get(key: Key) -> Value {
     return Data.readFile(key.name) ??
-      Network.sharedInstance.get("/key", key) ??
+      Network.sharedInstance.get("/api/find", key) ??
       Value.default
   }
   func set(key: Key, value: Value) { /*...*/ }
@@ -25,20 +25,20 @@ class Cache {
 ```swift
 func increment(key: Key) {
   let value = Cache.sharedInstance.get(key: key)
-  Cache.sharedInstance.set(key: key, value: inc(value))
+  Cache.sharedInstance.set(key: key, value: value.inc)
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
-### Why does it suck?
+### Why is it bad?
 
 Singletons!
 
 !!!
 
-### Hmm singletons
+### singletons?
 
 * A single instance that has mutable state or does side-effects
 * Accessed from anywhere via a static property
@@ -55,7 +55,17 @@ Note: These are bad. You learn this early.
 
 ### Singletons are globals!
 
-(picture)
+![Novel reader](img/novel-reader2.jpg)
+
+> https://upload.wikimedia.org/wikipedia/commons/7/73/The_Novel_Reader.jpg
+
+!!!
+
+### Unprincipled usage of state
+
+![books stack](img/book-stack2.jpg)
+
+> http://dl.maxpixel.freegreatpicture.com/?f=books-1082949_1280.jpg&type=Download&token=0089c38f1e35d52df822cbbcd97116fc&pid=1082949
 
 !!!
 
@@ -70,9 +80,21 @@ Note: Can't reason about code in small pieces, modularity good for software; You
 
 ### Let's fix it
 
-(picture)
+![hammer](img/hammer2.jpg)
+
+> https://pixabay.com/p-1707705/?no_redirect
 
 Note: Instead of implicitly depending on our modules...
+
+!!!
+
+### Dependency Injection
+
+![inject](img/inject.jpg)
+
+> https://c2.staticflickr.com/8/7005/6636556953_08a05f7fe2_b.jpg
+
+Note: Passing a dependency explicitly. View our dependencies
 
 !!!
 
@@ -97,7 +119,15 @@ Note: This is called dependency injection (if you do it this way, you're already
 
 ### Unfortunately, this gets unwieldy fast
 
-(screenshot of nested dependencies)
+```swift
+let cache = Cache(disk: disk, network: network)
+
+let module1 = Module1(cache: cache, /*...*/)
+// ...
+let module2 = Module2(cache: cache, /*...*/)
+```
+
+Note: And this doesn't scale to separate compilation units
 
 !!!
 
@@ -108,18 +138,18 @@ let graph = Node()
 ```
 
 ```swift
-graph.register(Foo.self, { _ in Foo() })
+graph.register(/* ... */)
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-graph.register(Bar.self, { graph in Bar(foo: graph[Foo.self]!)})
+graph.register(/* ... */)
 // ...
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-let bar = graph[Bar.self]!
+let foo = graph[Foo.self]!
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
@@ -130,16 +160,18 @@ Note: This is definitely a step up, but see the problem?
 ### The problem
 
 ```swift
-let bar = graph[Bar.self]!
+let foo = graph[Foo.self]!
 ```
 
 Note: You can forget to register a type in your dependency graph and you won't know until runtime! This is not typesafe.
 
 !!!
 
-### What is this talk?
+### Change how we think
 
-(picture)
+![Lean book think](img/lean-book-think2.jpg)
+
+> https://c1.staticflickr.com/1/740/31689460193_18d613a3d8_b.jpg
 
 Note: I'm not pitching one particular library, I'm trying to teach you a different way to think about dependencies to hopefully inspire you to create patterns that work for your Swift app/program. What I want to do is show you that the state of the world is bad. We can do better.
 
@@ -222,7 +254,9 @@ func set(key: Key, value: Value, config: CacheConfig)
 
 ### Curry the function
 
-(picture)
+![cook book](img/cook-book2.jpg)
+
+> http://maxpixel.freegreatpicture.com/Antiquariat-Antiquarian-Cookbook-Old-Cookbook-Book-1724472
 
 !!!
 
@@ -230,13 +264,17 @@ func set(key: Key, value: Value, config: CacheConfig)
 
 ```swift
 // uncurried
-func get(key: Key, config: CacheConfig) -> Value
+func get(key: Key, config: CacheConfig) -> Value {
+  return config.findKey(key)
+}
 let value = get(key: k, config: config)
 ```
 
 ```swift
 // curried
-func get(key: Key) -> (CacheConfig) -> Value
+func get(key: Key) -> (CacheConfig) -> Value {
+  return { config in config.findKey(key) }
+}
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -280,7 +318,7 @@ func set(key: Key, value: Value) -> (CacheConfig) -> ()
 
 !!!
 
-### Capture the second part in a type
+### Capture the function in a type
 
 ```swift
 struct Reader<Deps, Data> {
@@ -299,7 +337,9 @@ func set(key: Key, value: Value) -> Reader<CacheConfig, ()>
 
 ### Reader me a story
 
-(picture)
+![reader me a story](img/reader-me-a-story2.jpg)
+
+> https://upload.wikimedia.org/wikipedia/commons/6/64/Laura_Muntz_Lyall_-_Interesting_Story_-_Google_Art_Project.jpg
 
 !!!
 
@@ -371,6 +411,8 @@ func flatMap<NewData>(
 ```
 <!-- .element: class="fragment" data-fragment-index="6" -->
 
+Note: It's saying run the first, then run the second
+
 !!!
 
 ### Hooking up increment
@@ -381,7 +423,7 @@ func increment(key: Key) -> Reader<CacheConfig, ()> {
 
 ```swift
   return get(key: key).flatMap{ value in
-    let newValue = inc(value)
+    let newValue = value.inc
     return set(key: key, value: newValue)
   }
 }
@@ -392,7 +434,9 @@ func increment(key: Key) -> Reader<CacheConfig, ()> {
 
 ### Great it works!
 
-(picture)
+![great it works](img/great-it-works2.jpg)
+
+> https://static.pexels.com/photos/269474/pexels-photo-269474.jpeg
 
 !!!
 
@@ -461,7 +505,7 @@ Note: If we truly depend on nothing, we can pretend to depend on something
 
 ### Two different dependencies?
 
-![two reader two deps](img/two-readers-two-deps.png)
+![two reader two deps](img/two-readers-two-deps2.png)
 
 !!!
 
@@ -474,7 +518,7 @@ func increment(key: Key) -> Reader<CacheConfig, ()>
 
 ```swift
 func incTodaysKey() -> Reader<?, ()> {
-  return todaysKey().flatMap{ increment($0) }
+  return todaysKey().flatMap{ key in increment(key: key) }
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -483,13 +527,13 @@ func incTodaysKey() -> Reader<?, ()> {
 
 ### Consider the union of the two
 
-![one reader two deps](img/one-reader-two-deps.png)
+![one reader two deps](img/one-reader-two-deps2.png)
 
 !!!
 
 ### Lift each one to the global context
 
-![project deps](img/project-deps.png)
+![project deps](img/project-deps2.png)
 
 !!!
 
@@ -509,12 +553,20 @@ func incTodaysKey() -> Reader<TimeAndCache, ()> {
 
 ```swift
   return todaysKey().local{ both in both.time }
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
       .flatMap{ key in
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
         increment(key).local{ both in both.cache }
       }
 }
 ```
-<!-- .element: class="fragment" data-fragment-index="2" -->
+<!-- .element: class="fragment" data-fragment-index="4" -->
 
 !!!
 
@@ -551,13 +603,11 @@ extension Reader {
 
 !!!
 
-(add a slide about pureity)
-
-!!!
-
 ### More effects
 
-(picture)
+![Effects book](img/effects-book.jpg)
+
+> https://pixabay.com/p-1569032/?no_redirect
 
 Note: We can view depending on something as an effect. We may want more effects: our cache maybe will fail to give us a value for example
 
@@ -652,48 +702,6 @@ extension OptionReader {
 
 !!!
 
-### OptionReader
-
-```swift
-// can fail and needs dep
-func get(key: Key) -> OptionReader<CacheConfig, Value>
-// needs dep
-func cacheInfo() -> Reader<CacheConfig, Info>
-// can fail
-func withMetadata(key: Key) -> Key?
-```
-
-```swift
-
-typealias O<Value> = OptionReader<CacheConfig, Value>
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-func loadWithMetadata(key: Key) -> O<Value> {
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```swift
-  O(cacheInfo().map{.some($0)}).flatMap{ info in
-```
-<!-- .element: class="fragment" data-fragment-index="3" -->
-
-```swift
-    O(Reader.pure(info.canHoldMeta ? withMetadata(key: key) : nil))
-```
-<!-- .element: class="fragment" data-fragment-index="4" -->
-
-```swift
-  }.flatMap(get)
-}
-```
-<!-- .element: class="fragment" data-fragment-index="5" -->
-
-Note: So noisy!
-
-!!!
-
 ### OptionReader reduce noise
 
 ```swift
@@ -735,7 +743,7 @@ func loadWithMetadata(key: Key) -> O<Value> {
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-    O.lift(opt: info.reversable ? maybeReverse(key: key) : nil)
+    O.lift(opt: withMetadata(key: key))
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
@@ -749,7 +757,7 @@ func loadWithMetadata(key: Key) -> O<Value> {
 
 ### Effects stack
 
-(picture of Reader, Option, Future)
+![Effect stack](img/effect-stack2.png)
 
 Note: This works for any monad (Future, option, reader, nondeterminism, etc). Unfortunately, in Swift you do have to do this work for your bespoke effect stack in your program, we can't abstract it in a library (unless we codegen)
 
@@ -779,7 +787,9 @@ Note: Swift's type inference isn't great, and the compiler falls over with error
 
 ### Real name: Reader Monad
 
-(picture)
+![Greek book](img/greek-book2.jpg)
+
+> https://commons.wikimedia.org/wiki/File:Title_page_of_Herodotus%27_history_of_the_Greek_and_Persian_Wars_1502.jpg
 
 Note: bum bum buh
 
@@ -789,13 +799,15 @@ Note: bum bum buh
 
 Do you need to "understand monads" to use Reader? No.
 
-Note: I encourage everyone to try and learn as much as they can, so I don't like the excuse of "monads are confusing, I won't talk about them", but even here you can use Reader without know monads. The effects that stack in the way I showed above are all monads
+Note: I encourage everyone to try and learn as much as they can, but here you can use Reader without knowing monads. The effects that stack in the way I showed above are all monads
 
 !!!
 
 ### Other typesafe DI methods
 
-(picture)
+![timeless books](img/timeless-book2.jpg)
+
+> https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Timeless_Books.jpg/1024px-Timeless_Books.jpg
 
 Note: I have to mention these, for the interested to explore
 
