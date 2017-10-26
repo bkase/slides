@@ -562,7 +562,7 @@ func incTodaysKey() -> Reader<TimeAndCache, ()> {
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
 ```swift
-        increment(key).local{ both in both.cache }
+        increment(key: key).local{ both in both.cache }
       }
 }
 ```
