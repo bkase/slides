@@ -55,6 +55,17 @@
 13. Lift each into global code, line by line
 
 
+1. Reminder of the problem
+2. Spend more time on pure and side-effects
+3. Have mini version without syntactic sugar
+3. Functional programming
+4. Put some comments on the screen
+5. Constant cost that has exponential return
+6. Maybe kill the graph DI section
+Typealias for reader deps/newdata
+7. It's a one-liner, don't understand it
+8. Type parameters
+
 
 Abstract:
 

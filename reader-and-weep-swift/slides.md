@@ -14,7 +14,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 ```swift
 class Cache {
   func get(key: Key) -> Value {
-    return Data.readFile(key.name) ??
+    return Disk.sharedInstance.readFile(key.name) ??
       Network.sharedInstance.get("/api/find", key) ??
       Value.default
   }
@@ -34,11 +34,21 @@ func increment(key: Key) {
 
 ### Why is it bad?
 
-Singletons!
+It's _untestable_!
+
+Note: Code being hard to test as a consequence means hard to reuse and compose with other parts of your codebase
 
 !!!
 
-### singletons?
+### Unprincipled usage of dependencies
+
+![books stack](img/book-stack2.jpg)
+
+> http://dl.maxpixel.freegreatpicture.com/?f=books-1082949_1280.jpg&type=Download&token=0089c38f1e35d52df822cbbcd97116fc&pid=1082949
+
+!!!
+
+### Singletons?
 
 * A single instance that has mutable state or does side-effects
 * Accessed from anywhere via a static property
@@ -61,30 +71,13 @@ Note: These are bad. You learn this early.
 
 !!!
 
-### Unprincipled usage of state
-
-![books stack](img/book-stack2.jpg)
-
-> http://dl.maxpixel.freegreatpicture.com/?f=books-1082949_1280.jpg&type=Download&token=0089c38f1e35d52df822cbbcd97116fc&pid=1082949
-
-!!!
-
-### The problems:
-
-* Tight _implicit_ coupling to core modules
-* <!-- .element: class="fragment" data-fragment-index="1" --> Requires reflection-esque mocking to test (very hard in swift) <!-- .element: class="fragment" data-fragment-index="1" -->
-
-Note: Can't reason about code in small pieces, modularity good for software; You could easily forget a nested dependency and accidentally hit the network in unit tests
-
-!!!
-
 ### Let's fix it
 
 ![hammer](img/hammer2.jpg)
 
 > https://pixabay.com/p-1707705/?no_redirect
 
-Note: Instead of implicitly depending on our modules...
+Note: If the problem is that we're not thinking carefully about dependencies, think carefully about them
 
 !!!
 
@@ -94,7 +87,7 @@ Note: Instead of implicitly depending on our modules...
 
 > https://c2.staticflickr.com/8/7005/6636556953_08a05f7fe2_b.jpg
 
-Note: Passing a dependency explicitly. View our dependencies
+Note: Providing dependencies explicitly
 
 !!!
 
@@ -205,7 +198,7 @@ class Cache {
 ```swift
 class Cache {
   // ...
-  init(data: Data, network: Network)
+  init(disk: Disk, network: Network)
   // ...
 ```
 
@@ -224,8 +217,8 @@ Note: Key-value cache/store
 
 ```swift
 // this is what the cache does
-func get(data: Data, network: Network, key: Key) -> Value
-func set(data: Data, network: Network, key: Key, value: Value)
+func get(disk: Disk, network: Network, key: Key) -> Value
+func set(disk: Disk, network: Network, key: Key, value: Value)
 ```
 
 !!!
@@ -234,7 +227,7 @@ func set(data: Data, network: Network, key: Key, value: Value)
 
 ```swift
 struct CacheConfig {
-  let data: Data
+  let disk: Disk
   let network: Network
 }
 func get(config: CacheConfig, key: Key) -> Value
@@ -376,40 +369,32 @@ func increment(key: Key) -> Reader<CacheConfig, ()>
 
 ```swift
 // struct Reader<Deps, Data>
-func flatMap<NewData>(
+extension Reader {
 ```
 
 ```swift
-  _ f: @escaping (Data) -> Reader<Deps, NewData>
+  func flatMap<NewData>(
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-) -> Reader<Deps, NewData> {
+    _ f: @escaping (Data) -> Reader<Deps, NewData>
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-  return Reader<Deps, NewData> { (deps: Deps) -> NewData in
+  ) -> Reader<Deps, NewData> {
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
 ```swift
-    let data: Data = self.run(deps)
-```
-<!-- .element: class="fragment" data-fragment-index="4" -->
-
-```swift
-    let newReader: Reader<Deps, NewData> = f(data)
-```
-<!-- .element: class="fragment" data-fragment-index="5" -->
-
-```swift
-    return newReader.run(deps)
+    return Reader<Deps, NewData> { (deps: Deps) -> NewData in
+      f(self.run(deps)).run(deps)
+    }
   }
 }
 ```
-<!-- .element: class="fragment" data-fragment-index="6" -->
+<!-- .element: class="fragment" data-fragment-index="4" -->
 
 Note: It's saying run the first, then run the second
 
@@ -453,6 +438,16 @@ func incrementTwice(key: Key) -> Reader<CacheConfig, ()> {
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
+### Composability
+
+![so many books](img/so-many-books2.jpg)
+
+> https://pixabay.com/en/books-library-knowledge-tunnel-21849/
+
+Note: The composability means we are mindful of dependencies at EVERY level of sub-computation. It's readers all the way down. This isn't just a decent solution, it's an absolute one
 
 !!!
 
@@ -531,12 +526,6 @@ func incTodaysKey() -> Reader<?, ()> {
 
 !!!
 
-### Lift each one to the global context
-
-![project deps](img/project-deps2.png)
-
-!!!
-
 ### Lift each into the global
 
 ```swift
@@ -564,39 +553,6 @@ func incTodaysKey() -> Reader<TimeAndCache, ()> {
 ```swift
         increment(key: key).local{ both in both.cache }
       }
-}
-```
-<!-- .element: class="fragment" data-fragment-index="4" -->
-
-!!!
-
-### Local in Reader
-
-```swift
-// struct Reader<Deps, Data>
-extension Reader {
-```
-
-```swift
-  func local<Global>(
-    _ f: (Global) -> Deps) -> Reader<Global, Data> {
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-    return Reader<Global, Data> { (global: Global) -> Data in
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```swift
-      let localDeps: Deps = f(global)
-```
-<!-- .element: class="fragment" data-fragment-index="3" -->
-
-```swift
-      return self.run(localDeps)
-    }
-  }
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="4" -->
@@ -655,36 +611,18 @@ struct OptionReader<Deps, Data> {
 }
 ```
 
-```swift
-extension OptionReader {
-  static func pure(data: Data) -> OptionReader<Deps, Data> {
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-    let someData: Data? = .some(data)
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```swift
-    return OptionReader(
-```
-<!-- .element: class="fragment" data-fragment-index="3" -->
-
-```swift
-      Reader<Deps, Data?>.pure( someData )
-    )
-  }
-}
-```
-<!-- .element: class="fragment" data-fragment-index="4" -->
-
 !!!
 
 ### OptionReader map/flatMap
 
 ```swift
 extension OptionReader {
+  static func pure(data: Data) -> OptionReader<Deps, Data> {
+    /* ... */
+  }
+```
+
+```swift
   func map<NewData>(
       _ f: (Data) -> NewData) -> OptionReader<Deps, Data> {
     /* ... */
@@ -763,28 +701,6 @@ Note: This works for any monad (Future, option, reader, nondeterminism, etc). Un
 
 !!!
 
-### Real life
-
-```swift
-// the boilerplate
-func foo() -> OptionReader<Config, String> {
-  return OptionReader(
-    Reader { config in makeFoo(config: config) }
-  )
-}
-```
-
-```swift
-private func makeFoo(config: Config) -> String? {
-  // your actual logic
-}
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-Note: Swift's type inference isn't great, and the compiler falls over with errors large closures, so this is a nice model that makes the type checker happy. I used this for a script that needed to make 10 api requests to different services. It worked out really nice because everything just fit together.
-
-!!!
-
 ### Real name: Reader Monad
 
 ![Greek book](img/greek-book2.jpg)
@@ -799,7 +715,7 @@ Note: bum bum buh
 
 Do you need to "understand monads" to use Reader? No.
 
-Note: I encourage everyone to try and learn as much as they can, but here you can use Reader without knowing monads. The effects that stack in the way I showed above are all monads
+Note: Constant learning cost, to get a return later of maintainability. I encourage everyone to try and learn as much as they can, but here you can use Reader without knowing monads.
 
 !!!
 
@@ -820,23 +736,12 @@ protocol Cache: HasData, HasNetwork {
   func get(key: Key) -> Value
   func set(key: Key, value: Value)
 }
-```
-
-```swift
 extension Cache {
   // implementation for get and set
 }
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
 protocol HasCache {
   var cache: Cache
 }
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```swift
 protocol Program: HasCache, HasTime {
   func main()
 }
@@ -844,7 +749,6 @@ extension Program {
   func main() { /*...*/ }
 }
 ```
-<!-- .element: class="fragment" data-fragment-index="3" -->
 
 Note: Layers and layers of protocols
 
@@ -857,14 +761,11 @@ enum CacheCommands<Next> {
   case get(key: Key, next: (Value) -> Next)
   case set(key: Key, value: Value, next: () -> Next)
 }
-```
 
-```swift
 // and machinery to make the callbacks
 // turn into pures, maps, and flatmaps
 // a monad "for free"
 ```
-<!-- .element: class="fragment" data-fragment-index="1" -->
 
 Note: Lots of boilerplate, codegen necessary for use in Swift
 
@@ -901,4 +802,63 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.
 Slide Deck: [https://is.gd/mjJamZ](https://is.gd/mjJamZ)
 
 [DI Explorations](https://github.com/bkase/swift-di-explorations), [Corridor](https://github.com/symentis/Corridor), [Monads (effect stacks with codegen)](https://github.com/facile-it/Monads)
+
+!!!
+
+## Appendix
+
+!!!
+
+### Real life
+
+```swift
+// the boilerplate
+func foo() -> OptionReader<Config, String> {
+  return OptionReader(
+    Reader { config in makeFoo(config: config) }
+  )
+}
+```
+
+```swift
+private func makeFoo(config: Config) -> String? {
+  // your actual logic
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: Swift's type inference isn't great, and the compiler falls over with errors large closures, so this is a nice model that makes the type checker happy. I used this for a script that needed to make 10 api requests to different services. It worked out really nice because everything just fit together.
+
+!!!
+
+### Local in Reader
+
+```swift
+// struct Reader<Deps, Data>
+extension Reader {
+```
+
+```swift
+  func local<Global>(
+    _ f: (Global) -> Deps) -> Reader<Global, Data> {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    return Reader<Global, Data> { (global: Global) -> Data in
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+      let localDeps: Deps = f(global)
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
+      return self.run(localDeps)
+    }
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="4" -->
 
