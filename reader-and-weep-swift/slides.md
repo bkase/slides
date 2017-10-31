@@ -825,7 +825,7 @@ Note: There is some elegance in the math here. Maybe you can come up with a nice
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
-Slide Deck: [https://is.gd/mjJamZ](https://is.gd/mjJamZ)
+Slide Deck: [https://is.gd/VIOCb6](https://is.gd/VIOCb6)
 
 [DI Explorations](https://github.com/bkase/swift-di-explorations), [Corridor](https://github.com/symentis/Corridor), [Monads (effect stacks with codegen)](https://github.com/facile-it/Monads)
 
