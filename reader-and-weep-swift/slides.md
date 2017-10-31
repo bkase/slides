@@ -325,7 +325,6 @@ func set(key: Key, value: Value) -> Reader<CacheConfig, ()>
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
-
 !!!
 
 ### Reader me a story
@@ -333,6 +332,33 @@ func set(key: Key, value: Value) -> Reader<CacheConfig, ()>
 ![reader me a story](img/reader-me-a-story2.jpg)
 
 > https://upload.wikimedia.org/wikipedia/commons/6/64/Laura_Muntz_Lyall_-_Interesting_Story_-_Google_Art_Project.jpg
+
+!!!
+
+### Reader Map
+
+```swift
+// Data -> NewData
+// =>
+// Reader<Deps, Data> -> Reader<Deps, NewData>
+```
+
+```swift
+extension Reader {
+  func map<NewData>(
+    _ f: @escaping (Data) -> NewData
+  ) -> Reader<Deps, NewData> {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    return Reader<Deps, NewData> { (deps: Deps) -> NewData in
+      f(self.run(deps))
+    }
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
