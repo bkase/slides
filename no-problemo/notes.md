@@ -28,3 +28,25 @@ Don’t use calculator in abstract olny talk.  You see this problem in X use-cas
 - Conclusion: Expression Problem…
 
 
+
+Feedback:
+
+1. Add a new renderer (1) why would I care that I can't add a new renderer. Don't bring it up earlier. Build on an example
+2. Expression problem definition:
+  * What is a new interpretation for the items (at this point in the talk)
+  * Talk back to what we've covered. Hand-wave back to what we've established
+3. Side-effects
+  * Got lost getting into side-effects, hypothetical use-cases (remove this one)
+  * Move to a btw
+4. Drawing shapes (lean in to this and forget the arithmetic)
+  * Focus on the people's space and get them going at the end
+  * Add a gif of drawing shapes
+5. Try to express the power of the shapes
+  * Ask that in the Q&A
+6. Yeah it'd be great if we could design and implement our UI once, but get PDFs for free, etc... instead of the "Solve the Expression Problem"
+7. At the end say, btw this is called "Final Tagless DSLs/Interpreters"
+8. Cleanup the recap. Boom. boom. boom. Skip the examples in the recap. Just expression problem and final-tagless
+
+
+
+

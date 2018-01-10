@@ -46,21 +46,23 @@ class MyMapView: UIView {
 
 !!!
 
-### Add new renderer?
+### What about changing what a view means?
 
 (picture)
 
 !!!
 
-### Can't render UIKit views to AppKit, Website, Serialize to disk etc
+### We can't from outside UIKit
 
-!!!
+(picture of AppKit, Website, Serialization to disk)
 
-### What if we want to render to multiple places?
+Note: But what if we wanted to...
 
 !!!
 
 ### How about an Enum?
+
+(picture)
 
 !!!
 
@@ -92,7 +94,7 @@ Note: TableViews etc...
 
 ```swift
 extension View {
-  func renderSomething() {
+  func renderSomething() -> Something {
 ```
 
 ```swift
@@ -115,24 +117,33 @@ extension View {
 ```swift
 extension View {
   func renderUIView() -> UIView {
+```
+
+```swift
     switch self {
     case let .textField(hint):
       let tv = UITextField()
       /* ... */
       return tv
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
     case let .stack(axis, children):
       let sv = UIStackView()
       let subViews = children.map{ $0.renderSomething() }
+      subViews.forEach{ sv.addSubView($0) }
       /* ... */
       return sv
     }
   }
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
-### We can render to a NSView
+### We can render to NSViews
 
 ```swift
 extension View {
@@ -171,60 +182,18 @@ enum View {
 
 ### Expression Problem
 
-* Add new kinds of items
-* Add new interpretations for those items
-* From outside the scope of the initial definitions of items/interpretations
-* Keeping type-safety
+* <!-- .element: class="fragment" data-fragment-index="1" --> Add new kinds of items <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Add new interpretations for those items <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> From outside the scope of the initial definitions of items/interpretations <!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" --> Keeping type-safety <!-- .element: class="fragment" data-fragment-index="4" -->
 
-Note: If we cast things and forget about type safety it's not too hard. This is not a talk about a new view framework, this is a talk about solving the expression problem. So let's talk about more...
-
-!!!
-
-### More Expression Problem instances
+Note: MAKE SURE TO REFER BACK TO VIEWS. If we cast things and forget about type safety it's not too hard. This is not a talk about a new view framework, this is a talk about solving the expression problem. So let's talk about more...
 
 !!!
 
-### Arithmetic
-
-```
-// 1 + (2 - 3)
-```
-
-!!!
-
-### Arithmetic: New interpretations
+### Another Expression Problem Instance
 
 (picture)
-
-Note: We could want to render to an integer, or serialize to a string
-
-!!!
-
-### Arithmetic: New operations
-
-* Multiplication
-* Division
-
-!!!
-
-### Side-effects
-
-(picture)
-
-!!!
-
-### Side-effects: New interpreations
-
-* Execute for the effects
-* Log to the console
-* Show in a debug view
-
-!!!
-
-### Side-effects: New operations
-
-* Make a network request
-* Pick a random number
 
 !!!
 
@@ -236,18 +205,24 @@ Note: We could want to render to an integer, or serialize to a string
 
 ### Drawing Shapes: New Interpretations
 
-* CoreGraphics
-* CoreAnimation
-* Svg image
+* <!-- .element: class="fragment" data-fragment-index="1" --> CoreGraphics <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> CoreAnimation <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Svg image <!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
 ### Drawing Shapes: New Operations
 
-* Ellipse
-* Rectangle
-* Gradients
-* Layer many shapes
+* <!-- .element: class="fragment" data-fragment-index="1" --> Ellipse <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Rectangle <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Gradients <!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" --> Layer many shapes <!-- .element: class="fragment" data-fragment-index="4" -->
+
+!!!
+
+### Drawing Shapes
+
+(gif of drawing shapes app)
 
 !!!
 
@@ -260,19 +235,11 @@ Note: We could want to render to an integer, or serialize to a string
 
 !!!
 
-### Expression Problem Power
-
-(epitome of modularity picture)
-
-Note: This is the epitome of modularity. Libraries compatible with expression problem are encourage ecosystems of libraries that don't need to depend on each other
-
-!!!
-
-### Solve the expression problem?
+### Can we solve the Expression Problem?
 
 (picture of high-dimensional legos)
 
-Note: Super extensible, composable, modular library. You can swap out the renderer, add new cases, you don't need to fork anything. Healthy ecosystem of helper libraries around yours. Lego pieces. Legos in different dimensions.
+Note: Wouldn't it be great to take the same view once and render it in multiple extensible places
 
 !!!
 
@@ -346,10 +313,6 @@ Note: But what do I do in the default case, how do I adapt my new enum case to t
 It's always protocols isn't it
 
 Note: But not just "protocols" with hand-waving
-
-!!!
-
-### Final Tagless DSLs
 
 !!!
 
@@ -428,10 +391,22 @@ extension HTML : View {
 
 ```swift
 func renderUIKit(_ v: UIView) -> UIView { v }
+```
+
+```swift
 func renderWeb(_ v: HTML) -> HTML { v }
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
 func renderPdf(_ v: Pdf) -> Pdf { v }
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
 func serialize(_ v: NSData) -> NSData { v }
 ```
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
@@ -440,10 +415,21 @@ func serialize(_ v: NSData) -> NSData { v }
 ```swift
 // inside view-controller
 self.view = renderUIKit(complex2())
+```
 
+```swift
 // ...
 showPdf(renderPdf(complex2()))
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: But what is this approach called?
+
+!!!
+
+### Final Tagless Style
+
+Note: A protocol is a final tagless dsl, and instance is a final tagless interpreter.
 
 !!!
 
@@ -473,22 +459,23 @@ Note: We don't actually do any recursion
 
 ### Recap
 
-1. UIKit flaws
-2. EnumKit flaws
-3. Expression Problem
-  * Ultimate modularity
-4. Arithmetic, Side-Effects, Diagrams, and Forms
-5. Final Tagless DSL Approach:
-  * Items -- Protocols: Methods return Self
-  * Interpretations -- Protocol Instances
-  * Little indirection + recursively resolved for free
+1. <!-- .element: class="fragment" data-fragment-index="1" --> Expression Problem <!-- .element: class="fragment" data-fragment-index="1" -->
+  * <!-- .element: class="fragment" data-fragment-index="2" --> Add new items <!-- .element: class="fragment" data-fragment-index="2" -->
+  * <!-- .element: class="fragment" data-fragment-index="3" --> Add new interpretations <!-- .element: class="fragment" data-fragment-index="3" -->
+  * <!-- .element: class="fragment" data-fragment-index="4" --> Without modifying original code <!-- .element: class="fragment" data-fragment-index="4" -->
+  * <!-- .element: class="fragment" data-fragment-index="5" --> Maintaining typesafety <!-- .element: class="fragment" data-fragment-index="5" -->
+4. <!-- .element: class="fragment" data-fragment-index="6" --> Final Tagless Approach: <!-- .element: class="fragment" data-fragment-index="6" -->
+  * <!-- .element: class="fragment" data-fragment-index="7" --> Items -- Protocols: Methods return Self <!-- .element: class="fragment" data-fragment-index="7" -->
+  * <!-- .element: class="fragment" data-fragment-index="8" --> Interpretations -- Protocol Instances <!-- .element: class="fragment" data-fragment-index="8" -->
 
 !!!
 
 ### Resources:
 
-* Paper
-* Gists/repos
+* [Oleg's Tagless Final Lecture Notes](http://okmij.org/ftp/tagless-final/course/lecture.pdf)
+* [Chris's Side-effects](https://gist.github.com/chriseidhof/a542d0a074cbf8d418d25a8b8253ff33)
+* [Tagless Graphics]()
+* Forms?
 * Check out upcoming Swift Talk episodes!
 
 !!!
@@ -498,6 +485,4 @@ Note: We don't actually do any recursion
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
 Slide Deck: [https://is.gd/mjJamZ](https://is.gd/mjJamZ)
-
-[DI Explorations](https://github.com/bkase/swift-di-explorations), [Corridor](https://github.com/symentis/Corridor), [Monads (effect stacks with codegen)](https://github.com/facile-it/Monads)
 
