@@ -1,7 +1,7 @@
 <!-- .slide: data-background="#2aa198" -->
 <!-- .slide: data-state="terminal" -->
 
-# No Problemo: Finally, an Expression Problem solution
+# Finally Solving the Expression Problem
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
@@ -178,14 +178,13 @@ enum View {
 
 (picture)
 
+Note: If you think about it, this isn't specific to views...
+
 !!!
 
 ### Expression Problem
 
-* <!-- .element: class="fragment" data-fragment-index="1" --> Add new kinds of items <!-- .element: class="fragment" data-fragment-index="1" -->
-* <!-- .element: class="fragment" data-fragment-index="2" --> Add new interpretations for those items <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> From outside the scope of the initial definitions of items/interpretations <!-- .element: class="fragment" data-fragment-index="3" -->
-* <!-- .element: class="fragment" data-fragment-index="4" --> Keeping type-safety <!-- .element: class="fragment" data-fragment-index="4" -->
+(picture of a graph showing the orthoganilaty of adding items and interpretations)
 
 Note: MAKE SURE TO REFER BACK TO VIEWS. If we cast things and forget about type safety it's not too hard. This is not a talk about a new view framework, this is a talk about solving the expression problem. So let's talk about more...
 
@@ -222,16 +221,16 @@ Note: MAKE SURE TO REFER BACK TO VIEWS. If we cast things and forget about type 
 
 ### Drawing Shapes
 
-(gif of drawing shapes app)
+(gif of drawing shapes example)
 
 !!!
 
 ### Expression Problem
 
-* Add new kinds of items
-* Add new interpretations for those items
-* From outside the scope of the initial definitions of items/interpretations
-* Keeping type-safety
+* <!-- .element: class="fragment" data-fragment-index="1" --> Add new kinds of items <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Add new interpretations for those items <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> From outside the scope of the initial definitions of items/interpretations <!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" --> Keeping type-safety <!-- .element: class="fragment" data-fragment-index="4" -->
 
 !!!
 
@@ -255,13 +254,15 @@ Note: We can add new views, but we can't change what it menas to be a view
 
 (picture)
 
-Note: We can change what it menas to be a view, but we can't add new views
+Note: We can change what it means to be a view, but we can't add new views
 
 !!!
 
 ### Non-exhaustive Enums?
 
 (picture of https://github.com/apple/swift-evolution/blob/master/proposals/0192-non-exhaustive-enums.md)
+
+Note: For those that don't know, this proposal is about making enums open to adding new variants outside it's definition
 
 !!!
 
@@ -316,21 +317,38 @@ Note: But not just "protocols" with hand-waving
 
 !!!
 
-### Provide set of items
+### Solving the expression problem
 
-```
+* <!-- .element: class="fragment" data-fragment-index="1" -->Provide initial views <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" -->Adding new views outside the library<!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" -->Building view-hierarchies<!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" -->Providing multiple interpretations for the view hierarchies<!-- .element: class="fragment" data-fragment-index="4" -->
+
+!!!
+
+### Provide initial views
+
+```swift
 protocol View {
+```
+
+```swift
   static func button(text: String, onTap: () -> ()) -> Self
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
   static func stack(axis: Axis, children: [Self]) -> Self
   /*...*/
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 Note: These are your "UIView subclasses"
 
 !!!
 
-### Adding new items with additional protocols
+### Adding new views later
 
 ```
 protocol WithMapView: View {
@@ -340,20 +358,54 @@ protocol WithMapView: View {
 
 !!!
 
-### Build up complex view hierarchies with a generic function
+### Describing view hierarchies
+
+(picture of a stackview containing an image, then a map, then two buttons horizontally)
+
+!!!
+
+### Describing view hierarchies
 
 ```swift
-func complex1<V: View>() -> V {/* ... */ }
+func twoButtons<V: View>() -> V {
+```
 
-func complex2<V: WitMapView>() -> V {
-  WithMapView.stack(axis: .vertical, children: [
-    .complex1(),
-    .map(initialLatLong: Gps.Point.here())
+```swift
+  return V.stack(axis: .horizontal, children: [
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    .button('Like', likePerson),
+    .button('Skip', skipPerson)
   ])
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
-Note: It's composable btw
+!!!
+
+### Describing view hierarchies
+
+```swift
+func fullView<V: WithMapView>() -> V {
+```
+
+```swift
+  return V.stack(axis: .vertical, children: [
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    .image(avatarImage),
+    .map(initialLatLong: Gps.Point.here()),
+    twoButtons(),
+  ])
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: ... but how do we actually render the views. How do we interpret them:
 
 !!!
 
@@ -361,7 +413,14 @@ Note: It's composable btw
 
 ```swift
 extension UIView : View {
+```
+
+```swift
   static func text(text: String) -> UIView {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
     let tv = UITextView()
     tv.text = text
     return tv
@@ -369,6 +428,7 @@ extension UIView : View {
   /* etc */
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
@@ -376,6 +436,9 @@ extension UIView : View {
 
 ```swift
 extension HTML : View {
+```
+
+```swift
   static func text(text: String) -> HTML {
     // <p>{text}</p>
     return .p([
@@ -384,27 +447,28 @@ extension HTML : View {
   }
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
 ### Choose an interpretation with an identity function
 
 ```swift
-func renderUIKit(_ v: UIView) -> UIView { v }
+func renderUIKit(_ v: UIView) -> UIView { return v }
 ```
 
 ```swift
-func renderWeb(_ v: HTML) -> HTML { v }
+func renderWeb(_ v: HTML) -> HTML { return v }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-func renderPdf(_ v: Pdf) -> Pdf { v }
+func renderPdf(_ v: Pdf) -> Pdf { return v }
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-func serialize(_ v: NSData) -> NSData { v }
+func serialize(_ v: NSData) -> NSData { return v }
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
@@ -414,12 +478,12 @@ func serialize(_ v: NSData) -> NSData { v }
 
 ```swift
 // inside view-controller
-self.view = renderUIKit(complex2())
+self.view = renderUIKit(fullView())
 ```
 
 ```swift
 // ...
-showPdf(renderPdf(complex2()))
+showPdf(renderPdf(fullView()))
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -430,14 +494,6 @@ Note: But what is this approach called?
 ### Final Tagless Style
 
 Note: A protocol is a final tagless dsl, and instance is a final tagless interpreter.
-
-!!!
-
-### That's not all: Little indirection
-
-(diagram of pointers)
-
-Note: We don't need to build up intermediate structure that we immediately destroy
 
 !!!
 
@@ -460,11 +516,8 @@ Note: We don't actually do any recursion
 ### Recap
 
 1. <!-- .element: class="fragment" data-fragment-index="1" --> Expression Problem <!-- .element: class="fragment" data-fragment-index="1" -->
-  * <!-- .element: class="fragment" data-fragment-index="2" --> Add new items <!-- .element: class="fragment" data-fragment-index="2" -->
-  * <!-- .element: class="fragment" data-fragment-index="3" --> Add new interpretations <!-- .element: class="fragment" data-fragment-index="3" -->
-  * <!-- .element: class="fragment" data-fragment-index="4" --> Without modifying original code <!-- .element: class="fragment" data-fragment-index="4" -->
-  * <!-- .element: class="fragment" data-fragment-index="5" --> Maintaining typesafety <!-- .element: class="fragment" data-fragment-index="5" -->
-4. <!-- .element: class="fragment" data-fragment-index="6" --> Final Tagless Approach: <!-- .element: class="fragment" data-fragment-index="6" -->
+  * <!-- .element: class="fragment" data-fragment-index="5" --> Extensibility in two dimensions  <!-- .element: class="fragment" data-fragment-index="5" -->
+2. <!-- .element: class="fragment" data-fragment-index="6" --> Final Tagless Approach: <!-- .element: class="fragment" data-fragment-index="6" -->
   * <!-- .element: class="fragment" data-fragment-index="7" --> Items -- Protocols: Methods return Self <!-- .element: class="fragment" data-fragment-index="7" -->
   * <!-- .element: class="fragment" data-fragment-index="8" --> Interpretations -- Protocol Instances <!-- .element: class="fragment" data-fragment-index="8" -->
 
@@ -474,8 +527,7 @@ Note: We don't actually do any recursion
 
 * [Oleg's Tagless Final Lecture Notes](http://okmij.org/ftp/tagless-final/course/lecture.pdf)
 * [Chris's Side-effects](https://gist.github.com/chriseidhof/a542d0a074cbf8d418d25a8b8253ff33)
-* [Tagless Graphics]()
-* Forms?
+* [Tagless Graphics](https://github.com/bkase/tagless-graphics)
 * Check out upcoming Swift Talk episodes!
 
 !!!
