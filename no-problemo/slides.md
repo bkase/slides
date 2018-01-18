@@ -1,23 +1,25 @@
-<!-- .slide: data-background="#2aa198" -->
-<!-- .slide: data-state="terminal" -->
 
-# Finally Solving the Expression Problem
+(image of the gui with avatar, map, like, skip buttons)
 
-By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
+Note: Animate this in, so the thing starts blank
 
 !!!
 
-### Let's think about views
+### How do we build this for iOS
 
 (picture)
 
 !!!
 
-### UIKit
+### Breakdown
+
+(image of the gui with the 3d explosion thing)
+
+Note: The whole thing is a UIStackView (which itself subclasses UIView), then we have UIImageView and UIButtons
 
 !!!
 
-### Base view + preset views
+### UIKit Subclassing
 
 ```swift
 class UIView { /*...*/ }
@@ -25,6 +27,7 @@ class UIView { /*...*/ }
 
 ```swift
 class UIButton : UIView { /*...*/ }
+class UIImageView : UIView { /*...*/ }
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -36,7 +39,15 @@ class UIStackView : UIView { /*...*/ }
 
 !!!
 
-### Add views without modifying UIKit (subclassing)
+### Is that everything?
+
+(image of the gui with avatar, map, like, skip buttons)
+
+Note: What about the map, this isn't in UIKit
+
+!!!
+
+### MapView
 
 ```swift
 class MyMapView: UIView {
@@ -44,25 +55,68 @@ class MyMapView: UIView {
 }
 ```
 
+Note: But this isn't a problem, we can subclass UIView ourselves and make our own view
+
 !!!
 
-### What about changing what a view means?
+### What about a Mac App
+
+(thinking face image)
+
+Note: I'd have to do the same thing all over with NSView and NSButton
+
+!!!
+
+### What about a website?
+
+(thinking face2)
+
+Note: I'd have to do the same thing all over in HTML/CSS/JS
+
+!!!
+
+### Define once, use everywhere
+
+(image)
+
+Note: I always have an image view, a map view, and two buttons. Why do I need to rewrite the same code over and over again? TRANSITION: Moreover, this doesn't really come up with just views, right? Thisis a more general problem; called the Expression Problem
+
+!!!
+
+# Expression Problem
+
+Note: Not just be able to add new entities, but also new interpretations for those entities; and so
+
+!!!
+
+<!-- .slide: data-background="#2aa198" -->
+<!-- .slide: data-state="terminal" -->
+
+# Finally Solving the Expression Problem
+
+By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
+
+!!!
+
+### Subclassing (UIKit) doesn't work
 
 (picture)
 
-!!!
-
-### We can't from outside UIKit
-
-(picture of AppKit, Website, Serialization to disk)
-
-Note: But what if we wanted to...
+Note: We can add new views, but we can't change the view hierarchies' interpretation without modifying UIView inside UIKit.
 
 !!!
 
 ### How about an Enum?
 
-(picture)
+(question face)
+
+!!!
+
+### How about an Enum?
+
+(frown face)
+
+Note: It turns out this won't get us there either, but we'll run into a separate limitation. Once we understand both, we can think about the reason
 
 !!!
 
@@ -131,7 +185,7 @@ extension View {
 ```swift
     case let .stack(axis, children):
       let sv = UIStackView()
-      let subViews = children.map{ $0.renderSomething() }
+      let subViews = children.map{ $0.renderUIView() }
       subViews.forEach{ sv.addSubView($0) }
       /* ... */
       return sv
@@ -174,87 +228,11 @@ enum View {
 
 !!!
 
-### How can we make UIKit + EnumKit?
-
-(picture)
-
-Note: If you think about it, this isn't specific to views...
-
-!!!
-
 ### Expression Problem
 
 (picture of a graph showing the orthoganilaty of adding items and interpretations)
 
 Note: MAKE SURE TO REFER BACK TO VIEWS. If we cast things and forget about type safety it's not too hard. This is not a talk about a new view framework, this is a talk about solving the expression problem. So let's talk about more...
-
-!!!
-
-### Another Expression Problem Instance
-
-(picture)
-
-!!!
-
-### Drawing Shapes
-
-(picture)
-
-!!!
-
-### Drawing Shapes: New Interpretations
-
-* <!-- .element: class="fragment" data-fragment-index="1" --> CoreGraphics <!-- .element: class="fragment" data-fragment-index="1" -->
-* <!-- .element: class="fragment" data-fragment-index="2" --> CoreAnimation <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> Svg image <!-- .element: class="fragment" data-fragment-index="3" -->
-
-!!!
-
-### Drawing Shapes: New Operations
-
-* <!-- .element: class="fragment" data-fragment-index="1" --> Ellipse <!-- .element: class="fragment" data-fragment-index="1" -->
-* <!-- .element: class="fragment" data-fragment-index="2" --> Rectangle <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> Gradients <!-- .element: class="fragment" data-fragment-index="3" -->
-* <!-- .element: class="fragment" data-fragment-index="4" --> Layer many shapes <!-- .element: class="fragment" data-fragment-index="4" -->
-
-!!!
-
-### Drawing Shapes
-
-(gif of drawing shapes example)
-
-!!!
-
-### Expression Problem
-
-* <!-- .element: class="fragment" data-fragment-index="1" --> Add new kinds of items <!-- .element: class="fragment" data-fragment-index="1" -->
-* <!-- .element: class="fragment" data-fragment-index="2" --> Add new interpretations for those items <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> From outside the scope of the initial definitions of items/interpretations <!-- .element: class="fragment" data-fragment-index="3" -->
-* <!-- .element: class="fragment" data-fragment-index="4" --> Keeping type-safety <!-- .element: class="fragment" data-fragment-index="4" -->
-
-!!!
-
-### Can we solve the Expression Problem?
-
-(picture of high-dimensional legos)
-
-Note: Wouldn't it be great to take the same view once and render it in multiple extensible places
-
-!!!
-
-### Subclassing (UIKit) doesn't work
-
-(picture)
-
-Note: We can add new views, but we can't change what it menas to be a view
-
-!!!
-
-### Enums (EnumKit) doesn't work
-
-(picture)
-
-Note: We can change what it means to be a view, but we can't add new views
 
 !!!
 
@@ -348,9 +326,31 @@ Note: These are your "UIView subclasses"
 
 !!!
 
+### Protocol Instance Template
+
+```swift
+extesnsion __ : View {
+```
+
+```swift
+  static func button(text: String, onTap: () -> ()) -> __
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+  static func stack(axis: Axis, children: [__]) -> __
+  /*...*/
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: Protocol instances
+
+!!!
+
 ### Adding new views later
 
-```
+```swift
 protocol WithMapView: View {
   static func map(initialLatLong: Gps.Point) -> Self
 }
@@ -358,13 +358,13 @@ protocol WithMapView: View {
 
 !!!
 
-### Describing view hierarchies
+### Describing our view hierarchy
 
 (picture of a stackview containing an image, then a map, then two buttons horizontally)
 
 !!!
 
-### Describing view hierarchies
+### Describing our view hierarchy
 
 ```swift
 func twoButtons<V: View>() -> V {
@@ -385,7 +385,7 @@ func twoButtons<V: View>() -> V {
 
 !!!
 
-### Describing view hierarchies
+### Describing our view hierarchy
 
 ```swift
 func fullView<V: WithMapView>() -> V {
@@ -513,6 +513,49 @@ Note: We don't actually do any recursion
 
 !!!
 
+### More Expression Problem Instances
+
+(picture)
+
+!!!
+
+### Diagrams on a canvas
+
+* Items:
+  * Specific shapes
+  * Layering of shapes
+* Interpretations:
+  * CoreGraphics
+  * CoreAnimation
+  * Svg
+
+!!!
+
+### Side-effects
+
+* Items:
+  * Post request
+  * Analytics tracking
+* Interpretations:
+  * Perform the effect
+  * Log the effect, but don't perform it
+  * Emit a datastructure that you can test against
+
+!!!
+
+### Arithmetic
+
+* Items:
+  * Numbers
+  * Addition of numbers
+  * Multiplication of numbers
+* Interpretations:
+  * Number
+  * String
+  * UIView
+
+!!!
+
 ### Recap
 
 1. <!-- .element: class="fragment" data-fragment-index="1" --> Expression Problem <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -534,7 +577,7 @@ Note: We don't actually do any recursion
 
 # Thanks!
 
-By <a href="http://bkase.com">Brandon Kase</a> / <a href="https://www.pinterest.com/brandernan/"><i class="fa fa-pinterest" aria-hidden="true"></i>brandernan</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
+By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
 Slide Deck: [https://is.gd/mjJamZ](https://is.gd/mjJamZ)
 
