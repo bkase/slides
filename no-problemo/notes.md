@@ -48,5 +48,15 @@ Feedback:
 8. Cleanup the recap. Boom. boom. boom. Skip the examples in the recap. Just expression problem and final-tagless
 
 
+Practice more for the pace:
+
+1. Protocol instance / or extensions spelt wrong
+2. Too much to do every line maybe
+
+Go slower on enum View slide
+Explain Expression Problem slower
+Show the fullView() way earlier (with the enums)
+
+
 
 
