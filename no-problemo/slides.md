@@ -1,5 +1,5 @@
 
-(image of the gui with avatar, map, like, skip buttons)
+![mockup](img/mockup2.png) <!-- .element: class="fragment" data-fragment-index="1" -->
 
 Note: Animate this in, so the thing starts blank
 
@@ -7,13 +7,13 @@ Note: Animate this in, so the thing starts blank
 
 ### How do we build this for iOS
 
-(picture)
+![hammer](img/hammer2.png)
+
+> https://pixabay.com/p-306313/?no_redirect
 
 !!!
 
-### Breakdown
-
-(image of the gui with the 3d explosion thing)
+![mockup](img/mockup2.png)
 
 Note: The whole thing is a UIStackView (which itself subclasses UIView), then we have UIImageView and UIButtons
 
@@ -39,9 +39,7 @@ class UIStackView : UIView { /*...*/ }
 
 !!!
 
-### Is that everything?
-
-(image of the gui with avatar, map, like, skip buttons)
+![mockup](img/mockup2.png)
 
 Note: What about the map, this isn't in UIKit
 
@@ -61,7 +59,9 @@ Note: But this isn't a problem, we can subclass UIView ourselves and make our ow
 
 ### What about a Mac App
 
-(thinking face image)
+![thinking face](img/thinking-face2.jpg)
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
 
 Note: I'd have to do the same thing all over with NSView and NSButton
 
@@ -69,15 +69,16 @@ Note: I'd have to do the same thing all over with NSView and NSButton
 
 ### What about a website?
 
-(thinking face2)
+![thinking face](img/thinking-face3.jpg)
+![thinking face](img/thinking-face3.jpg)
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
 
 Note: I'd have to do the same thing all over in HTML/CSS/JS
 
 !!!
 
-### Define once, use everywhere
-
-(image)
+![mockup](img/mockup2.png)
 
 Note: I always have an image view, a map view, and two buttons. Why do I need to rewrite the same code over and over again? TRANSITION: Moreover, this doesn't really come up with just views, right? Thisis a more general problem; called the Expression Problem
 
@@ -100,7 +101,9 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 ### Subclassing (UIKit) doesn't work
 
-(picture)
+![broken hammer](img/broken-hammer2.jpg)
+
+> https://c2.staticflickr.com/2/1354/534849776_dfd2c24092_b.jpg
 
 Note: We can add new views, but we can't change the view hierarchies' interpretation without modifying UIView inside UIKit.
 
@@ -108,13 +111,17 @@ Note: We can add new views, but we can't change the view hierarchies' interpreta
 
 ### How about an Enum?
 
-(question face)
+![thinking face](img/thinking-face2.jpg)
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
 
 !!!
 
 ### How about an Enum?
 
-(frown face)
+![frown face](img/frown-face2.jpg)
+
+> https://c1.staticflickr.com/4/3198/2683098551_d798ab5f4c.jpg
 
 Note: It turns out this won't get us there either, but we'll run into a separate limitation. Once we understand both, we can think about the reason
 
@@ -141,6 +148,26 @@ indirect enum View {
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 Note: TableViews etc...
+
+!!!
+
+### Describing a view
+
+```swift
+let twoButtons =
+```
+
+```swift
+  .stack(axis: .horizontal, children: [
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    .button("Like", likeButton),
+    .button("Skip", skipButton)
+  ])
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
@@ -213,7 +240,9 @@ extension View {
 
 ### How do we add new view types?
 
-(picture)
+![thinking face](img/thinking-face2.jpg)
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
 
 !!!
 
@@ -230,7 +259,7 @@ enum View {
 
 ### Expression Problem
 
-(picture of a graph showing the orthoganilaty of adding items and interpretations)
+![ability to add new interpretations (y-axis) vs ability to add new items (x-axis); expression problem is located in the top-right](img/expression-problem-chart.png)
 
 Note: MAKE SURE TO REFER BACK TO VIEWS. If we cast things and forget about type safety it's not too hard. This is not a talk about a new view framework, this is a talk about solving the expression problem. So let's talk about more...
 
@@ -238,7 +267,7 @@ Note: MAKE SURE TO REFER BACK TO VIEWS. If we cast things and forget about type 
 
 ### Non-exhaustive Enums?
 
-(picture of https://github.com/apple/swift-evolution/blob/master/proposals/0192-non-exhaustive-enums.md)
+![non-exhaustive enums](img/non-exhaustive.png)
 
 Note: For those that don't know, this proposal is about making enums open to adding new variants outside it's definition
 
@@ -283,15 +312,19 @@ Note: But what do I do in the default case, how do I adapt my new enum case to t
 
 ### Protocols?
 
-(picture)
+![thinking face](img/thinking-face2.jpg)
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
 
 !!!
 
-### Protocols!
+### Protocols
 
-It's always protocols isn't it
+![bored face](img/bored-face.jpg)
 
-Note: But not just "protocols" with hand-waving
+> http://images.medicaldaily.com/sites/medicaldaily.com/files/styles/headline/public/2013/08/04/0/62/6242.jpg
+
+Note: It's always protocols isn't it; But not just "protocols" with hand-waving
 
 !!!
 
@@ -358,9 +391,7 @@ protocol WithMapView: View {
 
 !!!
 
-### Describing our view hierarchy
-
-(picture of a stackview containing an image, then a map, then two buttons horizontally)
+![mockup](img/mockup2.png)
 
 !!!
 
@@ -515,44 +546,46 @@ Note: We don't actually do any recursion
 
 ### More Expression Problem Instances
 
-(picture)
+![uncountable](img/uncountable2.jpg)
+
+> https://c1.staticflickr.com/2/1618/26663431642_3ee25eb693_b.jpg
 
 !!!
 
 ### Diagrams on a canvas
 
-* Items:
-  * Specific shapes
-  * Layering of shapes
-* Interpretations:
-  * CoreGraphics
-  * CoreAnimation
-  * Svg
+* <!-- .element: class="fragment" data-fragment-index="1" --> Items: <!-- .element: class="fragment" data-fragment-index="1" -->
+  * <!-- .element: class="fragment" data-fragment-index="2" --> Specific shapes <!-- .element: class="fragment" data-fragment-index="2" -->
+  * <!-- .element: class="fragment" data-fragment-index="3" -->Layering of shapes <!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" -->Interpretations: <!-- .element: class="fragment" data-fragment-index="4" -->
+  * <!-- .element: class="fragment" data-fragment-index="5" -->CoreGraphics <!-- .element: class="fragment" data-fragment-index="5" -->
+  * <!-- .element: class="fragment" data-fragment-index="6" -->CoreAnimation <!-- .element: class="fragment" data-fragment-index="6" -->
+  * <!-- .element: class="fragment" data-fragment-index="7" -->Svg <!-- .element: class="fragment" data-fragment-index="7" -->
 
 !!!
 
 ### Side-effects
 
-* Items:
-  * Post request
-  * Analytics tracking
-* Interpretations:
-  * Perform the effect
-  * Log the effect, but don't perform it
-  * Emit a datastructure that you can test against
+* <!-- .element: class="fragment" data-fragment-index="1" -->Items: <!-- .element: class="fragment" data-fragment-index="1" -->
+  * <!-- .element: class="fragment" data-fragment-index="2" -->Post request <!-- .element: class="fragment" data-fragment-index="2" -->
+  * <!-- .element: class="fragment" data-fragment-index="3" -->Analytics tracking <!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" -->Interpretations: <!-- .element: class="fragment" data-fragment-index="4" -->
+  * <!-- .element: class="fragment" data-fragment-index="5" -->Perform the effect <!-- .element: class="fragment" data-fragment-index="5" -->
+  * <!-- .element: class="fragment" data-fragment-index="6" -->Log the effect, but don't perform it<!-- .element: class="fragment" data-fragment-index="6" -->
+  * <!-- .element: class="fragment" data-fragment-index="7" -->Emit a datastructure that you can test against <!-- .element: class="fragment" data-fragment-index="7" -->
 
 !!!
 
 ### Arithmetic
 
-* Items:
-  * Numbers
-  * Addition of numbers
-  * Multiplication of numbers
-* Interpretations:
-  * Number
-  * String
-  * UIView
+* <!-- .element: class="fragment" data-fragment-index="1" -->Items: <!-- .element: class="fragment" data-fragment-index="1" -->
+  * <!-- .element: class="fragment" data-fragment-index="2" -->Numbers <!-- .element: class="fragment" data-fragment-index="2" -->
+  * <!-- .element: class="fragment" data-fragment-index="3" -->Addition of numbers<!-- .element: class="fragment" data-fragment-index="3" -->
+  * <!-- .element: class="fragment" data-fragment-index="4" -->Multiplication of numbers<!-- .element: class="fragment" data-fragment-index="4" -->
+* <!-- .element: class="fragment" data-fragment-index="5" -->Interpretations: <!-- .element: class="fragment" data-fragment-index="5" -->
+  * <!-- .element: class="fragment" data-fragment-index="6" -->Number<!-- .element: class="fragment" data-fragment-index="6" -->
+  * <!-- .element: class="fragment" data-fragment-index="7" -->String <!-- .element: class="fragment" data-fragment-index="7" -->
+  * <!-- .element: class="fragment" data-fragment-index="8" -->UIView<!-- .element: class="fragment" data-fragment-index="8" -->
 
 !!!
 
