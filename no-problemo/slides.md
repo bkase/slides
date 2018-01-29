@@ -293,9 +293,9 @@ Note: Okay so now we can add an enum case, but...
 extension View {
   func renderAppKit() -> NSView {
     switch self {
-    case button(text: String, onTap: () -> (), /*...*/)
-    case textField(hint: String)
-    case stack(axis: Axis, children: [View])
+    case let .button(text: String, onTap: () -> ()): /*...*/
+    case let .textField(hint: String): /*...*/
+    case let .stack(axis: Axis, children: [View]): /*...*/
 ```
 
 ```swift
@@ -362,16 +362,16 @@ Note: These are your "UIView subclasses"
 ### Protocol Instance Template
 
 ```swift
-extesnsion __ : View {
+extension REAL : View {
 ```
 
 ```swift
-  static func button(text: String, onTap: () -> ()) -> __
+  static func button(text: String, onTap: () -> ()) -> REAL
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-  static func stack(axis: Axis, children: [__]) -> __
+  static func stack(axis: Axis, children: [REAL]) -> REAL
   /*...*/
 }
 ```
@@ -528,22 +528,6 @@ Note: A protocol is a final tagless dsl, and instance is a final tagless interpr
 
 !!!
 
-### That's not all: Recursion done for you!
-
-```swift
-extension HTML : View {
-  // Self type is replaced recursively
-  static func stack(children: [HTML]) -> HTML {
-    return .div(style: [.position(absolute)], children)
-  }
-  /* ... */
-}
-```
-
-Note: We don't actually do any recursion
-
-!!!
-
 ### More Expression Problem Instances
 
 ![uncountable](img/uncountable2.jpg)
@@ -613,4 +597,27 @@ Note: We don't actually do any recursion
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
 Slide Deck: [https://is.gd/mjJamZ](https://is.gd/mjJamZ)
+
+!!!
+
+## Appendix
+
+!!!
+
+### That's not all: Recursion done for you!
+
+```swift
+extension HTML : View {
+  // Self type is replaced recursively
+  static func stack(children: [HTML]) -> HTML {
+    return .div(style: [.position(absolute)], children)
+  }
+  /* ... */
+}
+```
+
+Note: We don't actually do any recursion
+
+!!!
+
 
