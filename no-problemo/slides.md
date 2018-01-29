@@ -596,7 +596,7 @@ Note: A protocol is a final tagless dsl, and instance is a final tagless interpr
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
-Slide Deck: [https://is.gd/mjJamZ](https://is.gd/mjJamZ)
+Slide Deck: [https://is.gd/Qv7rC6](https://is.gd/Qv7rC6)
 
 !!!
 
