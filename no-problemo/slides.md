@@ -337,6 +337,17 @@ Note: It's always protocols isn't it; But not just "protocols" with hand-waving
 
 !!!
 
+### Remember EnumKit
+
+```swift
+indirect enum View {
+  case button(text: String, onTap: () -> ())
+  case stack(axis: Axis, children: [View])
+}
+```
+
+!!!
+
 ### Provide initial views
 
 ```swift
@@ -384,7 +395,7 @@ Note: Protocol instances
 ### Adding new views later
 
 ```swift
-protocol WithMapView: View {
+protocol WithMapView {
   static func map(initialLatLong: Gps.Point) -> Self
 }
 ```
@@ -419,7 +430,7 @@ func twoButtons<V: View>() -> V {
 ### Describing our view hierarchy
 
 ```swift
-func fullView<V: WithMapView>() -> V {
+func fullView<V: View & WithMapView>() -> V {
 ```
 
 ```swift
@@ -482,39 +493,16 @@ extension HTML : View {
 
 !!!
 
-### Choose an interpretation with an identity function
-
-```swift
-func renderUIKit(_ v: UIView) -> UIView { return v }
-```
-
-```swift
-func renderWeb(_ v: HTML) -> HTML { return v }
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-func renderPdf(_ v: Pdf) -> Pdf { return v }
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```swift
-func serialize(_ v: NSData) -> NSData { return v }
-```
-<!-- .element: class="fragment" data-fragment-index="3" -->
-
-!!!
-
 ### Use it
 
 ```swift
 // inside view-controller
-self.view = renderUIKit(fullView())
+self.view = fullView()
 ```
 
 ```swift
-// ...
-showPdf(renderPdf(fullView()))
+// assuming `Pdf : View` and `Pdf : WithMapView`
+showPdf(fullView())
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
