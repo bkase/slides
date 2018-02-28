@@ -576,7 +576,7 @@ Note: A protocol is a final tagless dsl, and instance is a final tagless interpr
 * [Oleg's Tagless Final Lecture Notes](http://okmij.org/ftp/tagless-final/course/lecture.pdf)
 * [Chris's Side-effects](https://gist.github.com/chriseidhof/a542d0a074cbf8d418d25a8b8253ff33)
 * [Tagless Graphics](https://github.com/bkase/tagless-graphics)
-* Check out upcoming Swift Talk episodes!
+* [Swift Talk Episodes: (1)](https://talk.objc.io/episodes/S01E88-extensible-libraries-1-enums-vs-classes) / [and (2)](https://talk.objc.io/episodes/S01E89-extensible-libraries-2-protocol-composition)
 
 !!!
 
@@ -589,6 +589,24 @@ Slide Deck: [https://is.gd/Qv7rC6](https://is.gd/Qv7rC6)
 !!!
 
 ## Appendix
+
+!!!
+
+### Conforming to open-classes
+
+```swift
+// We do need to wrap non-final classes
+// because Swift gets confused when returning Self
+struct UIViewWrapper {
+  let wrapped: () -> UIView
+}
+```
+
+```swift
+// Now everything should compile!
+extension UIViewWrapper: View { /* all your methods */ }
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
@@ -605,7 +623,4 @@ extension HTML : View {
 ```
 
 Note: We don't actually do any recursion
-
-!!!
-
 
