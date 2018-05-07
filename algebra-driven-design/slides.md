@@ -1,6 +1,8 @@
 
 (actually make an animation of something flying across)
 
+Note: How would we go about designing a library for this?
+
 !!!
 
 ### Uncontroversial Goals
@@ -46,7 +48,7 @@ Note: In other words, a way to increase expressiveness without harming simplicit
 
 ### Composable Animations
 
-(image or something)
+(image of legos)
 
 Note: Composable animations let us describe primitives once and then re-use them like lego bricks to make complex reusable layer two primitives.....
 
@@ -58,27 +60,44 @@ Note: Composable animations let us describe primitives once and then re-use them
 
 !!!
 
-### One facet of composition: Sequencing animations
+### Sequencing animations
+
+(show sequence animation)
 
 !!!
 
-### Another facet of composition: Playing two animations simultaneously
+### Simultaneous animations
+
+(show parallel animation)
 
 !!!
 
-### Another facet of composition: Changing time
+### Changing time
+
+(show easing curve)
 
 !!!
 
-### You could stop here, and build out a library, if you use purity, you'll already create something better than 99% of the design space
+### What do we do now?
+
+(image)
+
+Note: You could stop here, and build out a library, if you use purity, you'll already create something better than 99% of the design space
 
 !!!
 
-### But there's a secret, we can do more thinking up-front; look to mathematics
+### Math!
+
+(image)
+
+Note: But there's a secret, we can do more thinking up-front; look to mathematics
 
 !!!
+### Category Theory?
 
-### Category Theory is the obvious place, but I think category theory is hard. There is something more primitive, easier to understand, and possible to instantiate in "every-day" modern languages (like swift) not just Haskell/Scala
+(complex category theory)
+
+Note: Category Theory is the obvious place, but I think category theory is hard to comprehend and express in certain languges. There is something more primitive, easier to understand, and possible to instantiate in "every-day" modern languages (like swift) not just Haskell/Scala
 
 !!!
 
@@ -87,7 +106,7 @@ Note: Composable animations let us describe primitives once and then re-use them
 
 # Abstract-algebra-driven Design
 
-## Animation in Swift as (almost)-Semirings
+## Animation in Swift as Semirings
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
@@ -138,6 +157,12 @@ Note: Naming is hard. We're talking about something so general that we have to r
 
 ### Magma (example)
 
+(animation of sequence again)
+
+!!!
+
+### Magma (example)
+
 ```swift
 // sequencing two animations
 translate <> fadeOut
@@ -145,11 +170,17 @@ translate <> fadeOut
 
 !!!
 
-### So far, we haven't recovered any powers other than a name; We can think about how our composition behaves
+### So what?
+
+(image)
+
+Note: So far, we haven't recovered any powers other than a name; We can think about how our composition behaves...
 
 !!!
 
 ### Using Laws!
+
+(image)
 
 !!!
 
@@ -201,17 +232,17 @@ protocol Semigroup: Magma {}
 
 ### Sequencing Animations
 
-(associative)
+(animation to illustrate)
 
 !!!
 
 ### Associativity power: Freedom to chunk work
 
 ```swift
-let xy = x <> y
-let all = xy <> z
+let moveAndFade = translate <> fade
+let all = moveAndFade <> appear
 // or
-let all = x <> y <> z
+let all = translate <> fade <> appear
 ```
 
 Note: It's up to the consumers of the API. They get more expressive power!
@@ -226,6 +257,8 @@ let a = x <> y // on thread1
 let b = z <> w // on thread2
 return a <> b
 ```
+
+Note: Not so important in the animation domain, but very useful for other domains
 
 !!!
 
@@ -271,8 +304,7 @@ Note: Again this is up to the client to decide if the inlining will make the cod
 /// (x <> y) <> z = x <> (y <> z) (associativity)
 protocol Monoid: Semigroup {
   static var empty: Self { get }
-  // func op(other: Self) -> Self
-  // (from Magma)
+  static func <>(lhs: Self, rhs: Self) -> Self
 }
 ```
 
@@ -342,27 +374,67 @@ protocol CommutativeMonoid: Monoid {}
 
 ### Parallel composition?
 
+(animation parallel)
+
 Note: This IS commutative, but is it also a monoid?
 
 !!!
 
 ### Parallel composition -- magma
 
+(animation parallel)
+
+Note: It's a magma
+
 !!!
 
 ### Parallel composition -- semigroup
 
-!!!
+(animation associative)
 
-### Parallel composiiton -- monoid?
-
-??? let's just skip this for now
+Note: It's a semigroup
 
 !!!
 
-### There are more laws for a single operation but let's skip that for now
+### Parallel composition -- monoid?
 
-Note: such as idempotence
+(image)
+
+Note: What's the identity?
+
+!!!
+
+### Cancelling animations
+
+(image)
+
+Note: We can say cancelled animations in parallel with anything runs the anything
+
+!!!
+
+### Parallel Composition Commutative Monoid
+
+(image)
+
+Note: Thus parallel composition does form a commutative monoid
+
+!!!
+
+### Law 4: Annihilation
+
+!!!
+
+### Annihilation
+
+TODO
+
+!!!
+
+### More laws
+
+(image)
+
+Note: There are more laws for a single operation but let's skip that for now ; such as idempotence; annihilation
 
 !!!
 
@@ -374,11 +446,50 @@ Note: such as idempotence
 
 !!!
 
-TODO
+### Distibutivity
+
+```
+// left
+x * (y + z) = x*y + x*z
+// right
+(y + z) * x = y*x + z*x
+
+// ex: 2 * (3 + 1) = 2*3 + 2*1 = 8
+// ex: (3 + 1) * 2 = 3*2 + 1*2 = 8
+```
 
 !!!
 
-### Let's take addition to be parallel composition and multiplication to sequence
+### Sequence distributes over parallel
+
+```swift
+translate * (fade + bluify) =
+    translate*fade + translate*bluify
+```
+
+!!!
+
+### Sequence distributes over parallel
+
+(animation)
+
+!!!
+
+### Notation change notice!
+
+`+` means parallel <br>
+`*` means sequence
+
+!!!
+
+### Semiring
+
+```swift
+// + forms a commutative monoid (empty = 0)
+// * forms a monoid (empty = 1)
+// * distributes over + (left and right)
+// 0* annihalates (0 * x = x * 0 = 0)
+```
 
 !!!
 
