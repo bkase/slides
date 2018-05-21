@@ -306,6 +306,17 @@ body {
   margin: 15px auto;
   border: 0px; }
 
+.reveal video {
+  display: block;
+  margin: 15px auto;
+  width: 70%;
+}
+
+.vidcode code {
+  display: block;
+  text-align: center;
+}
+
 .reveal table {
   margin: 0px; }
 

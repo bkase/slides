@@ -150,5 +150,23 @@ Scaling time!
 
 
 
+NOTES:
+1. Make title animate title
+2. Why are iOS and Android bad -- explain it ;; introduce the goals then analyze the two
+3. Why should we use Math -- motivate it ;; objectivity and more princippled approach guide you. Don't let your feelings or your gut drive
+4. Show the code for the title slide somewhere -- beautiful idealized form.
+5. Watch my old videos "shared language across mathematicians and programmers"
+6. On the `x <> (y <> z)` slide you can show it maybe
+7. Maybe do animations for the digrams
+8. Remove "Cancelled Animations" slide
+9. Sequence distributes over parallel
+10. Don't forget sequence is *
+11. Make the distribute less confusion
+12. Show sequence and parallel together; use the times and addition. I can introduce Delay
+13. Now that that we've done this principled reasoning ... there's no confusion
+14. See it visually then show the code
+15. POWER: Drop the optional -- (fade or empty) instead
+16. I'll do another slide on the min part of parallel
+17. Here's an example of me moving numbers around. I won't even call out the category theory, we could keep going but I'm going to stop here
 
 

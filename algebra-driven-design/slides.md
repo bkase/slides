@@ -1,7 +1,53 @@
 
-(actually make an animation of something flying across)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/title.mp4" type="video/mp4">
+  </video>
+</div>
 
 Note: How would we go about designing a library for this?
+
+!!!
+
+### Looking at other approaches
+
+(image)
+
+!!!
+
+### iOS UIView animations
+
+```swift
+UIView.animate(withDuration: /* ... */, animate: () -> {
+```
+
+```swift
+  /* parallel */
+  self.button.color = blue
+  self.x = 4
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+} {
+  /* sequence */
+  UIView.animate(withDuration: /* .. */, animate: () -> {
+    ...
+  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: simple on the surface, but relies too heavily on effects and requires callbacks that don't compose easily for sequencing, hard to choreograph, there is hidden complexity as this function is overloaded like crazy to get all the expressive power you'd want (easing curves etc)
+
+!!!
+
+### Android Animations
+
+(insert video of the Android animation docs here)
+
+
+Note: Has a solution for choreographing animations explicitly in a non-effectful way, but is *very complicated*. Adjusting duration / easing curves are effectful.
 
 !!!
 
@@ -62,13 +108,27 @@ Note: Composable animations let us describe primitives once and then re-use them
 
 ### Sequencing animations
 
-(show sequence animation)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-then-fade.mp4" type="video/mp4">
+  </video>
+  ```
+  grow ; fadeout
+  ```
+</div>
 
 !!!
 
 ### Simultaneous animations
 
-(show parallel animation)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/fade-grow-parallel.mp4" type="video/mp4">
+  </video>
+  ```
+  grow | fadeout
+  ```
+</div>
 
 !!!
 
@@ -82,7 +142,7 @@ Note: Composable animations let us describe primitives once and then re-use them
 
 (image)
 
-Note: You could stop here, and build out a library, if you use purity, you'll already create something better than 99% of the design space
+Note: You could stop here, and build out a library, if you use purity, you'll already create something better than the other things out there. But we can do better...
 
 !!!
 
@@ -93,6 +153,7 @@ Note: You could stop here, and build out a library, if you use purity, you'll al
 Note: But there's a secret, we can do more thinking up-front; look to mathematics
 
 !!!
+
 ### Category Theory?
 
 (complex category theory)
@@ -137,6 +198,8 @@ protocol Magma {
 }
 ```
 
+Note: Names are important to allow discourse across disciplines
+
 !!!
 
 ### Magma: Diagram view
@@ -145,28 +208,16 @@ protocol Magma {
 
 !!!
 
-### Magma: The name
-
-![Brandt](img/brandt.jpg)
-
-> Heinrich Brandt (1926) and Hausmann & Ore (1937)
-
-Note: Naming is hard. We're talking about something so general that we have to reach for scary sounding names. But mathemticians deal with these general things so they have names for them. Instead of making up a name, let's use the ones the mathematicians gave us. I'll speak more to that later.
-
-!!!
-
 ### Magma (example)
 
-(animation of sequence again)
-
-!!!
-
-### Magma (example)
-
-```swift
-// sequencing two animations
-translate <> fadeOut
-```
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-then-fade.mp4" type="video/mp4">
+  </video>
+  ```
+  grow <> fadeout
+  ```
+</div>
 
 !!!
 
@@ -232,7 +283,14 @@ protocol Semigroup: Magma {}
 
 ### Sequencing Animations
 
-(animation to illustrate)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-red-fade.mp4" type="video/mp4">
+  </video>
+  ```
+  (grow <> red) <> fade = grow <> (red <> fade)
+  ```
+</div>
 
 !!!
 
@@ -279,17 +337,10 @@ Note: Some element that when combined on the left or right is the same
 
 !!!
 
-### Identity power: Drop the optional
+### Identity power: Capture conditional effects
 
 ```swift
-func annoyinglyNeedOptional() -> Foo? {
-  return something ? x <> y : nil
-}
-// to
-func expressiveNoNeedOptional() -> Foo {
-  return something ? x <> y : empty
-}
-// or: optFoo ?? empty
+let maybeFadeout = didUserWin ? fadeOut : empty
 ```
 
 Note: Again this is up to the client to decide if the inlining will make the code cleaner at the client's callsite. More expressive power!
@@ -320,13 +371,47 @@ Note: Just extending semigroup with the identity constant
 
 ### Sequence Animations Monoid
 
-(image)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-seq-identity.mp4" type="video/mp4">
+  </video>
+  ```
+  grow <> empty = empty <> grow = grow
+  ```
+</div>
 
 Note: This is a little tougher, but if we think really carefully, we can make sure to include some notion of duration in our animation primitive
 
 !!!
 
-## Law 3: Commutativity
+### Law 3: Annihilation
+
+!!!
+
+### Annihilation
+
+```
+x <> 0 = 0
+0 <> x = 0
+// ex: 0 * 1 = 0
+// ex: 1 * 0 = 0
+```
+
+Note: Annihilation erases information
+
+!!!
+
+### Sequencing Animations with Cancel
+
+```swift
+.cancelled <> transparent = .cancelled
+```
+
+Note: Once you cancel, it's a no-op over sequence
+
+!!!
+
+## Law 4: Commutativity
 
 !!!
 
@@ -370,11 +455,28 @@ protocol CommutativeMonoid: Monoid {}
 
 ### Sequencing animations NOT a commutative monoid
 
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/fade-then-grow.mp4" type="video/mp4">
+  </video>
+  ```
+  fade <> grow != grow <> fade
+  ```
+</div>
+
+
 !!!
 
 ### Parallel composition?
 
-(animation parallel)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/fade-grow-parallel.mp4" type="video/mp4">
+  </video>
+  ```
+  fade <> grow = grow <> fade
+  ```
+</div>
 
 Note: This IS commutative, but is it also a monoid?
 
@@ -382,7 +484,14 @@ Note: This IS commutative, but is it also a monoid?
 
 ### Parallel composition -- magma
 
-(animation parallel)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/fade-grow-parallel.mp4" type="video/mp4">
+  </video>
+  ```
+  fade <> grow
+  ```
+</div>
 
 Note: It's a magma
 
@@ -390,7 +499,14 @@ Note: It's a magma
 
 ### Parallel composition -- semigroup
 
-(animation associative)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-red-fade-par.mp4" type="video/mp4">
+  </video>
+  ```
+  grow <> (red <> fade) = (grow <> red) <> fade
+  ```
+</div>
 
 Note: It's a semigroup
 
@@ -398,17 +514,16 @@ Note: It's a semigroup
 
 ### Parallel composition -- monoid?
 
-(image)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-par-identity.mp4" type="video/mp4">
+  </video>
+  ```
+  grow <> .cancelled = grow <> .cancelled = grow
+  ```
+</div>
 
 Note: What's the identity?
-
-!!!
-
-### Cancelling animations
-
-(image)
-
-Note: We can say cancelled animations in parallel with anything runs the anything
 
 !!!
 
@@ -420,21 +535,11 @@ Note: Thus parallel composition does form a commutative monoid
 
 !!!
 
-### Law 4: Annihilation
-
-!!!
-
-### Annihilation
-
-TODO
-
-!!!
-
 ### More laws
 
 (image)
 
-Note: There are more laws for a single operation but let's skip that for now ; such as idempotence; annihilation
+Note: There are more common laws for a single operation but let's skip that for now ; such as idempotence
 
 !!!
 
@@ -446,7 +551,7 @@ Note: There are more laws for a single operation but let's skip that for now ; s
 
 !!!
 
-### Distibutivity
+### Distributivity
 
 ```
 // left
@@ -460,25 +565,39 @@ x * (y + z) = x*y + x*z
 
 !!!
 
-### Sequence distributes over parallel
+### Distributivity Power
 
-```swift
-translate * (fade + bluify) =
-    translate*fade + translate*bluify
+```
+// reduce work!
+x*y + x*z = x*(y + z)
+// 3 operations vs 2 operations
 ```
 
 !!!
 
 ### Sequence distributes over parallel
 
-(animation)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/right-distributive.mp4" type="video/mp4">
+  </video>
+  ```
+  grow * (red + fade) = grow * red + grow * fade
+  ```
+</div>
 
 !!!
 
-### Notation change notice!
+### Sequence distributes over parallel
 
-`+` means parallel <br>
-`*` means sequence
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/left-distributive.mp4" type="video/mp4">
+  </video>
+  ```
+  (grow + red) * fade = grow * fade + red * fade
+  ```
+</div>
 
 !!!
 
@@ -489,21 +608,29 @@ translate * (fade + bluify) =
 // * forms a monoid (empty = 1)
 // * distributes over + (left and right)
 // 0* annihalates (0 * x = x * 0 = 0)
+protocol Semiring {
+  func +(lhs: Self, rhs: Self) -> Self
+  func *(lhs: Self, rhs: Self) -> Self
+  var zero: Self { get }
+  var one: Self { get }
+}
 ```
 
 !!!
 
-### Semirings! Animations are so close to semirings, but don't have a simple additive identity
+### Animations are semirings!
 
 !!!
 
 ### Finally, we can think about implementing
 
-Now we have our abstract model in our head. We know how we want it to behave. Now we can start implementing it.
+(image)
+
+Note: Now we have our abstract model in our head. We know how we want it to behave. Now we can start implementing it.
 
 !!!
 
-### Creativity
+### Creativity with guide-rails
 
 Note: I sat down with very smart people and we played around with different representations for a bit until we found one that works
 
@@ -515,81 +642,298 @@ A value changing over time
 
 !!!
 
-### Remember, we need to keep the duration to get all our laws to work
+### Animation at a high-level
 
-Animaation = Value changing over time AND a duration
+```swift
+/*
+Animation :=
+  | Value changing over time AND a non-zero duration
+  | A cancelled animation (additive identity)
+  | A trivial animation with no duration (multiplicative identity)
+*/
+```
+
+Note: Remember, we need to keep the duration to get all our laws to work
 
 !!!
 
 ### We use the algebra of datatypes and parametricity
 
 ```swift
-public struct Animation<A> {
-  let duration: CFAbsoluteTime
-  let _value: (CFAbsoluteTime) -> A
+public enum Animation<A> {
+```
+
+```swift
+  case cancelled
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+  case trivial
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+  case runnable(duration: CFAbsoluteTime, value: (Progress) -> A)
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
-### Let's start with the sequence identity
+### Identities
 
 ```swift
   /// A multiplicative identity
   public static var one: Animation {
-    return .init(duration: 0) { _ in fatalError() }
+    return .trivial
   }
 ```
+
+```swift
+  /// An additive identity
+  public static var zero: Animation {
+    return .cancelled
+  }
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
 ### Sequence composition (mulitiplication)
 
 ```swift
-  public static func * (lhs: Animation, rhs: Animation) -> Animation {
-    let sum = lhs.duration + rhs.duration
-    let ratio = lhs.duration / sum
-
-    return Animation(duration: sum) { t in
-      (t <= ratio && lhs.duration != 0)
-        ? lhs.value(t / ratio)
-        : rhs.value((t - ratio) / (1 - ratio))
-    }
-  }
+static func *(lhs: Animation, rhs: Animation) -> Animation {
 ```
 
+```swift
+   switch (lhs, rhs) {
+   case (.cancelled, _),
+          (_, .cancelled):
+         return .cancelled
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+   case (.trivial, let x),
+        (let x, .trivial):
+       return x
+   /* ... */
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
-### It's more powerful if we define the parallel composition only when A is a semigroup
+### Sequence composition (multiplication)
+
+```swift
+static func *(lhs: Animation, rhs: Animation) -> Animation {
+```
+
+```swift
+    switch (lhs, rhs) {
+    /* ... */
+    case (._runnable(let duration1, let value1),
+      ._runnable(let duration2, let value2)):
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+        let sum = duration1 + duration2
+        let ratio = duration1 / sum
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+        return Animation.runnable(duration: sum) { t in
+            t <= ratio
+                ? value1(t / ratio)
+                : value2((t - ratio) / (1 - ratio))
+        }
+    }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+!!!
+
+### Parallel Composition
 
 ```swift
 extension Animation where A: Semigroup {
-  /// Runs two animations in paralllel and combines the results. If one is longer than the other, the shorter one will stop at it's
-  /// last value until the longer one finishes.
-  public static func + (lhs: Animation, rhs: Animation) -> Animation {
-    let newDuration = max(lhs.duration, rhs.duration)
-  
-    return .init(duration: newDuration) { t in
-      let a1 = lhs.value(min(1, t * newDuration / lhs.duration))
-      let a2 = rhs.value(min(1, t * newDuration / rhs.duration))
-      return a1 <> a2
+```
+
+```swift
+public static func +(lhs: Animation, rhs: Animation) -> Animation {
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+   switch (lhs, rhs) {
+   case (.cancelled, .trivial),
+        (.trivial, .cancelled),
+        (.trivial, .trivial):
+       return .trivial
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+   case (.cancelled, .cancelled):
+       return .cancelled
+   /* ... */
+   }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+!!!
+
+### Parallel Composition
+
+```swift
+public static func +(lhs: Animation, rhs: Animation) -> Animation {
+```
+
+```swift
+    /* ... */
+    case (._runnable(let duration1, let value1),
+    ._runnable(let duration2, let value2)):
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+        let newDuration = max(duration1, duration2)
+
+        return .runnable(duration: newDuration) { t in
+            let a1 = value1(min(1, t * newDuration / duration1))
+            let a2 = value2(min(1, t * newDuration / duration2))
+            return a1 <> a2
+        }
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+    case (_, ._runnable(let d, let v)),
+         (._runnable(let d, let v), _):
+        return .runnable(duration:d, value:v)
     }
-  }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+Note: This is the almost part (the semigroup constraint on the A)
+
+!!!
+
+### Validate laws!
+
+(image)
+
+Note: You can use quickcheck for the this, here is a not proof, but something at least
+
+!!!
+
+### Extra bits
+
+```swift
+func map<B>(_ f: (A) -> B) -> Animation<B>
+```
+
+```swift
+func zip<B>(_ other: Animation<B>) -> Animation<(A, B)>
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: It turns out we do some category-theoretic composition as well, so we can animate As and Bs
+
+!!!
+
+### Some higher-level primitives
+
+```swift
+/// Reverses the animation.
+public var reversed: Animation<A> {
+```
+
+```swift
+    switch self {
+    case .trivial:
+        return .trivial
+    case .cancelled:
+        return .cancelled
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+    case ._runnable(let duration, let value):
+        return .runnable(duration: duration) { t in
+            return value(1 - t)
+        }
+    }
+}
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+!!!
+
+### Some higher-level primitives
+
+```swift
+/// Run this animation and then runs its reverse.
+public var looped: Animation
+
+```
+
+```swift
+public func delayed(by delay: CFAbsoluteTime) -> Animation
+
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+public func linear(from a: CGFloat, to b: CGFloat, in duration: CFAbsoluteTime) -> Animation<CGFloatAverage>
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+!!!
+
+### API Consumers are empowered
+
+<div class="vidcode">
+  <video playsinline autoplay muted loop style="width:60%;">
+    <source src="vids/actors.mp4" type="video/mp4">
+  </video>
+  ```
+  scene = .times(/*...*/, .plus(/*...*/))
+  ```
+</div>
+
+!!!
+
+### Scene
+
+```swift
+struct Scene {
+  let fragments : FreeSemiring<SceneFragment>
+  let actors : [UIView]
 }
 ```
 
+```swift
+struct SceneFragment {
+  let name : String
+  let animation : Animation<Unit>
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: Mostly drawing logic using iOS UIViews, the actual timeline calculations is a 15line recursive function!
+
 !!!
 
-### (It turns out we do some category-theoretic composition as well, so we can animate As and Bs)
-
-It's an applicative functor
-
-!!!
-
-Maybe a few more animations???
-
-!!!
+<!-- .slide: data-background="#2aa198" -->
+<!-- .slide: data-state="terminal" -->
 
 # Thanks!
 
@@ -602,4 +946,30 @@ Slide Deck: [https://is.gd/Qv7rC6](https://is.gd/Qv7rC6)
 ## Appendix
 
 !!!
+
+## The interval function
+
+```swift
+    private static func intervals(_ frags: FreeSemiring<SceneFragment>) -> [(String, Double, Double)] {
+
+        func helper(_ a: FreeSemiring<SceneFragment>, _ currDuration: CFAbsoluteTime, _ build: [(String, CFAbsoluteTime, CFAbsoluteTime)]) -> [(String, CFAbsoluteTime, CFAbsoluteTime)] {
+            switch a {
+            case ._one: return build
+            case ._zero: return []
+            case .single(let a): return build + [(a.name, currDuration, currDuration+a.animation.duration)]
+            case .plus(let l, let r):
+                let lBuild = helper(l, currDuration, build)
+                return helper(r, currDuration, lBuild)
+            case .times(let l, let r):
+                let lBuild = helper(l, currDuration, build)
+                let next = longestTime(lBuild)
+                return helper(r, currDuration+next, lBuild)
+            }
+        }
+
+        return helper(frags, 0, [])
+    }
+```
+
+
 
