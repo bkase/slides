@@ -170,3 +170,14 @@ NOTES:
 17. Here's an example of me moving numbers around. I won't even call out the category theory, we could keep going but I'm going to stop here
 
 
+18. Show the code of the title in beginning
+19. Don't have to say what a magma is
+20. Skip over some of the laws, only show a couple
+21. General concept of monoid which is something you can put together, examples of Monoid integers/lists/animations ;; animations
+22. Animation slide is too brief. If you implement this and this and this
+23. Seqeunce ; and | for parallel
+24. Move the uncontroversial goals, then examples
+25. Closed
+26. Don't get in the weeds. Keep it on the topic of animations.
+27. Focus on the examples...
+

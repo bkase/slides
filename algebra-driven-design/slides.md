@@ -5,13 +5,104 @@
   </video>
 </div>
 
+
+!!!
+
+### Natural description
+
+```ideal
+let left =
+  grow v1 from radius 10 to 100 with an ease-in-out
+```
+
+```ideal
+let right =
+  rotate v2 from 0 to 2*pi degrees with a high ease-out
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```ideal
+let animations = left || right
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```ideal
+let final = fadeIn all views ; animations
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+!!!
+
+### The real code
+
+```swift
+let left =
+  linear(from: 10, to: 100, in: 2.0).time(easeInOut)
+    .do(resize(v1))
+```
+
+```swift
+let right =
+  linear(from: 0, to: 2*CGFloat.pi, in: 2.0).time(easeOut(1.5))
+    .do(rotate(v2))
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+```swift
+let fadeIn =
+  linear(from: 0, to: 1, in: 1.0).time(easeInOut)
+    .bind(container, with: \.alpha)
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+let animations = left + right
+let final = fadeIn * animations
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
 Note: How would we go about designing a library for this?
+
+!!!
+
+### Uncontroversial Goals
+
+1. Minimize Complexity (Simple)
+2. Maximize Expressivity
+
+!!!
+
+### Complexity: How to measure
+
+Complexity increases as public interface primitive count increases
+
+Note: Primitive means a parameters to a function, a new type in the library, a side-effect, hidden mutation. A very simple library has one type and one method with one parameter for example. Yes this can actually be useful, we'll see later.
+
+!!!
+
+### Expressivity: How to measure
+
+Expressivity increases as problem solutions increase
+
+Note: Empower to write clean code in applications. But it's hard to do more things with fewer things...
+
+!!!
+
+### Tradeoff
+
+<img alt="expressivity vs complexity" src="img/graph.png" width="80%" height="80%"/>
+
+> created with https://jakevdp.github.io/blog/2012/10/07/xkcd-style-plots-in-matplotlib/
+
+Note: Tradeoff, we want to impact simplicity very trivially and extremely raise expressivity. ; now before we start designing this animation library...
 
 !!!
 
 ### Looking at other approaches
 
-(image)
+![woman glasses](img/woman-glasses.jpg)
+
+> https://www.goodfreephotos.com/albums/people/woman-with-glasses-looking-at-screen.jpg
 
 !!!
 
@@ -44,49 +135,19 @@ Note: simple on the surface, but relies too heavily on effects and requires call
 
 ### Android Animations
 
-(insert video of the Android animation docs here)
-
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/android_animation.mp4" type="video/mp4">
+  </video>
+</div>
 
 Note: Has a solution for choreographing animations explicitly in a non-effectful way, but is *very complicated*. Adjusting duration / easing curves are effectful.
 
 !!!
 
-### Uncontroversial Goals
-
-1. Minimize Complexity (Simple)
-2. Maximize Expressivity
-
-!!!
-
-### Complexity: How to measure
-
-Complexity increases as public interface primitive count increases
-
-Note: Primitive means a parameters to a function, a new type in the library. A very simple library has one type and one method with one parameter for example. Yes this can actually be useful, we'll see later.
-
-!!!
-
-### Expressivity: How to measure
-
-Expressivity increases as problem solutions increase
-
-Note: Empower to write clean code in applications. But it's hard to do more things with fewer things...
-
-!!!
-
-### Tradeoff
-
-<img alt="expressivity vs complexity" src="img/graph.png" width="80%" height="80%"/>
-
-> created with https://jakevdp.github.io/blog/2012/10/07/xkcd-style-plots-in-matplotlib/
-
-Note: Tradeoff, we want to impact simplicity very trivially and extremely raise expressivity.
-
-!!!
-
 ### Composable APIs: Expressive and Simple
 
-The local maxima for expressiveness squeezed from one type
+Necessary and sufficient
 
 Note: In other words, a way to increase expressiveness without harming simplicity as much
 
@@ -94,7 +155,9 @@ Note: In other words, a way to increase expressiveness without harming simplicit
 
 ### Composable Animations
 
-(image of legos)
+![lego composable](img/lego.jpg)
+
+> https://pixabay.com/en/lego-building-blocks-colorful-2285065/
 
 Note: Composable animations let us describe primitives once and then re-use them like lego bricks to make complex reusable layer two primitives.....
 
@@ -102,7 +165,9 @@ Note: Composable animations let us describe primitives once and then re-use them
 
 ### Okay we want composition... how can we find it in animations
 
-(thinking face)
+![thinking face](img/thinking-face2.jpg)
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
 
 !!!
 
@@ -126,7 +191,7 @@ Note: Composable animations let us describe primitives once and then re-use them
     <source src="vids/fade-grow-parallel.mp4" type="video/mp4">
   </video>
   ```
-  grow | fadeout
+  grow || fadeout
   ```
 </div>
 
@@ -134,13 +199,18 @@ Note: Composable animations let us describe primitives once and then re-use them
 
 ### Changing time
 
-(show easing curve)
+![ease in out](img/ease-in-out.svg)
+
+> https://upload.wikimedia.org/wikipedia/commons/8/88/CSS3_Ease-in-out_timing_function_curve.svg
 
 !!!
 
 ### What do we do now?
 
-(image)
+![thinking face](img/thinking-face2.jpg)
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
+
 
 Note: You could stop here, and build out a library, if you use purity, you'll already create something better than the other things out there. But we can do better...
 
@@ -148,7 +218,10 @@ Note: You could stop here, and build out a library, if you use purity, you'll al
 
 ### Math!
 
-(image)
+<img alt="math" src="img/math.svg" width="80%" height="80%"/>
+
+> https://upload.wikimedia.org/wikipedia/commons/b/b8/Lots_of_math_symbols_and_numbers.svg
+
 
 Note: But there's a secret, we can do more thinking up-front; look to mathematics
 
@@ -156,7 +229,9 @@ Note: But there's a secret, we can do more thinking up-front; look to mathematic
 
 ### Category Theory?
 
-(complex category theory)
+<img alt="chaos" src="img/chaos2.jpg" width="75%" height="75%"/>
+
+> https://pixabay.com/p-724096
 
 Note: Category Theory is the obvious place, but I think category theory is hard to comprehend and express in certain languges. There is something more primitive, easier to understand, and possible to instantiate in "every-day" modern languages (like swift) not just Haskell/Scala
 
@@ -169,75 +244,52 @@ Note: Category Theory is the obvious place, but I think category theory is hard 
 
 ## Animation in Swift as Semirings
 
-By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
+By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
 !!!
 
-### Closed Binary Operation
+### Binary Operation
 
 ```swift
-infix operator <>: MultiplicationPrecedence {
-  associativity: left
-}
-func <>(lhs: A, rhs: A) -> A {
+func ;(lhs: A, rhs: A) -> A {
   // implement this for some A
 }
 
-// Usage: `x <> y <> z`
+// Usage: `x ; y ; z`
 ```
 
-Note: Explain closed! This is so general...
+Note: So general
 
 !!!
 
-### Magma
-
-```swift
-protocol Magma {
-  static func <>(lhs: Self, rhs: Self) -> Self
-}
-```
-
-Note: Names are important to allow discourse across disciplines
-
-!!!
-
-### Magma: Diagram view
-
-![magma diagram](img/magma-diagram.png)
-
-!!!
-
-### Magma (example)
+### Sequence Animations
 
 <div class="vidcode">
   <video playsinline autoplay muted loop>
     <source src="vids/grow-then-fade.mp4" type="video/mp4">
   </video>
   ```
-  grow <> fadeout
+  grow ; fadeout
   ```
 </div>
 
-!!!
-
-### So what?
-
-(image)
-
-Note: So far, we haven't recovered any powers other than a name; We can think about how our composition behaves...
+Note: So general ... We give it meaning using laws
 
 !!!
 
 ### Using Laws!
 
-(image)
+<img alt="law" src="img/law.jpg" width="80%" height="80%"/>
+
+> https://upload.wikimedia.org/wikipedia/commons/b/b7/Law3.jpg
 
 !!!
 
 ### Laws?
 
 A law is an _equivalence_ between two programs<br> that should _always be true_
+
+Note: I will show you how laws are the secret that gives us the guide-rails to build an expressive interface without losing simplicity
 
 !!!
 
@@ -259,7 +311,7 @@ Note: These are equivalent for any x,y,z for integer addition
 ### Associativity
 
 ```
-(x <> y) <> z = x <> (y <> z)
+(x ; y) ; z = x ; (y ; z)
 ```
 
 Note: On our closed binary operation, we can reason about associativity with this: any x,y,z under some type with the operation `<>`)
@@ -269,15 +321,11 @@ Note: On our closed binary operation, we can reason about associativity with thi
 ### Associativity
 
 ```
-/// Law: (x <> y) <> z = x <> (y <> z) (associativity)
-protocol Semigroup: Magma {}
+/// Law: (x ; y) ; z = x ; (y ; z) (associativity)
+protocol Semigroup {
+  static func ;(lhs: Self, rhs: Self) -> Self
+}
 ```
-
-!!!
-
-### Semigroup: Diagram view
-
-![semigroup diagram](img/semigroup-diagram.png)
 
 !!!
 
@@ -288,7 +336,7 @@ protocol Semigroup: Magma {}
     <source src="vids/grow-red-fade.mp4" type="video/mp4">
   </video>
   ```
-  (grow <> red) <> fade = grow <> (red <> fade)
+  (grow ; red) ; fade = grow ; (red ; fade)
   ```
 </div>
 
@@ -297,10 +345,10 @@ protocol Semigroup: Magma {}
 ### Associativity power: Freedom to chunk work
 
 ```swift
-let moveAndFade = translate <> fade
-let all = moveAndFade <> appear
+let moveAndFade = translate ; fade
+let all = moveAndFade ; appear
 // or
-let all = translate <> fade <> appear
+let all = translate ; fade ; appear
 ```
 
 Note: It's up to the consumers of the API. They get more expressive power!
@@ -310,10 +358,10 @@ Note: It's up to the consumers of the API. They get more expressive power!
 ### Associativity power: Paralellization is safe
 
 ```swift
-// work I need to do: x <> y <> z <> w
-let a = x <> y // on thread1
-let b = z <> w // on thread2
-return a <> b
+// work I need to do: x ; y ; z ; w
+let a = x ; y // on thread1
+let b = z ; w // on thread2
+return a ; b
 ```
 
 Note: Not so important in the animation domain, but very useful for other domains
@@ -327,8 +375,8 @@ Note: Not so important in the animation domain, but very useful for other domain
 ### Identity
 
 ```
-empty <> x = x
-x <> empty = x
+empty + x = x
+x + empty = x
 // ex: 0 + 1 = 1
 // ex: 1 + 0 = 1
 ```
@@ -350,22 +398,15 @@ Note: Again this is up to the client to decide if the inlining will make the cod
 ## Idenity + Semigroup = Monoid
 
 ```swift
-/// Law: empty <> x = x <> empty = x (identity)
+/// Law: empty ; x = x ; empty = x (identity)
 /// and is a Semigroup
-/// (x <> y) <> z = x <> (y <> z) (associativity)
+/// (x ; y) ; z = x ; (y ; z) (associativity)
 protocol Monoid: Semigroup {
   static var empty: Self { get }
-  static func <>(lhs: Self, rhs: Self) -> Self
 }
 ```
 
 Note: Just extending semigroup with the identity constant
-
-!!!
-
-### Monoid: Diagram view
-
-![monoid diagram](img/monoid-diagram.png)
 
 !!!
 
@@ -376,7 +417,7 @@ Note: Just extending semigroup with the identity constant
     <source src="vids/grow-seq-identity.mp4" type="video/mp4">
   </video>
   ```
-  grow <> empty = empty <> grow = grow
+  grow ; empty = empty ; grow = grow
   ```
 </div>
 
@@ -391,8 +432,8 @@ Note: This is a little tougher, but if we think really carefully, we can make su
 ### Annihilation
 
 ```
-x <> 0 = 0
-0 <> x = 0
+x * 0 = 0
+0 * x = 0
 // ex: 0 * 1 = 0
 // ex: 1 * 0 = 0
 ```
@@ -404,7 +445,7 @@ Note: Annihilation erases information
 ### Sequencing Animations with Cancel
 
 ```swift
-.cancelled <> transparent = .cancelled
+.cancelled ; transparent = .cancelled
 ```
 
 Note: Once you cancel, it's a no-op over sequence
@@ -418,19 +459,7 @@ Note: Once you cancel, it's a no-op over sequence
 ### Commutativity
 
 ```swift
-x <> y = y <> x
-```
-
-!!!
-
-### Comutativity Power: Operations can be reordered
-
-```swift
-var combined = Sum.empty
-/* ... */
-func onNewInt(v: Int) {
-  combined = Sum(value: v) <> combined
-}
+x + y = y + x
 ```
 
 !!!
@@ -438,18 +467,12 @@ func onNewInt(v: Int) {
 ### Commutative Monoid
 
 ```swift
-/// Law: x <> y = y <> x (commutativity)
+/// Law: x ; y = y ; x (commutativity)
 /// and the Monoid laws:
-/// empty <> x = x <> empty = x (identity)
-/// (x <> y) <> z = x <> (y <> z) (asociativity)
+/// empty ; x = x ; empty = x (identity)
+/// (x ; y) ; z = x ; (y ; z) (asociativity)
 protocol CommutativeMonoid: Monoid {}
 ```
-
-!!!
-
-### CommutativeMonoid: Diagram view
-
-![commutativemonoid diagram](img/commutativemonoid-diagram.png)
 
 !!!
 
@@ -460,7 +483,7 @@ protocol CommutativeMonoid: Monoid {}
     <source src="vids/fade-then-grow.mp4" type="video/mp4">
   </video>
   ```
-  fade <> grow != grow <> fade
+  fade ; grow != grow ; fade
   ```
 </div>
 
@@ -474,26 +497,11 @@ protocol CommutativeMonoid: Monoid {}
     <source src="vids/fade-grow-parallel.mp4" type="video/mp4">
   </video>
   ```
-  fade <> grow = grow <> fade
+  fade || grow = grow || fade
   ```
 </div>
 
 Note: This IS commutative, but is it also a monoid?
-
-!!!
-
-### Parallel composition -- magma
-
-<div class="vidcode">
-  <video playsinline autoplay muted loop>
-    <source src="vids/fade-grow-parallel.mp4" type="video/mp4">
-  </video>
-  ```
-  fade <> grow
-  ```
-</div>
-
-Note: It's a magma
 
 !!!
 
@@ -504,7 +512,7 @@ Note: It's a magma
     <source src="vids/grow-red-fade-par.mp4" type="video/mp4">
   </video>
   ```
-  grow <> (red <> fade) = (grow <> red) <> fade
+  grow || (red || fade) = (grow || red) || fade
   ```
 </div>
 
@@ -519,7 +527,7 @@ Note: It's a semigroup
     <source src="vids/grow-par-identity.mp4" type="video/mp4">
   </video>
   ```
-  grow <> .cancelled = grow <> .cancelled = grow
+  grow || .cancelled = grow || .cancelled = grow
   ```
 </div>
 
@@ -529,7 +537,9 @@ Note: What's the identity?
 
 ### Parallel Composition Commutative Monoid
 
-(image)
+<img alt="party popper" src="img/party-popper.svg" width="50%" height="50%"/>
+
+> https://upload.wikimedia.org/wikipedia/commons/3/31/Emojione_1F389.svg
 
 Note: Thus parallel composition does form a commutative monoid
 
@@ -537,7 +547,10 @@ Note: Thus parallel composition does form a commutative monoid
 
 ### More laws
 
-(image)
+<img alt="hammer" src="img/hammer.jpg" width="80%" height="80%"/>
+
+> https://pixabay.com/en/hammer-books-law-court-lawyer-719066/
+
 
 Note: There are more common laws for a single operation but let's skip that for now ; such as idempotence
 
@@ -582,7 +595,7 @@ x*y + x*z = x*(y + z)
     <source src="vids/right-distributive.mp4" type="video/mp4">
   </video>
   ```
-  grow * (red + fade) = grow * red + grow * fade
+  grow ; (red || fade) = (grow ; red) || (grow ; fade)
   ```
 </div>
 
@@ -595,7 +608,7 @@ x*y + x*z = x*(y + z)
     <source src="vids/left-distributive.mp4" type="video/mp4">
   </video>
   ```
-  (grow + red) * fade = grow * fade + red * fade
+  (grow || red) ; fade = (grow ; fade) || (red ; fade)
   ```
 </div>
 
@@ -604,13 +617,13 @@ x*y + x*z = x*(y + z)
 ### Semiring
 
 ```swift
-// + forms a commutative monoid (empty = 0)
-// * forms a monoid (empty = 1)
-// * distributes over + (left and right)
-// 0* annihalates (0 * x = x * 0 = 0)
+// || forms a commutative monoid (empty = 0)
+// ; forms a monoid (empty = 1)
+// ; distributes over || (left and right)
+// 0; annihalates (0 ; x = x ; 0 = 0)
 protocol Semiring {
-  func +(lhs: Self, rhs: Self) -> Self
-  func *(lhs: Self, rhs: Self) -> Self
+  func ||(lhs: Self, rhs: Self) -> Self
+  func ;(lhs: Self, rhs: Self) -> Self
   var zero: Self { get }
   var one: Self { get }
 }
@@ -624,7 +637,9 @@ protocol Semiring {
 
 ### Finally, we can think about implementing
 
-(image)
+![thinking face](img/thinking-face2.jpg)
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
 
 Note: Now we have our abstract model in our head. We know how we want it to behave. Now we can start implementing it.
 
@@ -674,7 +689,9 @@ public enum Animation<A> {
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-  case runnable(duration: CFAbsoluteTime, value: (Progress) -> A)
+  case runnable(
+    duration: CFAbsoluteTime,
+    value: (Progress) -> A)
 }
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
@@ -703,7 +720,7 @@ public enum Animation<A> {
 ### Sequence composition (mulitiplication)
 
 ```swift
-static func *(lhs: Animation, rhs: Animation) -> Animation {
+static func ;(lhs: Animation, rhs: Animation) -> Animation {
 ```
 
 ```swift
@@ -728,10 +745,7 @@ static func *(lhs: Animation, rhs: Animation) -> Animation {
 ### Sequence composition (multiplication)
 
 ```swift
-static func *(lhs: Animation, rhs: Animation) -> Animation {
-```
-
-```swift
+static func ;(lhs: Animation, rhs: Animation) -> Animation {
     switch (lhs, rhs) {
     /* ... */
     case (._runnable(let duration1, let value1),
@@ -747,6 +761,10 @@ static func *(lhs: Animation, rhs: Animation) -> Animation {
 
 ```swift
         return Animation.runnable(duration: sum) { t in
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+```swift
             t <= ratio
                 ? value1(t / ratio)
                 : value2((t - ratio) / (1 - ratio))
@@ -754,18 +772,18 @@ static func *(lhs: Animation, rhs: Animation) -> Animation {
     }
 }
 ```
-<!-- .element: class="fragment" data-fragment-index="3" -->
+<!-- .element: class="fragment" data-fragment-index="4" -->
 
 !!!
 
 ### Parallel Composition
 
 ```swift
-extension Animation where A: Semigroup {
+extension Animation where A: CommutativeSemigroup {
 ```
 
 ```swift
-public static func +(lhs: Animation, rhs: Animation) -> Animation {
+public static func ||(lhs: Animation, rhs: Animation) -> Animation {
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -792,10 +810,7 @@ public static func +(lhs: Animation, rhs: Animation) -> Animation {
 ### Parallel Composition
 
 ```swift
-public static func +(lhs: Animation, rhs: Animation) -> Animation {
-```
-
-```swift
+public static func ||(lhs: Animation, rhs: Animation) -> Animation {
     /* ... */
     case (._runnable(let duration1, let value1),
     ._runnable(let duration2, let value2)):
@@ -804,14 +819,18 @@ public static func +(lhs: Animation, rhs: Animation) -> Animation {
 
 ```swift
         let newDuration = max(duration1, duration2)
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
 
         return .runnable(duration: newDuration) { t in
             let a1 = value1(min(1, t * newDuration / duration1))
             let a2 = value2(min(1, t * newDuration / duration2))
-            return a1 <> a2
+            return a1 + a2
         }
 ```
-<!-- .element: class="fragment" data-fragment-index="2" -->
+<!-- .element: class="fragment" data-fragment-index="3" -->
 
 ```swift
     case (_, ._runnable(let d, let v)),
@@ -820,7 +839,7 @@ public static func +(lhs: Animation, rhs: Animation) -> Animation {
     }
 }
 ```
-<!-- .element: class="fragment" data-fragment-index="3" -->
+<!-- .element: class="fragment" data-fragment-index="4" -->
 
 Note: This is the almost part (the semigroup constraint on the A)
 
@@ -828,7 +847,7 @@ Note: This is the almost part (the semigroup constraint on the A)
 
 ### Validate laws!
 
-(image)
+![verify laws](img/verification.png)
 
 Note: You can use quickcheck for the this, here is a not proof, but something at least
 
@@ -838,6 +857,7 @@ Note: You can use quickcheck for the this, here is a not proof, but something at
 
 ```swift
 func map<B>(_ f: (A) -> B) -> Animation<B>
+
 ```
 
 ```swift
@@ -849,50 +869,52 @@ Note: It turns out we do some category-theoretic composition as well, so we can 
 
 !!!
 
-### Some higher-level primitives
+### Layer2 primitives
 
 ```swift
-/// Reverses the animation.
-public var reversed: Animation<A> {
+public var reversed: Animation
+
 ```
 
 ```swift
-    switch self {
-    case .trivial:
-        return .trivial
-    case .cancelled:
-        return .cancelled
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```swift
-    case ._runnable(let duration, let value):
-        return .runnable(duration: duration) { t in
-            return value(1 - t)
-        }
-    }
-}
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-!!!
-
-### Some higher-level primitives
-
-```swift
-/// Run this animation and then runs its reverse.
 public var looped: Animation
 
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
 public func delayed(by delay: CFAbsoluteTime) -> Animation
 
 ```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+```swift
+public func linear(
+    from a: CGFloat,
+    to b: CGFloat,
+    in duration: CFAbsoluteTime
+) -> Animation<CGFloatAverage>
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+!!!
+
+### Layer3 primitives
+
+```swift
+public static var fadeOut: Animation
+
+```
+
+```swift
+public static var translate: Animation
+
+```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-public func linear(from a: CGFloat, to b: CGFloat, in duration: CFAbsoluteTime) -> Animation<CGFloatAverage>
+public static var rotate: Animation
+
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
@@ -929,6 +951,43 @@ struct SceneFragment {
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 Note: Mostly drawing logic using iOS UIViews, the actual timeline calculations is a 15line recursive function!
+
+!!!
+
+### Secret Sauce
+
+```swift
+func intervals(_ frags: FreeSemiring<SceneFragment>)
+  -> [(String, Double, Double)]
+```
+
+!!!
+
+### Scenes
+
+<div class="vidcode">
+  <video playsinline autoplay muted loop style="width:60%;">
+    <source src="vids/actors.mp4" type="video/mp4">
+  </video>
+  ```
+  scene = .times(/*...*/, .plus(/*...*/))
+  ```
+</div>
+
+!!!
+
+### Take-away
+
+* <!-- .element: class="fragment" data-fragment-index="1" --> API design is about maximizing simplicity and expressivity
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Composable APIs maximize these properties
+<!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> We can find composition in animations
+<!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" --> Don't stop at composition. More laws = More expressivity
+<!-- .element: class="fragment" data-fragment-index="4" -->
+* <!-- .element: class="fragment" data-fragment-index="5" --> These libraries empower API consumers to do amazing things!
+<!-- .element: class="fragment" data-fragment-index="5" -->
 
 !!!
 
