@@ -181,3 +181,33 @@ NOTES:
 26. Don't get in the weeds. Keep it on the topic of animations.
 27. Focus on the examples...
 
+
+
+
+
+1. Go slower
+2. Break up some of the flow with summary slides (segment)
+3. scale/grow
+4. Think about title slide ;;
+5. Explain swiftisms ; trailing closures
+6. two different animations, running in parallel,
+7. Appendix
+8. Commutative monoids (two charts next to eachotehr)
+9. Playgrounds (* PLAY WITH THE CODE *)
+10. Mention the performance
+11. The real * multiplication + addition
+12. Know the things
+13. Use Perception and visualize
+14. Changing time -- didn't understand it. Say easiing curves and changing time are the same
+15. Confused about zip (up-and-down) and sequential
+16. FreeSemiring LEAVE IT OUT OR DONT TALK ABOUT IT
+17. Make sure text is not cut off
+18. People are really into functional (they won't know what an easiing curve is) -- this is an easing curve (show the different curves)
+19. Definition of complexity is controversial ;; Look it's less complicated and more complicated
+20. Figure out the outline -- really good to have the signpost; Write bullet points. Where's the jump.
+21. Maybe we can just remove map and zip
+
+
+
+
+
