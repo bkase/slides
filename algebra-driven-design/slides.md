@@ -5,6 +5,7 @@
   </video>
 </div>
 
+Note: While this is billed as a "beginner" talk, we're going to be doing a little bit of math. For thsoe that know the math already, feel free to zone out in those sections and come back when we have fun animations
 
 !!!
 
@@ -1088,6 +1089,8 @@ Note: Think of "FreeSemiring" as: taking advantage of the algebraic structure of
 * <!-- .element: class="fragment" data-fragment-index="5" --> These libraries empower API consumers to do amazing things!
 <!-- .element: class="fragment" data-fragment-index="5" -->
 
+Note: 5. Remember the layers
+
 !!!
 
 <!-- .slide: data-background="#2aa198" -->
@@ -1098,7 +1101,7 @@ Note: Think of "FreeSemiring" as: taking advantage of the algebraic structure of
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
 Library: [https://github.com/bkase/swift-fp-animations](https://github.com/bkase/swift-fp-animations)
-Slide Deck: [https://is.gd/Qv7rC6](https://is.gd/Qv7rC6)
+Slide Deck: [https://is.gd/x11G7Q](https://is.gd/x11G7Q)
 
 !!!
 
