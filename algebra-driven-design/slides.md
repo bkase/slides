@@ -608,7 +608,7 @@ Note: It's a semigroup
     <source src="vids/grow-par-identity.mp4" type="video/mp4">
   </video>
   ```
-  grow + .cancelled = grow + .cancelled = grow
+  grow + .cancelled = .cancelled + grow = grow
   ```
 </div>
 
@@ -1101,6 +1101,7 @@ Note: 5. Remember the layers
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a> 
 
 Library: [https://github.com/bkase/swift-fp-animations](https://github.com/bkase/swift-fp-animations)
+
 Slide Deck: [https://is.gd/x11G7Q](https://is.gd/x11G7Q)
 
 !!!
