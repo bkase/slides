@@ -1,48 +1,27 @@
+<!-- .slide: data-background="#2aa198" -->
+<!-- .slide: data-state="terminal" -->
 
-<div class="vidcode">
-  <video playsinline autoplay muted loop>
-    <source src="vids/title.mp4" type="video/mp4">
-  </video>
-</div>
+# Algebraic Animations
 
-!!!
-
-### Natural description
-
-```ideal
-let left =
-  grow circle from radius 10 to 100 with an ease-in-out
-```
-
-```ideal
-let right =
-  rotate square from 0 to 2*pi degrees with a high ease-out
-```
-<!-- .element: class="fragment" data-fragment-index="1" -->
-
-```ideal
-let animations = left + right
-```
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-```ideal
-let final = fadeIn all views * animations
-```
-<!-- .element: class="fragment" data-fragment-index="3" -->
+By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
 !!!
 
 ### Animations are important
 
-(image)
+![important](img/important.png)
+
+> https://pixabay.com/en/important-stamp-imprint-1705212/
 
 Note: Delightful animations make your users happy, and it makes your app standout.
 
 !!!
 
-### Principled Use of Animations More important
+### Principled Animations more important
 
-(image)
+<img alt="hammer" src="img/hammer.jpg" width="70%" height="70%"/>
+
+> https://pixabay.com/en/hammer-books-law-court-lawyer-719066/
 
 Note: Being consistent is extremely important. Large organizations even build out an official design language: these are the colors you should use, these are the curves, etc. All buttons should do the following...
 
@@ -64,7 +43,7 @@ Note: A very simple animation. Break it down.
 
 ```ideal
 let left =
-  grow circle from radius 10 to 100 with an ease-in-out
+  shrink circle from radius 100 to 10 with an ease-in-out
 ```
 
 ```ideal
@@ -87,10 +66,32 @@ let final = fadeIn all views * animations
 
 ### Why this description
 
-* Think about pieces separately
-* Combine the pieces later to build more complex things
-* Notion of composability (see my other talks on this)
-TODO
+* <!-- .element: class="fragment" data-fragment-index="1" --> Think about pieces separately
+<!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Combine the pieces later to build more complex things
+<!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Scales <!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="4" --> Video: [Beyond Types in Swift](https://www.youtube.com/watch?v=6z9QjDUKkCs) <!-- .element: class="fragment" data-fragment-index="4" -->
+
+Note: I hope you can see that this approach lets you scale. Scale in terms of people touching the code, scale in terms of power and complexity of output without hurting simplicity of code.
+
+!!!
+
+### Natural description
+
+```ideal
+let left =
+  shrink circle from radius 100 to 10 with an ease-in-out
+
+let right =
+  rotate square from 0 to 2*pi degrees with a high ease-out
+
+let animations = (left + right) looped once
+
+let final = fadeIn all views * animations
+```
+
+Note: Once again
 
 !!!
 
@@ -108,14 +109,17 @@ Note: A very simple animation. Break it down.
 
 ### Should be easy
 
-(image)
+<img alt="thinking face" src="img/thinking-face2.jpg" width="75%" height="75%"/>
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
 
 !!!
 
 ### Idiomatic iOS Approach
 
-(image)
+![woman glasses](img/woman-glasses.jpg)
 
+> https://www.goodfreephotos.com/albums/people/woman-with-glasses-looking-at-screen.jpg
 
 Note: UIView.animate
 
@@ -125,7 +129,7 @@ Note: UIView.animate
 
 ```ideal
 let left =
-  grow circle from radius 10 to 100 with an ease-in-out
+  shrink circle from radius 100 to 10 with an ease-in-out
 ```
 
 !!!
@@ -233,7 +237,14 @@ Note: But: We want a particular easeOut curve... Wait a minute! Side-effects, gl
 
 ### Parallel composition
 
-(video of simple parallel composition)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/fade-grow-parallel.mp4" type="video/mp4">
+  </video>
+  ```
+  grow + fadeout
+  ```
+</div>
 
 !!!
 
@@ -294,7 +305,9 @@ Note: We had to know apriori which completion fires second, otherwise this would
 
 ### Stuck
 
-(image)
+![uncountable](img/uncountable2.jpg)
+
+> https://c1.staticflickr.com/2/1618/26663431642_3ee25eb693_b.jpg
 
 Note: We can't do the looping because we can't inspect or manipulate the animations, they're trapped in a function.
 
@@ -302,7 +315,14 @@ Note: We can't do the looping because we can't inspect or manipulate the animati
 
 ### Sequential composition
 
-(video of simple sequential composition)
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-then-fade.mp4" type="video/mp4">
+  </video>
+  ```
+  grow * fadeout
+  ```
+</div>
 
 !!!
 
@@ -369,17 +389,19 @@ Note: Shouldn't this be simpler?
 
 !!!
 
-### Problems
+### UIView.animate Problems
 
-* Side-effects
-* Callback-based sequencing (leads to right-indentation hell)
-* Animations aren't values, can't manipulate them
+* <!-- .element: class="fragment" data-fragment-index="1" --> Side-effects <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Callback-based sequencing (leads to right-indentation hell) <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Animations aren't values, can't manipulate them <!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
 ### Core Animation
 
-(image)
+<img alt="chaos" src="img/chaos2.jpg" width="60%" height="60%"/>
+
+> https://pixabay.com/p-724096
 
 Note: More advanced, the implied tradeoff "power" vs "easy" (I say we can have both), but maybe the workarounds we had to do made the easy thing unneccesarily more confusing
 
@@ -389,7 +411,7 @@ Note: More advanced, the implied tradeoff "power" vs "easy" (I say we can have b
 
 ```ideal
 let left =
-  grow circle from radius 10 to 100 with an ease-in-out
+  shrink circle from radius 100 to 10 with an ease-in-out
 ```
 
 !!!
@@ -406,21 +428,21 @@ a.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInOut)
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```swift
-a.fromValue = 10
-a.toValue = 100
+a.fromValue = 100
+a.toValue = 10
 a.duration = 2.0
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 ```swift
-animation.fillMode = kCAFillModeForwards
+a.fillMode = kCAFillModeForwards
 // Note: You have to set this also
-animation.isRemovedOnCompletion = false
+a.isRemovedOnCompletion = false
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
 ```swift
-circle.layer.add(animation, forKey: nil)
+circle.layer.add(a, forKey: nil)
 ```
 <!-- .element: class="fragment" data-fragment-index="4" -->
 
@@ -430,7 +452,7 @@ Note: Animations are values now, but at what cost!
 
 ### Right
 
-(omitted for brevity)
+Omitted for brevity
 
 !!!
 
@@ -469,8 +491,6 @@ Note: Back to side-effect land; (1) we destructively modify left/right (2) we ca
 !!!
 
 ### Sequential Composition
-
-(vid)
 
 !!!
 
@@ -525,11 +545,11 @@ Note: (1) side effects :(, cannot compose sequentially, need to reach in to the 
 
 !!!
 
-### Problems CAAnimation
+### Core Animation Problems
 
-* Side-effects / hidden state
-* Composition is adhoc
-* Poor reuse
+* <!-- .element: class="fragment" data-fragment-index="1" --> Side-effects / hidden state <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Composition is adhoc <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Poor reuse <!-- .element: class="fragment" data-fragment-index="3" -->
 
 Note: (1) Animations are values? Sort of, but not really (2) Poor reuse BOTH through destructive modification of animations when combining, and adhoc side-effecty composition.
 
@@ -551,7 +571,7 @@ Note: Shouldn't this be simpler?
 
 ```ideal
 let left =
-  grow circle from radius 10 to 100 with an ease-in-out
+  shrink circle from radius 100 to 10 with an ease-in-out
 ```
 
 !!!
@@ -560,7 +580,7 @@ let left =
 
 ```swift
 let left =
-  linear(from: 10, to: 100, in: 2.0).time(easeInOut)
+  linear(from: 100, to: 10, in: 2.0).time(easeInOut)
     .do(resize(circle))
 ```
 
@@ -643,7 +663,7 @@ Note: Literally the same
 
 ```swift
 let left =
-  linear(from: 10, to: 100, in: 2.0).time(easeInOut)
+  linear(from: 100, to: 10, in: 2.0).time(easeInOut)
     .do(resize(circle))
 ```
 
@@ -664,15 +684,13 @@ let animations = left + right
 let final = fadeIn * animations
 ```
 
-Note: How would we go about designing a library for this?
-
 !!!
 
 ### Benefits
 
-* Animations are values
-* Animations compose cleanly
-* Rich algebraic structure
+* <!-- .element: class="fragment" data-fragment-index="1" --> Animations are values <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Animations compose cleanly <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Rich algebraic structure <!-- .element: class="fragment" data-fragment-index="3" -->
 
 Note: Let me speak a bit about it
 
@@ -680,23 +698,117 @@ Note: Let me speak a bit about it
 
 ### Library Design
 
-(image)
+<img alt="legos" src="img/lego.jpg" width="80%" height="80%"/>
 
-Note: Algebra-driven
+> https://pixabay.com/en/lego-building-blocks-colorful-2285065/
+
+Note: I was more informal about it earlier, but I believe it's important to think about the composition first. In this case, sequence/parallel, think about the algebraic properties of the composition, then think about the concrete representations. This is what I call...
 
 !!!
 
 ### Algebra-driven design
 
-(see my other talk)
+Vid: [Beyond Types in Swift](https://www.youtube.com/watch?v=6z9QjDUKkCs)
 
 !!!
 
-### Algebraic properties
+### Algebraic laws
 
-(image)
+<img alt="law" src="img/law.jpg" width="67%" height="67%"/>
 
-(TODO: Paste all the algebra stuff here and blast through it)
+> https://upload.wikimedia.org/wikipedia/commons/b/b7/Law3.jpg
+
+Note: We're going to blast through this, ready?
+
+!!!
+
+### Sequence Semigroup (associative)
+
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-red-fade.mp4" type="video/mp4">
+  </video>
+  ```
+  (grow * red) * fade = grow * (red * fade)
+  ```
+</div>
+
+!!!
+
+### Sequence Monoid (identity)
+
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-seq-identity.mp4" type="video/mp4">
+  </video>
+  ```
+  grow * empty = empty * grow = grow
+  ```
+</div>
+
+Note: Identity property
+
+!!!
+
+### Sequence Cancellation (annihilation)
+
+```swift
+.cancelled * anything = .cancelled
+```
+
+!!!
+
+### Parallel Semigroup (associtivity)
+
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-red-fade-par.mp4" type="video/mp4">
+  </video>
+  ```
+  grow + (red + fade) = (grow + red) + fade
+  ```
+</div>
+
+!!!
+
+### Parallel Monoid (identity)
+
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/grow-par-identity.mp4" type="video/mp4">
+  </video>
+  ```
+  grow + .cancelled = .cancelled + grow = grow
+  ```
+</div>
+
+!!!
+
+### Parallel Commutative Monoid
+
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/fade-grow-parallel.mp4" type="video/mp4">
+  </video>
+  ```
+  fade + grow = grow + fade
+  ```
+</div>
+
+!!!
+
+### Sequence Distributes over Parallel
+
+<div class="vidcode">
+  <video playsinline autoplay muted loop>
+    <source src="vids/right-distributive.mp4" type="video/mp4">
+  </video>
+  ```
+  grow * (red + fade) = (grow * red) + (grow * fade)
+  ```
+</div>
+
+Note: It does so on the left and right
 
 !!!
 
@@ -721,7 +833,7 @@ Note: Now we just need to find a value with which we can implement this protocol
 
 ### Creativity with guide-rails
 
-Note: I sat down with very smart people and we played around with different representations for a bit until we found one that works
+Note: Now we know what it must do, not how it must be formed. I sat down with very smart people...
 
 !!!
 
@@ -770,6 +882,8 @@ public enum Animation<A> {
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
 
+Note: We can drive the animation with CADisplayLink (see the library code), we can drive the animation using a touch gesture, we can drive the animation one frame at a time to generate an mp4 video to embed in a presentation
+
 !!!
 
 ### Animation Semiring
@@ -788,6 +902,8 @@ protocol Semiring {
 extension Animation : Semiring
 ```
 <!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: Boom, then we just implement it
 
 !!!
 
@@ -920,7 +1036,7 @@ public static func +(lhs: Animation, rhs: Animation) -> Animation {
         return .runnable(duration: newDuration) { t in
             let a1 = value1(min(1, t * newDuration / duration1))
             let a2 = value2(min(1, t * newDuration / duration2))
-            return a1 * a2
+            return a1 <> a2
         }
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
@@ -957,9 +1073,11 @@ Note: You can use quickcheck for the this, here is a not proof, but something at
   ```
 </div>
 
+Note: That's what I call the core
+
 !!!
 
-### Layer2 primitives
+### Combinator layer 2
 
 ```swift
 public var reversed: Animation
@@ -989,7 +1107,7 @@ public static func linear(
 
 !!!
 
-### Layer3 primitives
+### Combinator layer 3
 
 ```swift
 public static var fadeOut: Animation
@@ -1048,18 +1166,14 @@ Note: Think of "FreeSemiring" as: taking advantage of the algebraic structure of
 
 ### Take-away
 
-TODO
-
-* <!-- .element: class="fragment" data-fragment-index="1" --> API design is about maximizing simplicity and expressivity
+* <!-- .element: class="fragment" data-fragment-index="1" --> Solving problems by composing small independant pieces is natural and scalable
 <!-- .element: class="fragment" data-fragment-index="1" -->
-* <!-- .element: class="fragment" data-fragment-index="2" --> Composable APIs maximize these properties
+* <!-- .element: class="fragment" data-fragment-index="2" --> Both UIView.animate and Core Animation do not let us compose animations
 <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> We can find composition in animations
+* <!-- .element: class="fragment" data-fragment-index="3" --> We can do better if look towards algebra
 <!-- .element: class="fragment" data-fragment-index="3" -->
-* <!-- .element: class="fragment" data-fragment-index="4" --> Don't stop at composition. More laws = More expressivity
+* <!-- .element: class="fragment" data-fragment-index="4" --> These libraries empower API consumers to do amazing things!
 <!-- .element: class="fragment" data-fragment-index="4" -->
-* <!-- .element: class="fragment" data-fragment-index="5" --> These libraries empower API consumers to do amazing things!
-<!-- .element: class="fragment" data-fragment-index="5" -->
 
 Note: 5. Remember the layers
 
