@@ -833,6 +833,8 @@ Note: Now we just need to find a value with which we can implement this protocol
 
 ### Creativity with guide-rails
 
+* With help from Chris Eidhof and Brandon Williams
+
 Note: Now we know what it must do, not how it must be formed. I sat down with very smart people...
 
 !!!

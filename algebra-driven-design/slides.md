@@ -751,6 +751,8 @@ Note: Now we have our abstract model in our head. We know how we want it to beha
 
 ### Creativity with guide-rails
 
+* With help from Chris Eidhof and Brandon Williams
+
 Note: I sat down with very smart people and we played around with different representations for a bit until we found one that works
 
 !!!
