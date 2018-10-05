@@ -23,3 +23,7 @@ https://bkase.github.io/slides/composable-caching-swift-barcelona/
 
 Strings are Evil:
 https://bkase.github.io/slides/strings-are-evil
+
+Animations Semirings:
+https://bkase.github.io/slides/animations-semirings
+
