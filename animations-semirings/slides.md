@@ -1188,7 +1188,7 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 Library: [https://github.com/bkase/swift-fp-animations](https://github.com/bkase/swift-fp-animations)
 
-Slide Deck: [https://is.gd/x11G7Q](https://is.gd/x11G7Q)
+Slide Deck: [https://is.gd/EijJ6k](https://is.gd/EijJ6k)
 
 !!!
 
