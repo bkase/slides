@@ -136,7 +136,17 @@ Note: It's kind of like this but it helps if we model it differently
 
 !!!
 
-## Okay enough already, let's abstract
+### Aside: Associativity
+
+```
+(x <> y) <> z = x <> (y <> z)
+```
+
+Note: I can't give a talk without some algebra
+
+!!!
+
+### Okay enough already, let's abstract
 
 (picture)
 
