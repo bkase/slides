@@ -1,7 +1,7 @@
 <!-- .slide: data-background="#2aa198" -->
 <!-- .slide: data-state="terminal" -->
 
-# Parallel Periodic Scan
+# Solving a Cool Problem
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
@@ -9,13 +9,13 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 ### Coda
 
-(picture)
+<img src="img/coda-logo.svg"></img>
 
 !!!
 
 ### Succinct blockchain
 
-(picture)
+(picture -- from izzy)
 
 Note: .. powered zksnarks
 
@@ -23,7 +23,7 @@ Note: .. powered zksnarks
 
 ## zk-SNARKs
 
-(picture)
+<img src="img/zksnark.svg" style="height:60%;width:60%"></img>
 
 !!!
 
@@ -48,25 +48,15 @@ Note: Not about snarks, it's about dealing with the slowness of SNARK proof cons
 
 !!!
 
-### Plan
+## Process Transactions
 
-1. Concrete problem
-2. Abstract
-3. Goal
-4. Iterate
-5. Instantiate
+![processing transactions math](img/math0.png)
 
 !!!
 
 ## Process Transactions
 
-(picture of state transition (singular))
-
-!!!
-
-## Process Transactions
-
-(picture of state transitions (plural))
+![processing transactions math](img/math.png)
 
 !!!
 
@@ -74,7 +64,7 @@ Note: Not about snarks, it's about dealing with the slowness of SNARK proof cons
 
 ```swift
 extension Array {
-  func scan<U>(init: U, f: (U, Element) -> U) -> [U]
+  func scan<A>(init: A, f: (A, Element) -> A) -> [A]
 }
 ```
 
@@ -86,7 +76,7 @@ Note: It's almost like reduce, but you get the intermediate results
 
 ```swift
 extension Stream {
-  func scan<U>(init: U, f: (U, Element) -> U) -> Stream<U>
+  func scan<A>(init: A, f: (A, Element) -> A) -> Stream<A>
 }
 ```
 
@@ -102,51 +92,16 @@ Note: and then we have a bad cryptocurrency
 
 !!!
 
-## But what if we hold back some transactions
+### Plan
 
-(picture of batching transactions but not doing anything with them)
-
-!!!
-
-## And then handle them all at once somehow?
-
-(picture of question mark on the tree-like thing)
+1. <s>Concrete problem</s>
+2. Abstract
+3. Iterate
+4. Instantiate
 
 !!!
 
-## Merge SNARKs
-
-(picture)
-
-!!!
-
-## Aside: Periodic scan
-
-```swift
-extension Stream {
-  func periodicScan<A>(
-    init: A,
-    lift: Element -> A,
-    merge: (A, A) -> A
-  ) -> Stream<A>
-}
-```
-
-Note: It's kind of like this but it helps if we model it differently
-
-!!!
-
-### Aside: Associativity
-
-```
-(x <> y) <> z = x <> (y <> z)
-```
-
-Note: I can't give a talk without some algebra
-
-!!!
-
-### Okay enough already, let's abstract
+### Let's Abstract
 
 (picture)
 
@@ -184,7 +139,7 @@ Note: Since we can farm out work to the network, let's just assume we have an in
 
 ### Finding the problem
 
-1. Assume things
+1. <s>Assume things</s>
 2. Abstract things
 3. State the goal
 
@@ -212,18 +167,44 @@ Note: No more proofs
 
 !!!
 
+## Aside: Periodic scan
+
+```swift
+extension Stream {
+  func periodicScan<A>(
+    init: A,
+    lift: Element -> A,
+    merge: (A, A) -> A
+  ) -> Stream<A>
+}
+```
+
+Note: It's kind of like this but it helps if we model it differently
+
+!!!
+
 ### Associative merge operation
 
-(picture)
+```
+merge(merge(x, y), z) = merge(x, merge(y, z))
+```
 
 Note: No merge proofs
 
 !!!
 
+### Unit time for compute
+
+(picture)
+
+Note: All units of work take the same amount of time
+
+!!!
+
 ### Finding the problem
 
-1. Assume things
-2. Abstract things
+1. <s>Assume things</s>
+2. <s>Abstract things</s>
 3. State the goal
 
 !!!
@@ -302,6 +283,7 @@ protocol ScanState {
   associatedtype Data
   associatedtype A
 
+  static var start : Self { get }
   /* ... */
 }
 ```
@@ -319,17 +301,19 @@ protocol ScanState {
 ### State
 
 ```swift
+  func enqueueData(data: [Data]) -> Result<()>
+```
+
+!!!
+
+### State
+
+```swift
   func step(
     completedJobs: [Job.Complete<Data,A>]
   ) -> Result<A?>
 }
 ```
-
-!!!
-
-### Compute time
-
-All units of work take the same amount of time
 
 !!!
 
@@ -361,21 +345,57 @@ Note: Firehose of data; some associative combine
 
 !!!
 
-### Naive Solution
+### Serial Solution
 
-(all the pics needed to explain things)
+![A + D1](img/prenaive1.png)
+
+!!!
+
+### Serial Solution
+
+![(A + D1) + D2](img/prenaive2.png)
+
+!!!
+
+### Serial Solution
+
+![(A + D1) + D2 + ...](img/prenaive3.png)
+
+!!!
+
+### What if we gather some data first?
+
+(picture thinking face)
 
 !!!
 
 ### Naive Solution
 
-(nextJobs)
+![naive data](img/naive-data.png)
 
 !!!
 
 ### Naive Solution
 
-(step)
+![naive base](img/naive-base.png)
+
+!!!
+
+### Naive Solution
+
+![naive merge](img/naive-merge.png)
+
+!!!
+
+### Naive Solution
+
+![naive almost all](img/naive-almost-all.png)
+
+!!!
+
+### Naive Solution
+
+![naive all](img/naive-all.png)
 
 !!!
 
@@ -402,7 +422,7 @@ Note: Parallelism is halved every layer!
 
 ### More trees
 
-(picture)
+![better data](img/better-data.png)
 
 Note: Let's take the R data pieces that are available at every step
 
@@ -410,7 +430,7 @@ Note: Let's take the R data pieces that are available at every step
 
 ### More trees
 
-(pictures...)
+![better base](img/better-base.png)
 
 Note: Trace a run through
 
@@ -418,7 +438,37 @@ Note: Trace a run through
 
 ### More trees
 
-(picture log(n))
+![better merge1](img/better-merge1.png)
+
+!!!
+
+### More trees
+
+![better merge2](img/better-merge2.png)
+
+!!!
+
+### More trees
+
+![better merge3](img/better-merge3.png)
+
+!!!
+
+### More trees
+
+![better merge4](img/better-merge4.png)
+
+!!!
+
+### More trees
+
+![better merge5](img/better-merge5.png)
+
+!!!
+
+### More trees
+
+![better merge6](img/better-merge6.png)
 
 !!!
 
@@ -430,13 +480,13 @@ We increased throughput again at the cost of some latency
 
 ### Let's do better!
 
-Let's try to attack the size
+(picture)
 
 !!!
 
 ### Waste of space
 
-(picture)
+![waste of space](img/better-waste.png)
 
 Note: Once we process some layer of the tree, it becomes useless, higher layers are useless. Let's just not store that.
 
@@ -444,9 +494,15 @@ Note: Once we process some layer of the tree, it becomes useless, higher layers 
 
 ### Overlay the trees
 
-(picture)
+<img src="img/compress1.png" style="height:60%;width:60%"></img>
 
 Note: We have the "frontiers" of the log n trees at each layer
+
+!!!
+
+### Overlay the trees
+
+<img src="img/compress2.png" style="height:60%;width:60%"></img>
 
 !!!
 
@@ -458,13 +514,19 @@ Note: Same throughput and latency, but now we drastically reduced size
 
 !!!
 
+### Reveal the simplification
+
+<img src="img/job-view.png" style="height:60%;width:60%"></img>
+
+!!!
+
 ### More size shrinking!
 
 !!!
 
 ### Succinct data structures
 
-(picture of stuffing in an array)
+![succinct data structures](img/succinct.png)
 
 Note: But no time for this in details
 
@@ -472,7 +534,7 @@ Note: But no time for this in details
 
 ### Instantiate
 
-(picture)
+![instantiate](img/instantiation.png)
 
 Note: Now we can do the snark proof work for transactions faster, and have higher throughput on the cryptocurrency
 
@@ -488,9 +550,8 @@ Note: Now we can do the snark proof work for transactions faster, and have highe
 
 1. Concrete problem
 2. Abstract
-3. Goal
-4. Iterate
-5. Instantiate
+3. Iterate
+4. Instantiate
 
 !!!
 
