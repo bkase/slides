@@ -76,7 +76,10 @@ Note: It's almost like reduce, but you get the intermediate results
 
 ```swift
 extension Stream {
-  func scan<A>(init: A, f: (A, Element) -> A) -> Stream<A>
+  func scan<A>(
+    init: A,
+    f: (A, Element) -> A
+  ) -> Stream<A>
 }
 ```
 
@@ -323,12 +326,6 @@ protocol ScanState {
 
 !!!
 
-### Problem
-
-_Efficiently compute a periodic scan on an infinite stream pumping at some target rate, prefer maximizing throughput, then minimizing latency, then minimizing size of state on an infinite core machine._
-
-!!!
-
 ### Astronomic Data Processing
 
 (picture)
@@ -396,12 +393,6 @@ Note: Firehose of data; some associative combine
 ### Naive Solution
 
 ![naive all](img/naive-all.png)
-
-!!!
-
-### Analysis
-
-_Efficiently compute a periodic scan on an infinite stream pumping at some target rate, prefer maximizing throughput, then minimizing latency, then minimizing size of state on an infinite core machine._
 
 !!!
 
