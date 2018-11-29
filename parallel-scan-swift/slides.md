@@ -21,12 +21,6 @@ Note: .. powered zksnarks
 
 !!!
 
-## zk-SNARKs
-
-<img src="img/zksnark.svg" style="height:60%;width:60%"></img>
-
-!!!
-
 ## ZkSnark definition
 
 * Zero
@@ -40,23 +34,79 @@ Note: There exists DATA s.t. PROPERTY
 
 !!!
 
+## Simple SNARK
+
+_There exists_ a pdf file _such that_ the hash of the file is x.
+
+Note: And the fact that I am able to construct this means I KNOW such PDF
+
+!!!
+
+## zk-SNARKs
+
+<img src="img/zksnark.svg" style="height:60%;width:60%"></img>
+
+!!!
+
+### Blockchain SNARK
+
+_There exists_ a proof from genesis to now _and_ some new transactions _and_ consensus metadata _such that_ the proof verifies _and_ all transactions are valid _and_ the metadata is consistent.
+
+!!!
+
 ## SNARKs are slow to construct
 
 (picture)
 
-Note: Not about snarks, it's about dealing with the slowness of SNARK proof construction
+Note: Not about snarks, it's about dealing with the slowness of SNARK proof construction. So we actually do:
 
 !!!
 
-## Process Transactions
+### Blockchain SNARK
 
-![processing transactions math](img/math0.png)
+_There exists_ a proof from genesis to now _and_ a proof that the transactions changed our account state _and_ consensus metadata _such that_ both proofs verifies _and_ the metadata is consistent.
+
+Note: There are (at least) two different proofs floating around
 
 !!!
 
-## Process Transactions
+### Latex it up
 
-![processing transactions math](img/math.png)
+(Sigma)
+
+Note: Blockchain state is big sigma
+
+!!!
+
+### Latex it up
+
+(Sigma with little sigma)
+
+Note: Part of that state is the state of everyone's accounts
+
+!!!
+
+### Latex it up
+
+(A Blockchain SNARK proof)
+
+!!!
+
+### Latex it up
+
+(Transaction data)
+
+!!!
+
+### Latex it up
+
+(Transaction proof)
+
+!!!
+
+## Process Transactions Serially
+
+(TODO show diagram)
 
 !!!
 
@@ -98,75 +148,35 @@ Note: and then we have a bad cryptocurrency
 ### Plan
 
 1. <s>Concrete problem</s>
-2. Abstract
+2. Requirements
 3. Iterate
 4. Instantiate
 
 !!!
 
-### Let's Abstract
+### Properties
+
+(picture)
+
+Note: In order to derive requirements
+
+!!!
+
+### Transaction proofs and blockchain proofs are slow
 
 (picture)
 
 !!!
 
-### Finding the problem
+### Merge proofs
 
-1. Assume things
-2. Abstract things
-3. State the goal
+(a series of pictures explaining merge proofs are associative)
 
 !!!
 
-### Let's make some assumptions
+### Proof work can be done by others
 
 (picture)
-
-!!!
-
-### Assumption 1: Fixed rate of transactions R
-
-(picture)
-
-Note: We always have more transactions available than we can include in a transition
-
-!!!
-
-### Assumption 2: Infinite cores
-
-(picture)
-
-Note: Since we can farm out work to the network, let's just assume we have an infinite core machine (we want to max out parallelism)
-
-!!!
-
-### Finding the problem
-
-1. <s>Assume things</s>
-2. Abstract things
-3. State the goal
-
-!!!
-
-### Abstract away details
-
-(picture)
-
-!!!
-
-### Just data
-
-(picture)
-
-Note: No more transactions
-
-!!!
-
-### Expensive computation
-
-(picture)
-
-Note: No more proofs
 
 !!!
 
@@ -186,29 +196,29 @@ Note: It's kind of like this but it helps if we model it differently
 
 !!!
 
-### Associative merge operation
+## Process Transactions
 
-```
-merge(merge(x, y), z) = merge(x, merge(y, z))
-```
-
-Note: No merge proofs
+(TODO show the merge diagram more)
 
 !!!
 
-### Unit time for compute
+### Requirements
 
 (picture)
 
-Note: All units of work take the same amount of time
+!!!
+
+### Maximize throughput
+
+(picture)
 
 !!!
 
-### Finding the problem
+### Minimize latency
 
-1. <s>Assume things</s>
-2. <s>Abstract things</s>
-3. State the goal
+!!!
+
+### Minimize size of state
 
 !!!
 
@@ -218,105 +228,11 @@ _Efficiently compute a periodic scan on an infinite stream pumping at some targe
 
 !!!
 
-### Shared Model
+### Abstract
 
-(picture showing stepping)
+(A := foo, D := bar, etc)
 
 Note: Work happens out of band -- one step is taken at a time
-
-!!!
-
-### Swift!
-
-(picture)
-
-!!!
-
-### Jobs
-
-```swift
-enum Job {
-  // a namespace
-  enum Incomplete<Data, A> { /* ... */ }
-  enum Available<Data, A> { /* ... */ }
-  enum Complete<A> { /* ... */ }
-}
-```
-
-!!!
-
-### Jobs: Incomplete
-
-```swift
-enum Incomplete<Data, A> {
-  case base(Data?)
-  case merge(A?,A?)
-}
-```
-
-!!!
-
-### Jobs: Available
-
-```swift
-enum Available<Data, A> {
-  case base(Data)
-  case merge(A,A)
-}
-```
-
-
-!!!
-
-### Jobs: Complete
-
-```swift
-enum Complete<A> {
-  case lifted(A)
-  case merged(A)
-}
-```
-
-!!!
-
-### State
-
-```swift
-protocol ScanState {
-  associatedtype Data
-  associatedtype A
-
-  static var start : Self { get }
-  /* ... */
-}
-```
-
-!!!
-
-### State
-
-```swift
-  func nextJobs() -> [Job.Available<Data,A>]
-```
-
-!!!
-
-### State
-
-```swift
-  func enqueueData(data: [Data]) -> Result<()>
-```
-
-!!!
-
-### State
-
-```swift
-  func step(
-    completedJobs: [Job.Complete<Data,A>]
-  ) -> Result<A?>
-}
-```
 
 !!!
 
@@ -326,7 +242,7 @@ protocol ScanState {
 
 !!!
 
-### Astronomic Data Processing
+### Astronomical Telescope Data
 
 (picture)
 
@@ -339,30 +255,6 @@ Note: Non-parametric models, huge firehose of data with expensive compute on it
 (picture)
 
 Note: Firehose of data; some associative combine
-
-!!!
-
-### Serial Solution
-
-![A + D1](img/prenaive1.png)
-
-!!!
-
-### Serial Solution
-
-![(A + D1) + D2](img/prenaive2.png)
-
-!!!
-
-### Serial Solution
-
-![(A + D1) + D2 + ...](img/prenaive3.png)
-
-!!!
-
-### What if we gather some data first?
-
-(picture thinking face)
 
 !!!
 
@@ -519,7 +411,7 @@ Note: Same throughput and latency, but now we drastically reduced size
 
 ![succinct data structures](img/succinct.png)
 
-Note: But no time for this in details
+Note: "Implicit Heap"; I'll post a link to wikipedia at the end
 
 !!!
 
@@ -531,16 +423,10 @@ Note: Now we can do the snark proof work for transactions faster, and have highe
 
 !!!
 
-### Future Work
-
-(picture)
-
-!!!
-
 ### Take aways
 
 1. Concrete problem
-2. Abstract
+2. Requirements
 3. Iterate
 4. Instantiate
 
@@ -553,4 +439,6 @@ Note: Now we can do the snark proof work for transactions faster, and have highe
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
 Slide Deck: [https://is.gd/bWsLhD](https://is.gd/bWsLhD)
+
+Succinct Datastructures: [https://is.gd/1q22MX](https://is.gd/1q22MX)
 
