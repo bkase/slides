@@ -15,7 +15,9 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 
 ### Succinct blockchain
 
-(picture -- from izzy)
+![tiny leaf](img/tiny-leaf.jpg)
+
+> https://www.flickr.com/photos/75001512@N00/4450040533
 
 Note: .. powered zksnarks
 
@@ -56,7 +58,9 @@ _There exists_ a proof from genesis to now _and_ some new transactions _and_ con
 
 ### SNARKs are slow to construct
 
-(picture)
+![snail](img/snail.jpg)
+
+> https://pixabay.com/en/snail-slow-shell-mollusk-close-up-1844618/
 
 Note: Not about snarks, it's about dealing with the slowness of SNARK proof construction. So we actually do:
 
@@ -160,7 +164,6 @@ Note: and then we have a bad cryptocurrency
 1. <s>Concrete problem</s>
 2. <!-- .element: class="fragment" data-fragment-index="1" --> Properties and requirements <!-- .element: class="fragment" data-fragment-index="1" -->
 3. <!-- .element: class="fragment" data-fragment-index="2" --> Iterate <!-- .element: class="fragment" data-fragment-index="2" -->
-4. <!-- .element: class="fragment" data-fragment-index="3" --> Instantiate <!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
@@ -281,7 +284,6 @@ Note: There are just too many sigmas
 1. <s>Concrete problem</s>
 2. <s>Properties and requirements</s>
 3. Iterate
-4. Instantiate
 
 !!!
 
@@ -469,11 +471,10 @@ Note: "Implicit Heap"; I'll post a link to wikipedia at the end
 
 !!!
 
-### Instantiate
+### Other Applications
 
-![instantiate](img/instantiated.png)
-
-Note: Now we can do the snark proof work for transactions faster, and have higher throughput on the cryptocurrency
+* Astronomical Data Processing
+* <!-- .element: class="fragment" data-fragment-index="1" --> Livestream Analysis <!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!
 
@@ -481,8 +482,7 @@ Note: Now we can do the snark proof work for transactions faster, and have highe
 
 1. Concrete problem
 2. <!-- .element: class="fragment" data-fragment-index="1" --> Properties and requirements <!-- .element: class="fragment" data-fragment-index="1" -->
-3. <!-- .element: class="fragment" data-fragment-index="2" --> Iterate <!-- .element: class="fragment" data-fragment-index="2" -->
-4. <!-- .element: class="fragment" data-fragment-index="3" --> Instantiate <!-- .element: class="fragment" data-fragment-index="3" -->
+4. <!-- .element: class="fragment" data-fragment-index="2" --> Iterate <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
