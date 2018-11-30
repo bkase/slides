@@ -1,7 +1,7 @@
 <!-- .slide: data-background="#2aa198" -->
 <!-- .slide: data-state="terminal" -->
 
-# Solving a Cool Problem
+# Scanning for scans
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
@@ -21,7 +21,7 @@ Note: .. powered zksnarks
 
 !!!
 
-## ZkSnark definition
+### ZkSnark definition
 
 * Zero
 * Knowledge
@@ -34,15 +34,15 @@ Note: There exists DATA s.t. PROPERTY
 
 !!!
 
-## Simple SNARK
+### Simple SNARK
 
-_There exists_ a pdf file _such that_ the hash of the file is x.
+_There exists_ a pdf file _such that_ the hash of the file is ab3df33...
 
-Note: And the fact that I am able to construct this means I KNOW such PDF
+Note: And the fact that I am able to construct this means I KNOW such a PDF file
 
 !!!
 
-## zk-SNARKs
+### Recursive composition
 
 <img src="img/zksnark.svg" style="height:60%;width:60%"></img>
 
@@ -54,7 +54,7 @@ _There exists_ a proof from genesis to now _and_ some new transactions _and_ con
 
 !!!
 
-## SNARKs are slow to construct
+### SNARKs are slow to construct
 
 (picture)
 
@@ -72,7 +72,7 @@ Note: There are (at least) two different proofs floating around
 
 ### Latex it up
 
-(Sigma)
+![blockchain state](img/blockchain-state.png)
 
 Note: Blockchain state is big sigma
 
@@ -80,7 +80,7 @@ Note: Blockchain state is big sigma
 
 ### Latex it up
 
-(Sigma with little sigma)
+![blockchain state detailed](img/blockchain-state-detailed.png)
 
 Note: Part of that state is the state of everyone's accounts
 
@@ -88,33 +88,33 @@ Note: Part of that state is the state of everyone's accounts
 
 ### Latex it up
 
-(A Blockchain SNARK proof)
+![blockchain state proof](img/blockchain-state-proof.png)
 
 !!!
 
 ### Latex it up
 
-(Transaction data)
+![transaction data](img/single-transaction.png)
 
 !!!
 
 ### Latex it up
 
-(Transaction proof)
+![transaction proof](img/transaction-proof.png)
 
 !!!
 
-## Process Transactions Serially
+### Process Transactions Serially
 
-(TODO show diagram)
+![serial transaction processing](img/serial-proofs-concrete.png)
 
 !!!
 
-### Aside: Scan
+### Scan
 
 ```swift
 extension Array {
-  func scan<A>(init: A, f: (A, Element) -> A) -> [A]
+  func scan<U>(init: U, f: (U, Element) -> U) -> [U]
 }
 ```
 
@@ -122,14 +122,14 @@ Note: It's almost like reduce, but you get the intermediate results
 
 !!!
 
-### Aside: Scan on a stream
+### Scan on a stream
 
 ```swift
 extension Stream {
-  func scan<A>(
-    init: A,
-    f: (A, Element) -> A
-  ) -> Stream<A>
+  func scan<U>(
+    init: U,
+    f: (U, Element) -> U
+  ) -> Stream<U>
 }
 ```
 
@@ -137,26 +137,38 @@ Note: In Rx this is called: `X` in ReactiveSwift it's called `Y`
 
 !!!
 
-## Throughput is bad
+### Process Transactions Serially
 
-(picture)
+![serial transaction processing](img/serial-proofs-concrete.png)
+
+Note: Look again now that you know scan
+
+!!!
+
+### Low throughput
+
+![lean book think](img/lean-book-think2.jpg)
+
+> https://c1.staticflickr.com/1/740/31689460193_18d613a3d8_b.jpg
 
 Note: and then we have a bad cryptocurrency
 
 !!!
 
-### Plan
+### Plan to scan for a scan
 
 1. <s>Concrete problem</s>
-2. Requirements
-3. Iterate
-4. Instantiate
+2. <!-- .element: class="fragment" data-fragment-index="1" --> Properties and requirements <!-- .element: class="fragment" data-fragment-index="1" -->
+3. <!-- .element: class="fragment" data-fragment-index="2" --> Iterate <!-- .element: class="fragment" data-fragment-index="2" -->
+4. <!-- .element: class="fragment" data-fragment-index="3" --> Instantiate <!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
 ### Properties
 
-(picture)
+![book stack](img/book-stack2.jpg)
+
+>  http://dl.maxpixel.freegreatpicture.com/?f=books-1082949_1280.jpg&type=Download&token=0089c38f1e35d52df822cbbcd97116fc&pid=1082949
 
 Note: In order to derive requirements
 
@@ -164,97 +176,120 @@ Note: In order to derive requirements
 
 ### Transaction proofs and blockchain proofs are slow
 
-(picture)
-
 !!!
 
-### Merge proofs
-
-(a series of pictures explaining merge proofs are associative)
+### Transactions arrive at some rate R
 
 !!!
 
 ### Proof work can be done by others
 
-(picture)
+!!!
+
+### Merge proofs
+
+![merge proofs exist](img/merging-exists.png)
 
 !!!
 
-## Aside: Periodic scan
+### Merge Associative
+
+![merge proofs associative](img/merging-associative.png)
+
+!!!
+
+### Process Transactions
+
+![merge proofs concrete](img/merge-proofs-concrete.png)
+
+!!!
+
+### Periodic Scan
 
 ```swift
 extension Stream {
-  func periodicScan<A>(
-    init: A,
-    lift: Element -> A,
-    merge: (A, A) -> A
-  ) -> Stream<A>
+  func periodicScan<P>(
+    init: P,
+    lift: Element -> P,
+    merge: (P, P) -> P
+  ) -> Stream<P>
 }
 ```
 
-Note: It's kind of like this but it helps if we model it differently
-
-!!!
-
-## Process Transactions
-
-(TODO show the merge diagram more)
+Note: A scan-like operation that is more optimizable
 
 !!!
 
 ### Requirements
 
-(picture)
+![timeless book](img/timeless-book2.jpg)
+
+> https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Timeless_Books.jpg/1024px-Timeless_Books.jpg
 
 !!!
 
-### Maximize throughput
+### Requirements
 
-(picture)
-
-!!!
-
-### Minimize latency
-
-!!!
-
-### Minimize size of state
-
-!!!
-
-### State the goal
-
-_Efficiently compute a periodic scan on an infinite stream pumping at some target rate, prefer maximizing throughput, then minimizing latency, then minimizing size of state on an infinite core machine._
+* Maximize throughput
+* <!-- .element: class="fragment" data-fragment-index="1" --> Minimize latency <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Minimize state size <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
 ### Abstract
 
-(A := foo, D := bar, etc)
+![abstract](img/abstract.jpg)
 
-Note: Work happens out of band -- one step is taken at a time
+> https://wallpaperstudio10.com/wallpaper-abstract_colorful-67718.html
 
-!!!
-
-### More use-cases
-
-(picture)
+Note: There are just too many sigmas
 
 !!!
 
-### Astronomical Telescope Data
+### Data
 
-(picture)
-
-Note: Non-parametric models, huge firehose of data with expensive compute on it
+![D = s1 T1 s2](img/define-data.png)
 
 !!!
 
-### Livestream Analysis
+### Base
 
-(picture)
+![B = s0 -> s1](img/define-proof.png)
 
-Note: Firehose of data; some associative combine
+!!!
+
+### Merges
+
+![M12 = s0 -> s2](img/define-merge.png)
+
+!!!
+
+### Outter value
+
+![A = proof S](img/define-a.png)
+
+!!!
+
+### Scanning
+
+![naive with scan](img/naive-with-scan.png)
+
+!!!
+
+### Plan to scan for a scan
+
+1. <s>Concrete problem</s>
+2. <s>Properties and requirements</s>
+3. Iterate
+4. Instantiate
+
+!!!
+
+### Iterate
+
+![so many books](img/so-many-books2.jpg)
+
+> https://pixabay.com/en/books-library-knowledge-tunnel-21849/
 
 !!!
 
@@ -288,16 +323,25 @@ Note: Firehose of data; some associative combine
 
 !!!
 
+### Naive Solution
+
+![naive with scan](img/naive-with-scan.png)
+
+!!!
+
 ### Analysis
 
-1. We are computing a periodic scan on an infinite stream pumping at some rate R
-2. We have increased throughput at the cost of some latency when compared with the serial approach
+* Throughput up
+* <!-- .element: class="fragment" data-fragment-index="1" --> Latency increased <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> State size larger <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
 ### Problem?
 
-(picture)
+<img alt="thinking face" src="img/thinking-face2.jpg" width="75%" height="75%"/>
+
+> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
 
 Note: Parallelism is halved every layer!
 
@@ -357,13 +401,17 @@ Note: Trace a run through
 
 ### Analysis
 
-We increased throughput again at the cost of some latency
+* Throughput up more
+* <!-- .element: class="fragment" data-fragment-index="1" --> Latency same <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> State size larger <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
 ### Let's do better!
 
-(picture)
+![great it works](img/great-it-works2.jpg)
+
+> https://static.pexels.com/photos/269474/pexels-photo-269474.jpeg
 
 !!!
 
@@ -391,19 +439,25 @@ Note: We have the "frontiers" of the log n trees at each layer
 
 ### Analysis
 
-(picture)
+* Throughput same
+* <!-- .element: class="fragment" data-fragment-index="1" --> Latency same <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> State size smaller <!-- .element: class="fragment" data-fragment-index="2" -->
 
 Note: Same throughput and latency, but now we drastically reduced size
 
 !!!
 
-### Reveal the simplification
+### More size shrinking!
 
-<img src="img/job-view.png" style="height:60%;width:60%"></img>
+![great it works](img/great-it-works2.jpg)
+
+> https://static.pexels.com/photos/269474/pexels-photo-269474.jpeg
 
 !!!
 
-### More size shrinking!
+### Packing information
+
+<img src="img/job-view.png" style="height:60%;width:60%"></img>
 
 !!!
 
@@ -417,18 +471,18 @@ Note: "Implicit Heap"; I'll post a link to wikipedia at the end
 
 ### Instantiate
 
-![instantiate](img/instantiation.png)
+![instantiate](img/instantiated.png)
 
 Note: Now we can do the snark proof work for transactions faster, and have higher throughput on the cryptocurrency
 
 !!!
 
-### Take aways
+### We scanned for a scan
 
 1. Concrete problem
-2. Requirements
-3. Iterate
-4. Instantiate
+2. <!-- .element: class="fragment" data-fragment-index="1" --> Properties and requirements <!-- .element: class="fragment" data-fragment-index="1" -->
+3. <!-- .element: class="fragment" data-fragment-index="2" --> Iterate <!-- .element: class="fragment" data-fragment-index="2" -->
+4. <!-- .element: class="fragment" data-fragment-index="3" --> Instantiate <!-- .element: class="fragment" data-fragment-index="3" -->
 
 !!!
 
@@ -441,4 +495,33 @@ By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bka
 Slide Deck: [https://is.gd/bWsLhD](https://is.gd/bWsLhD)
 
 Succinct Datastructures: [https://is.gd/1q22MX](https://is.gd/1q22MX)
+
+!!!
+
+## Appendix
+
+!!!
+
+### More use-cases
+
+(picture)
+
+!!!
+
+### Astronomical Telescope Data
+
+(picture)
+
+Note: Non-parametric models, huge firehose of data with expensive compute on it
+
+!!!
+
+### Livestream Analysis
+
+(picture)
+
+Note: Firehose of data; some associative combine
+
+!!!
+
 

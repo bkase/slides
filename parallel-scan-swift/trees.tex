@@ -5,6 +5,7 @@
 \usepackage{units}    % non-stacked fractions and better unit spacing
 \usepackage{fancyvrb} % extended verbatim environments
 \usepackage{tikz}
+\usepackage{printlen}
 \usepackage{tkz-berge}
 \usepackage{mathtools}
 \usepackage{forest}
@@ -17,6 +18,62 @@
     %for tree={circle,draw}
   %}
 %}
+
+\section{Playground}
+
+\vspace{30px}
+
+\newcommand\measurexdistance[5][####1]{\measurexorydistance{#2}{#3}{#4}{#5}{\x}{-|}{(5pt,0)}{#1}}
+\newcommand\measureydistance[5][####1]{\measurexorydistance{#2}{#3}{#4}{#5}{\y}{|-}{(0,5pt)}{#1}}
+\tikzset{dimension/.style={<->,>=latex,thin,every rectangle node/.style={midway,font=\scriptsize}},
+ guideline/.style=dotted}
+\newdimen\absmd
+\def\measurexorydistance#1#2#3#4#5#6#7#8{%
+ \path #1 #3 #6 coordinate(md1) #1; \draw[guideline] #1 -- (md1);
+ \path (md1) #6 coordinate(md2) #2; \draw[guideline] #2 -- (md2);
+ \path let \p1=($(md1)-(md2)$), \n1={abs(#51)} in \pgfextra{\xdef\md{#51}\global\absmd=\n1\relax};
+ \def\distancelabelwrapper##1{#8}%
+ \ifdim\absmd>5mm
+ \draw[dimension] (md1)--(md2) node[#4]{\distancelabelwrapper{\uselengthunit{mm}\rndprintlength\absmd}};
+ \else
+ \ifdim\md>0pt
+ \draw[dimension,<-] (md1)--+#7; \draw[dimension,<-] let \p1=($(0,0)-#7$) in (md2)--+(\p1);
+ \else
+ \draw[dimension,<-] let \p1=($(0,0)-#7$) in (md1)--+(\p1); \draw[dimension,<-] (md2)--+#7;
+ \fi
+ \draw[dimension,-] (md1)--(md2) node[#4]{\distancelabelwrapper{\uselengthunit{mm}\rndprintlength\absmd}};
+ \fi}
+
+\begin{forest}
+  for tree={grow=east,s sep=8pt,l=0.5pt,inner sep=2pt}
+  [,circle,draw,name=oldest
+    [,circle,draw,edge=dotted
+    [,circle,draw,edge=dotted
+    [,circle,draw,edge=dotted
+    [,circle,draw,edge=dotted
+    [,circle,draw,edge=dotted
+    [,circle,draw,edge=dotted,name=locked
+    [,circle,draw
+      [,circle,draw
+            [,circle,draw
+              [,circle,draw
+                [,circle,draw
+                  [,circle,draw]]]
+              [,circle,draw
+                [,circle,draw
+                  [,circle,draw
+                    [,circle,draw,name=best]]]]
+              [,circle,draw]]
+            [,circle,draw]]]
+    ]]]]]]]
+    \measurexdistance[$k=2160$]
+ {(locked.north)}{(best.north)}{(.north)+(0,6mm)}{above}
+    \measurexdistance[$k=2160$]
+ {(oldest.north)}{(locked.south)}{(.south)+(0,-3mm)}{below}
+\end{forest}
+
+
+\vspace{30px}
 
 \section{Concrete}
 
@@ -96,13 +153,42 @@
 
 \vspace{30px}
 
-%\begin{forest}
+A
 
-% TODO: Show single s0 -> s2
-% TODO: Show s0 -> s3 both ways (associativity)
+\vspace{30px}
 
-%\end{forest}
+\begin{forest}
+[$\sigma_0 \implies \sigma_2$
+   [$\sigma_0 \implies \sigma_1$]
+   [$\sigma_1 \implies \sigma_2$]
+]
+\end{forest}
 
+\vspace{30px}
+
+B (left/right paren)
+
+\vspace{30px}
+
+\begin{forest}
+  [,phantom
+    [$\sigma_0 \implies \sigma_3$,name=left,for tree={green!50!black}
+      [$\sigma_0 \implies \sigma_2$
+       [$\sigma_0 \implies \sigma_1$]
+       [$\sigma_1 \implies \sigma_2$]
+      ]
+      [$\sigma_2 \implies \sigma_3$]
+    ]
+    [$\sigma_0 \implies \sigma_3$,name=right,for tree={purple!80!black}
+      [$\sigma_0 \implies \sigma_1$]
+      [$\sigma_1 \implies \sigma_3$
+       [$\sigma_1 \implies \sigma_2$]
+       [$\sigma_2 \implies \sigma_3$]
+      ]
+    ]
+  ]
+  \draw[dotted,<->] (left) to[out=east,in=west] (right);
+\end{forest}
 
 \vspace{30px}
 
@@ -146,7 +232,11 @@
 
 \vspace{30px}
 
-\[ M_{12} \coloneqq \; \; \sigma_1 \implies \sigma_2 \]
+\[ M_{12} \coloneqq \; \; \sigma_0 \implies \sigma_2 \]
+
+\vspace{30px}
+
+\[ B_1 \coloneqq \; \; \sigma_0 \implies \sigma_1 \]
 
 \vspace{30px}
 
@@ -643,7 +733,7 @@ H
   [,phantom
     [$A_2$,tier=top,name=b2,calign=first]
     [$A_3$,tier=top,name=b3,fit=rectangle
-     [$M_{9-12}$,for descendants={red}
+     [$M_{9-12}$,edge=dotted,for descendants={red}
        [$M_{9-10}$
          [$B_9$ [$D_9$] ]
          [$B_{10}$ [$D_{10}$] ]
@@ -692,7 +782,7 @@ Compress it
   [,phantom
     [$A_2$,tier=top,name=b2,calign=first]
     [$A_3$,tier=top,name=b3,fit=rectangle
-     [$M_{9-12}$
+     [$M_{9-12}$,edge=dotted
        [$M_{13-14}$
          [,circle,draw [$D_{17}$] ]
          [,circle,draw [$D_{18}$] ]
@@ -741,7 +831,7 @@ Step 2
   [,phantom
     [$\Rightarrow \! \! \Sigma_0$,tier=top,name=b0,calign=first]
     [$\Rightarrow \! \! \Sigma_1$,tier=top,name=b1,fit=rectangle
-     [$\sigma_0 \implies \sigma_4$
+     [$\sigma_0 \implies \sigma_4$,edge=dotted
        [$\sigma_4 \implies \sigma_6$
          [,circle,draw [$\sigma_8 \; T_8^9 \; \sigma_9$,magenta] ]
          [,circle,draw [$\sigma_9 \; T_9^{10} \; \sigma_{10}$,magenta] ]
