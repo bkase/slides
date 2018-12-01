@@ -492,7 +492,7 @@ Note: "Implicit Heap"; I'll post a link to wikipedia at the end
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
-Slide Deck: [https://is.gd/bWsLhD](https://is.gd/bWsLhD)
+Slide Deck: [https://is.gd/uoZkSf](https://is.gd/uoZkSf)
 
 Succinct Datastructures: [https://is.gd/1q22MX](https://is.gd/1q22MX)
 
