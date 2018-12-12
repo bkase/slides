@@ -117,8 +117,10 @@ Note: Part of that state is the state of everyone's accounts
 ### Scan
 
 ```swift
+// [1,2,3,4].scan(0, +) -> [1,3,6,10]
+
 extension Array {
-  func scan<U>(init: U, f: (U, Element) -> U) -> [U]
+  func scan<U>(init: U, _ f: (U, Element) -> U) -> [U]
 }
 ```
 
@@ -132,7 +134,7 @@ Note: It's almost like reduce, but you get the intermediate results
 extension Stream {
   func scan<U>(
     init: U,
-    f: (U, Element) -> U
+    _ f: (U, Element) -> U
   ) -> Stream<U>
 }
 ```
@@ -210,6 +212,15 @@ Note: In order to derive requirements
 ### Periodic Scan
 
 ```swift
+/* [1,2,3,4]
+    .periodicScan(
+      init: 0,
+      lift: { "\($0)" }
+      merge: { a, b in a + b }
+    )
+    -> [6,10]
+*/
+
 extension Stream {
   func periodicScan<P>(
     init: P,
