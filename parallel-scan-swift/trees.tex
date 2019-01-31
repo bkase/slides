@@ -9,7 +9,8 @@
 \usepackage{tkz-berge}
 \usepackage{mathtools}
 \usepackage{forest}
-\usetikzlibrary{arrows.meta,chains, decorations.pathreplacing, shapes.multipart}
+\usepackage{xcolor}
+\usetikzlibrary{arrows,arrows.meta,chains, decorations.pathreplacing, shapes.multipart}
 
 \begin{document}
 
@@ -22,6 +23,15 @@
 \section{Playground}
 
 \vspace{30px}
+
+\definecolor{syellow}{RGB}{181,137,0}
+\definecolor{sorange}{RGB}{203,75,22}
+\definecolor{sred}{RGB}{220,50,47}
+\definecolor{smagenta}{RGB}{211,54,130}
+\definecolor{sviolet}{RGB}{108,113,196}
+\definecolor{sblue}{RGB}{38,139,210}
+\definecolor{scyan}{RGB}{42,161,152}
+\definecolor{sgreen}{RGB}{133,153,0}
 
 \newcommand\measurexdistance[5][####1]{\measurexorydistance{#2}{#3}{#4}{#5}{\x}{-|}{(5pt,0)}{#1}}
 \newcommand\measureydistance[5][####1]{\measurexorydistance{#2}{#3}{#4}{#5}{\y}{|-}{(0,5pt)}{#1}}
@@ -129,9 +139,7 @@
 \vspace{30px}
 
 \begin{forest}
-  [,phantom
-    [$\Rightarrow \! \! \Sigma_0$,tier=top,name=b0,calign=first]
-    [$\Rightarrow \! \! \Sigma_1$,tier=top,name=b1,fit=rectangle
+    [,circle,draw,tier=top,name=b1,fit=rectangle
      [$\sigma_0 \implies \sigma_4$,edge=dashed
        [$\sigma_0 \implies \sigma_2$
          [$\sigma_0 \implies \sigma_1$ [$\sigma_0 \; T_0^1 \; \sigma_1$,magenta ] ]
@@ -143,8 +151,6 @@
        ]
      ]
     ]
-  ]
-  \draw[->] (b0) to[out=east,in=west] (b1);
 \end{forest}
 
 \vspace{30px}
@@ -197,28 +203,29 @@ B (left/right paren)
 \vspace{30px}
 
 \begin{forest}
-  [,phantom
-    [$\Rightarrow \! \! \Sigma_0$,tier=top,name=b0,calign=first]
-    [,circle,draw,tier=top,name=s01,fit=rectangle
-      [$\sigma_0 \implies \sigma_1$,edge=dashed [$\sigma_0 \; T_0^1 \; \sigma_1$,magenta] ]
-    ]
-    [,circle,draw,tier=top,name=s02
-      [$\sigma_0 \implies \sigma_2$,edge=dashed,name=i02 [$\sigma_1 \; T_1^2 \; \sigma_2$,magenta,name=i12] ]
-    ]
-    [,circle,draw,tier=top,name=s03
-      [$\sigma_0 \implies \sigma_3$,edge=dashed,name=i03 [$\sigma_2 \; T_2^3 \; \sigma_3$,magenta,name=i23] ]
-    ]
-    [$\Rightarrow \! \! \Sigma_1$,tier=top,name=b1,fit=rectangle
-      [$\sigma_0 \implies \sigma_4$,edge=dashed,name=i04 [$\sigma_3 \; T_3^4 \; \sigma_4$,magenta,name=i34] ]
-    ]
+  [,phantom,name=b0,fit=rectangle,s sep=1.5em
+    [$\sigma_0 \implies \sigma_0$,tier=mid,name=i00]
+      [,circle,draw,tier=top,name=s01,fit=rectangle
+        [$\sigma_0 \implies \sigma_1$,tier=mid,edge={dashed,<-},name=i01 [$\sigma_0 \; T_0^1 \; \sigma_1$,magenta,edge={<-}] ]
+      ]
+      [,circle,draw,tier=top,name=s02,fit=rectangle
+        [$\sigma_0 \implies \sigma_2$,tier=mid,edge={dashed,<-},name=i02 [$\sigma_1 \; T_1^2 \; \sigma_2$,magenta,edge={<-},name=i12] ]
+      ]
+      [,circle,draw,tier=top,name=s03,fit=rectangle
+        [$\sigma_0 \implies \sigma_3$,tier=mid,edge={dashed,<-},name=i03 [$\sigma_2 \; T_2^3 \; \sigma_3$,magenta,edge={<-},name=i23] ]
+      ]
+      [,circle,draw,tier=top,name=s04,fit=rectangle
+        [$\sigma_0 \implies \sigma_4$,tier=mid,edge={dashed,<-},name=i04 [$\sigma_3 \; T_3^4 \; \sigma_4$,magenta,edge={<-},name=i34] ]
+      ]
   ]
-  \draw[->] (b0) to[out=south,in=west] (s01);
-  \draw[->] (s01) to[out=east,in=west] (s02);
-  \draw[->] (s02) to[out=east,in=west] (s03);
-  \draw[->] (s03) to[out=east,in=north] (b1);
-  \draw[dashed,->] (s01) to[out=east,in=north west] (i12);
-  \draw[dashed,->] (s02) to[out=east,in=north west] (i23);
-  \draw[dashed,->] (s03) to[out=east,in=north west] (i34);
+  %\draw[->] (b0) to[out=south,in=west] (s01);
+  %\draw[->] (s01) to[out=east,in=west] (s02);
+  %\draw[->] (s02) to[out=east,in=west] (s03);
+  %\draw[->] (s03) to[out=east,in=north] (b1);
+  \draw[->] (i00) to[out=east,in=south] (i01);
+  \draw[->] (i01) to[out=east,in=south] (i02);
+  \draw[->] (i02) to[out=east,in=south] (i03);
+  \draw[->] (i03) to[out=east,in=south] (i04);
 \end{forest}
 
 
@@ -422,12 +429,31 @@ A
 \begin{forest}
    [,phantom
      [,phantom
-       [,phantom [$D_1$,green!50!black] ]
-       [,phantom [$D_2$,green!50!black] ]
+       [,phantom [$D_1$,scyan] ]
+       [,phantom [$D_2$,scyan] ]
      ]
      [,phantom
-       [,phantom [$D_3$,green!50!black] ]
-       [,phantom [$D_4$,green!50!black] ]
+       [,phantom [,phantom] ]
+       [,phantom [,phantom] ]
+     ]
+   ]
+\end{forest}
+
+\vspace{30px}
+
+A.5
+
+\vspace{30px}
+
+\begin{forest}
+   [,phantom
+     [,phantom, for tree={scyan}
+       [$B_1$ [$D_1$] ]
+       [$B_2$ [$D_2$] ]
+     ]
+     [,phantom, for tree={sviolet}
+       [,phantom [$D_3$] ]
+       [,phantom [$D_4$] ]
      ]
    ]
 \end{forest}
@@ -440,32 +466,27 @@ B
 
 \begin{forest}
   [,phantom
-   [,phantom,tier=top,name=b0,calign=first]
-   [,phantom,tier=top,name=b1,fit=rectangle
-      [,phantom
-       [,phantom
-         [$B_1$,green!50!black [$D_1$,green!50!black] ]
-         [$B_2$,green!50!black [$D_2$,green!50!black] ]
-       ]
-       [,phantom
-         [$B_3$,green!50!black [$D_3$,green!50!black] ]
-         [$B_4$,green!50!black [$D_4$,green!50!black] ]
-       ]
+   [$A_0$,tier=top,name=b0,calign=first]
+   [$A_1$,tier=top,name=b1,fit=rectangle
+     [$M_{12}$,edge=dotted, for tree={scyan}
+       [$B_1$ [$D_1$] ]
+       [$B_2$ [$D_2$] ]
+     ]
+   ]
+   [,phantom
+     [,phantom, for tree={sviolet}
+       [$B_3$ [$D_3$] ]
+       [$B_4$ [$D_4$] ]
      ]
    ]
    [,phantom,tier=top,name=b2
-     [,phantom
-       [,phantom
-         [,phantom [$D_5$,purple!80!black] ]
-         [,phantom [$D_6$,purple!80!black] ]
-       ]
-       [,phantom
-         [,phantom [,phantom] ]
-         [,phantom [,phantom] ]
-       ]
-     ]
+    [,phantom, for tree={sorange}
+     [,phantom [$D_5$] ]
+     [,phantom [$D_6$] ]
+    ]
    ]
   ]
+  \draw[->] (b0) to[out=east,in=west] (b1);
 \end{forest}
 
 \vspace{30px}
@@ -476,32 +497,34 @@ C
 
 \begin{forest}
   [,phantom
-   [,phantom,tier=top,name=b0,calign=first]
-   [,phantom,tier=top,name=b1,fit=rectangle
-     [,phantom
-       [$M_{12}$,green!50!black
-         [$B_1$,green!50!black [$D_1$,green!50!black] ]
-         [$B_2$,green!50!black [$D_2$,green!50!black] ]
-       ]
-       [$M_{34}$,green!50!black
-         [$B_3$,green!50!black [$D_3$,green!50!black] ]
-         [$B_4$,green!50!black [$D_4$,green!50!black] ]
-       ]
+   [$A_0$,tier=top,name=b0,calign=first]
+   [$A_1$,tier=top,name=b1,fit=rectangle
+     [$M_{12}$,edge=dotted, for tree={scyan}
+       [$B_1$ [$D_1$] ]
+       [$B_2$ [$D_2$] ]
      ]
    ]
-   [,phantom,tier=top,name=b2
-     [,phantom
-       [,phantom
-         [$B_5$,purple!80!black [$D_5$,purple!80!black] ]
-         [$B_6$,purple!80!black [$D_6$,purple!80!black] ]
-       ]
-       [,phantom
-         [,phantom [$D_7$,purple!80!black] ]
-         [,phantom [$D_8$,purple!80!black] ]
-       ]
+   [$A_2$,tier=top,name=b2,fit=rectangle
+     [$M_{34}$,edge=dotted, for tree={sviolet}
+       [$B_3$ [$D_3$] ]
+       [$B_4$ [$D_4$] ]
      ]
+   ]
+   [,phantom,tier=top,name=b3
+    [,phantom, for tree={sorange}
+     [$B_5$ [$D_5$] ]
+     [$B_6$ [$D_6$] ]
+    ]
+   ]
+   [,phantom,tier=top,name=b4
+    [,phantom, for tree={sblue}
+     [,phantom [$D_7$] ]
+     [,phantom [$D_8$] ]
+    ]
    ]
   ]
+  \draw[->] (b0) to[out=east,in=west] (b1);
+  \draw[->] (b1) to[out=east,in=west] (b2);
 \end{forest}
 
 \vspace{30px}
@@ -512,215 +535,34 @@ D
 
 \begin{forest}
   [,phantom
-    [$A_0$,tier=top,name=b0,calign=first]
-    [$A_1$,tier=top,name=b1,fit=rectangle
-     [$M_{1-4}$,green!50!black,edge=dotted
-       [$M_{12}$,green!50!black
-         [$B_1$,green!50!black [$D_1$,green!50!black] ]
-         [$B_2$,green!50!black [$D_2$,green!50!black] ]
-       ]
-       [$M_{34}$,green!50!black
-         [$B_3$,green!50!black [$D_3$,green!50!black] ]
-         [$B_4$,green!50!black [$D_4$,green!50!black] ]
-       ]
-     ]
-    ]
-   [,phantom,tier=top,name=b2
-     [,phantom
-       [$M_{56}$,purple!80!black
-         [$B_5$,purple!80!black [$D_5$,purple!80!black] ]
-         [$B_6$,purple!80!black [$D_6$,purple!80!black] ]
-       ]
-       [,phantom
-         [$B_7$,purple!80!black [$D_7$,purple!80!black] ]
-         [$B_8$,purple!80!black [$D_8$,purple!80!black] ]
-       ]
+   [$A_1$,tier=top,name=b0,calign=first]
+   [$A_2$,tier=top,name=b1,fit=rectangle
+     [$M_{34}$,edge=dotted, for tree={sviolet}
+       [$B_3$ [$D_3$] ]
+       [$B_4$ [$D_4$] ]
      ]
    ]
+   [$A_3$,tier=top,name=b2,fit=rectangle
+    [$M_{56}$,edge=dotted, for tree={sorange}
+     [$B_5$ [$D_5$] ]
+     [$B_6$ [$D_6$] ]
+    ]
+   ]
    [,phantom,tier=top,name=b3
-     [,phantom
-       [,phantom
-         [,phantom [$D_9$,yellow!60!black] ]
-         [,phantom [$D_{10}$,yellow!60!black] ]
-       ]
-       [,phantom
-         [,phantom [,phantom] ]
-         [,phantom [,phantom] ]
-       ]
-     ]
+    [,phantom, for tree={sblue}
+     [$B_7$ [$D_7$] ]
+     [$B_8$ [$D_8$] ]
+    ]
+   ]
+   [,phantom,tier=top,name=b4
+    [,phantom, for tree={smagenta}
+     [,phantom [$D_8$] ]
+     [,phantom [$D_9$] ]
+    ]
    ]
   ]
   \draw[->] (b0) to[out=east,in=west] (b1);
-\end{forest}
-
-\vspace{30px}
-
-E
-
-\vspace{30px}
-
-\begin{forest}
-  [,phantom
-    [$A_1$,tier=top,name=b1,calign=first]
-    [,phantom,tier=top,name=b2,fit=rectangle
-     [,phantom
-       [$M_{56}$,purple!80!black
-         [$B_5$,purple!80!black [$D_5$,purple!80!black] ]
-         [$B_6$,purple!80!black [$D_6$,purple!80!black] ]
-       ]
-       [$M_{78}$,purple!80!black
-         [$B_7$,purple!80!black [$D_7$,purple!80!black] ]
-         [$B_8$,purple!80!black [$D_8$,purple!80!black] ]
-       ]
-     ]
-    ]
-    [,phantom,tier=top,name=b3
-     [,phantom
-       [,phantom
-         [$B_9$,yellow!60!black [$D_9$,yellow!60!black] ]
-         [$B_{10}$,yellow!60!black [$D_{10}$,yellow!60!black] ]
-       ]
-       [,phantom
-         [,phantom [$D_{11}$,yellow!60!black] ]
-         [,phantom [$D_{12}$,yellow!60!black] ]
-       ]
-     ]
-    ]
-  ]
-\end{forest}
-
-\vspace{30px}
-
-F
-
-\vspace{30px}
-
-\begin{forest}
-  [,phantom
-    [$A_1$,tier=top,name=b1,calign=first]
-    [$A_2$,tier=top,name=b2,fit=rectangle
-     [$M_{5-8}$,purple!80!black,edge=dotted
-       [$M_{56}$,purple!80!black
-         [$B_5$,purple!80!black [$D_5$,purple!80!black] ]
-         [$B_6$,purple!80!black [$D_6$,purple!80!black] ]
-       ]
-       [$M_{78}$,purple!80!black
-         [$B_7$,purple!80!black [$D_7$,purple!80!black] ]
-         [$B_8$,purple!80!black [$D_8$,purple!80!black] ]
-       ]
-     ]
-    ]
-    [,phantom,tier=top,name=b3
-     [,phantom
-       [$M_{9-10}$,yellow!60!black
-         [$B_9$,yellow!60!black [$D_9$,yellow!60!black] ]
-         [$B_{10}$,yellow!60!black [$D_{10}$,yellow!60!black] ]
-       ]
-       [,phantom
-         [$B_{11}$,yellow!60!black [$D_{11}$,yellow!60!black] ]
-         [$B_{12}$,yellow!60!black [$D_{12}$,yellow!60!black] ]
-       ]
-     ]
-    ]
-    [,phantom,tier=top,name=b4
-     [,phantom
-       [,phantom
-         [,phantom [$D_{13}$,blue!80!black] ]
-         [,phantom [$D_{14}$,blue!80!black] ]
-       ]
-       [,phantom
-         [,phantom [,phantom] ]
-         [,phantom [,phantom] ]
-       ]
-     ]
-    ]
-  ]
   \draw[->] (b1) to[out=east,in=west] (b2);
-\end{forest}
-
-\vspace{30px}
-
-G
-
-\vspace{30px}
-
-\begin{forest}
-  [,phantom
-    [$A_2$,tier=top,name=b2,calign=first]
-    [,phantom,tier=top,name=b3,fit=rectangle
-     [,phantom
-       [$M_{9-10}$,yellow!60!black
-         [$B_9$,yellow!60!black [$D_9$,yellow!60!black] ]
-         [$B_{10}$,yellow!60!black [$D_{10}$,yellow!60!black] ]
-       ]
-       [$M_{11-12}$,yellow!60!black
-         [$B_{11}$,yellow!60!black [$D_{11}$,yellow!60!black] ]
-         [$B_{12}$,yellow!60!black [$D_{12}$,yellow!60!black] ]
-       ]
-     ]
-    ]
-    [,phantom,tier=top,name=b4
-     [,phantom
-       [,phantom
-         [$B_{13}$,blue!80!black [$D_{13}$,blue!80!black] ]
-         [$B_{14}$,blue!80!black [$D_{14}$,blue!80!black] ]
-       ]
-       [,phantom
-         [,phantom [$D_{15}$,blue!80!black] ]
-         [,phantom [$D_{16}$,blue!80!black] ]
-       ]
-     ]
-    ]
-  ]
-\end{forest}
-
-\vspace{30px}
-
-H
-
-\vspace{30px}
-
-\begin{forest}
-  [,phantom
-    [$A_2$,tier=top,name=b2,calign=first]
-    [$A_3$,tier=top,name=b3,fit=rectangle
-     [$M_{9-12}$,edge=dotted, for tree={yellow!60!black}
-       [$M_{9-10}$
-         [$B_9$ [$D_9$] ]
-         [$B_{10}$ [$D_{10}$] ]
-       ]
-       [$M_{11-12}$
-         [$B_{11}$ [$D_{11}$] ]
-         [$B_{12}$ [$D_{12}$] ]
-       ]
-     ]
-    ]
-    [,phantom,tier=top,name=b4
-      [,phantom
-       [$M_{13-14}$,blue!80!black
-         [$B_{13}$,blue!80!black [$D_{13}$,blue!80!black] ]
-         [$B_{14}$,blue!80!black [$D_{14}$,blue!80!black] ]
-       ]
-       [,phantom
-         [$B_{15}$,blue!80!black [$D_{15}$,blue!80!black] ]
-         [$B_{16}$,blue!80!black [$D_{16}$,blue!80!black] ]
-       ]
-      ]
-    ]
-    [,phantom,tier=top,name=b5
-      [,phantom
-        [,phantom
-          [,phantom [$D_{17}$,green!50!black] ]
-          [,phantom [$D_{18}$,green!50!black] ]
-        ]
-        [,phantom
-          [,phantom [,phantom] ]
-          [,phantom [,phantom] ]
-        ]
-      ]
-    ]
- ]
-  \draw[->] (b2) to[out=east,in=west] (b3);
 \end{forest}
 
 \vspace{30px}
@@ -731,45 +573,27 @@ H
 
 \begin{forest}
   [,phantom
-    [$A_2$,tier=top,name=b2,calign=first]
-    [$A_3$,tier=top,name=b3,fit=rectangle
-     [$M_{9-12}$,edge=dotted,for descendants={red}
-       [$M_{9-10}$
-         [$B_9$ [$D_9$] ]
-         [$B_{10}$ [$D_{10}$] ]
-       ]
-       [$M_{11-12}$
-         [$B_{11}$ [$D_{11}$] ]
-         [$B_{12}$ [$D_{12}$] ]
-       ]
-     ]
+   [$A_2$,tier=top,name=b0,calign=first]
+   [$A_3$,tier=top,name=b1,fit=rectangle
+    [$M_{56}$,edge=dotted, for descendants={sred}
+     [$B_5$ [$D_5$] ]
+     [$B_6$ [$D_6$] ]
     ]
-    [,phantom,tier=top,name=b4
-     [,phantom
-       [$M_{13-14}$,for descendants={red}
-         [$B_{13}$ [$D_{13}$] ]
-         [$B_{14}$ [$D_{14}$] ]
-       ]
-       [,phantom
-         [$B_{15}$ [$D_{15}$,red] ]
-         [$B_{16}$ [$D_{16}$,red] ]
-       ]
-     ]
+   ]
+   [,phantom,tier=top,name=b2
+    [,phantom
+     [$B_7$ [$D_7$,sred] ]
+     [$B_8$ [$D_8$,sred] ]
     ]
-    [,phantom,tier=top,name=b5
-     [,phantom
-       [,phantom
-         [,phantom [$D_{17}$] ]
-         [,phantom [$D_{18}$] ]
-       ]
-       [,phantom
-         [,phantom [,phantom] ]
-         [,phantom [,phantom] ]
-       ]
-     ]
+   ]
+   [,phantom,tier=top,name=b3
+    [,phantom
+     [,phantom [$D_9$] ]
+     [,phantom [$D_{10}$] ]
     ]
+   ]
   ]
-  \draw[->] (b2) to[out=east,in=west] (b3);
+  \draw[->] (b0) to[out=east,in=west] (b1);
 \end{forest}
 
 \vspace{30px}
@@ -779,49 +603,29 @@ Compress it
 \vspace{30px}
 
 \begin{forest}
-  [,phantom
-    [$A_2$,tier=top,name=b2,calign=first]
-    [$A_3$,tier=top,name=b3,fit=rectangle
-     [$M_{9-12}$,edge=dotted
-       [$M_{13-14}$
-         [,circle,draw [$D_{17}$] ]
-         [,circle,draw [$D_{18}$] ]
+  [,phantom,s sep=40pt
+    [,phantom
+      [$A_2$,tier=top,name=b0,calign=first]
+      [$A_3$,tier=top,name=b1,fit=rectangle
+       [$M_{56}$,sorange,edge=dotted
+         [$B_7$,sblue [$D_9$,smagenta]]
+         [$B_8$,sblue [$D_{10}$,smagenta]]
        ]
-       [,circle,draw
-         [$B_{15}$ [,circle,draw ] ]
-         [$B_{16}$ [,circle,draw ] ]
+      ]
+    ]
+    [,phantom
+      [$A_3$,tier=top,name=b3,fit=rectangle]
+      [$A_4$,tier=top,name=b4,fit=rectangle
+       [$M_{78}$,sblue,edge=dotted
+         [$B_9$,smagenta [$D_{11}$,scyan]]
+         [$B_{10}$,smagenta [$D_{12}$,scyan]]
        ]
-     ]
+      ]
     ]
   ]
-  \draw[->] (b2) to[out=east,in=west] (b3);
+  \draw[->] (b0) to[out=east,in=west] (b1);
+  \draw[->] (b3) to[out=east,in=west] (b4);
 \end{forest}
-
-\vspace{30px}
-
-Step 2
-
-\vspace{30px}
-
-\begin{forest}
-  [,phantom
-    [$A_3$,tier=top,name=b2,calign=first]
-    [,phantom,tier=top,name=b3,fit=rectangle
-     [,circle,draw
-       [,circle,draw
-         [$B_{17}$ [,circle,draw ] ]
-         [$B_{18}$ [,circle,draw ] ]
-       ]
-       [$M_{15-16}$
-         [,circle,draw [$D_{19}$ ] ]
-         [,circle,draw [$D_{20}$ ] ]
-       ]
-     ]
-    ]
-  ]
-\end{forest}
-
-\vspace{30px}
 
 \section{Instantiation}
 
@@ -849,14 +653,14 @@ Step 2
 \vspace{30px}
 
 \begin{forest}
-  [$M(M_{13-14}; M_{15-16})$
+   [$M(M_{13-14}; M_{15-16})$
      [$M(B_{17}; B_{18})$
-       [$B(\cdot)$ ]
-       [$B(\cdot)$ ]
+       [$B(D_{21})$ ]
+       [$B(D_{22})$ ]
      ]
-     [$M(\cdot;\cdot)$
-       [$B(D_{19})$  ]
-       [$B(D_{20})$  ]
+     [$M(B_{19}; B_{20})$
+       [$B(D_{23})$ ]
+       [$B(D_{24})$ ]
      ]
    ]
 \end{forest}
@@ -877,11 +681,11 @@ MyStyle/.style={draw, minimum width=2em, minimum height=2em,
   ]
 \node [MyStyle] (1) {$M(M_{13-14},M_{15-16})$};
 \node [MyStyle] (2) {$M(B_{17},B_{18})$};
-\node [MyStyle] (3) {$M(\cdot,\cdot)$};
-\node [MyStyle] (4) {$B(\cdot)$};
-\node [MyStyle] (5) {$B(\cdot)$};
-\node [MyStyle] (6) {$B(D_{19})$};
-\node [MyStyle] (7) {$B(D_{20})$};
+  \node [MyStyle] (3) {$M(B_{19},B_{20})$};
+  \node [MyStyle] (4) {$B(D_{21})$};
+\node [MyStyle] (5) {$B(D_{22})$};
+\node [MyStyle] (6) {$B(D_{23})$};
+\node [MyStyle] (7) {$B(D_{24})$};
 \begin{scope}[-{Stealth[length = 2.5pt]}]
   \draw[arrows={-Triangle[angle=90:4pt]}] (2.north) [out=155, in=25] to (1.north);
   \draw[arrows={-Triangle[angle=90:4pt]}] (3.north) [out=155, in=30] to (1.north);
