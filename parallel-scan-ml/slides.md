@@ -40,6 +40,12 @@ Note: .. powered zksnarks
 * Argument of
 * Knowledge
 
+!!!
+
+### SNARK statements
+
+_There exists_ data _such that_ predicates hold on that data
+
 Note: There exists DATA s.t. PROPERTY
 
 !!!
@@ -58,16 +64,6 @@ Note: And the fact that I am able to construct this means I KNOW such a PDF file
 
 !!!
 
-### Blockchain SNARK
-
-REPLACE WITH AN IMAGE
-
-_There exists_ ... _such that_ ...
-
-Note: There are (at least) two different proofs floating around
-
-!!!
-
 ### SNARKs are slow to construct
 
 ![snail](img/snail.jpg)
@@ -78,37 +74,17 @@ Note: Not about snarks, it's about dealing with the slowness of SNARK proof cons
 
 !!!
 
-### Blockchain SNARK
-
-_There exists_ a proof that transactions are valid _and_ ... _such that_ the proof verifies _and_ ...
-
-Note: There are (at least) two different proofs floating around
-
-!!!
-
-### What's the problem?
-
-Note: It's hard for me to describe the transaction proof until we chip away some concrete stuff and get to some symbols...
-
-!!!
-
 ### Latex it up
 
 ![account state latex](img/account-state.png)
 
-Note: Part of that state is the state of everyone's accounts
-
-!!!
-
-### Latex it up
-
 ![transaction data](img/single-transaction.png)
-
-!!!
-
-### Latex it up
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 ![transaction proof](img/transaction-proof.png)
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: Part of that state is the state of everyone's accounts
 
 !!!
 
@@ -122,13 +98,10 @@ Note: Squint
 
 ### Fold
 
-```ocaml
-(* foldLeft [1,2,3,4] ~init:0 ~f:(+) => 10 *)
+```haskell
+-- foldl (+) 0 [1,2,3,4] => 10
 
-val foldLeft : 'a list
-  -> init:'b
-  -> f:('b -> 'a -> 'b)
-  -> 'b
+foldl :: (b -> a -> b) -> b -> [a] -> b
 ```
 
 Note: This is likely review for most of this audience
@@ -137,13 +110,10 @@ Note: This is likely review for most of this audience
 
 ### Scan
 
-```ocaml
-(* scanLeft [1,2,3,4] ~init:0 ~f:(+) => [1,3,6,10] *)
+```haskell
+-- scanl (+) 0 [1,2,3,4] => [1,3,6,10]
 
-val scanLeft : 'a list
-  -> init:'b
-  -> f:('b -> 'a -> 'b)
-  -> 'b list
+scanl :: (b -> a -> b) -> b -> [a] -> [b]
 ```
 
 Note: It's almost like reduce, but you get the intermediate results
@@ -152,11 +122,8 @@ Note: It's almost like reduce, but you get the intermediate results
 
 ### Scan on a stream
 
-```ocaml
-val scan : 'a Stream.t
-  -> init:'b
-  -> f:('b -> 'a -> 'b)
-  -> 'b Stream.t
+```haskell
+scan :: (b -> a -> b) -> b -> Stream a -> Stream b
 ```
 
 Note: A push-based async stream
@@ -182,13 +149,6 @@ Note: Now we understand the real problem, great.
 !!!
 
 ### This talk
-
-1. Concrete / General to identify and solve a problem
-2. <!-- .element: class="fragment" data-fragment-index="1" --> An interesting problem and an interesting solution underneath it <!-- .element: class="fragment" data-fragment-index="1" -->
-
-!!!
-
-### This talk specifically
 
 1. <s>Concrete problem</s>
 2. <!-- .element: class="fragment" data-fragment-index="1" --> Properties and requirements <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -216,7 +176,9 @@ Note: In order to derive requirements
 
 !!!
 
-### Proof work can be done by others
+### Exists a distributed work pool
+
+Note: That scales with R
 
 !!!
 
@@ -264,23 +226,16 @@ Note: There are just too many sigmas
 
 ![D = s1 T1 s2](img/define-data.png)
 
-!!!
-
-### Base
-
 ![B = s0 -> s1](img/define-proof.png)
-
-!!!
-
-### Merges
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
 ![M02 = s0 -> s2](img/merge-definition.png)
-
-!!!
-
-### Outter value
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
 ![A = proof 0 -> R](img/acc-definition.png)
+<!-- .element: class="fragment" data-fragment-index="3" -->
+
+Note: You'll see how the notation fits together after our first example
 
 !!!
 
@@ -334,23 +289,22 @@ Note: There are just too many sigmas
 
 ![naive with scan](img/naive-with-scan.png)
 
+Note: Discuss throughput / latency
+
 !!!
 
 ### Periodic Scan
 
-```ocaml
-(* periodicScan 1->2->3->4->5->6->7->8
-   ~init:0
-   ~lift:(fun a -> a)
-   ~merge:(+) =>
-   10->36
-*)
-val periodicScan :
-  'a Stream.t ->
-  ~init:'b ->
-  ~lift:('a -> 'b) ->
-  ~merge:('b -> 'b -> 'b) ->
-  'b Stream.t
+```haskell
+-- periodicScan (+) id 0 1,2,3,4,5,6,7,8
+--    => 10,36
+
+periodicScan ::
+  (b -> b -> b) ->
+  (a -> b) ->
+  b ->
+  Stream a ->
+  Stream b
 ```
 
 Note: Some of you may be thinking oh this is like a parallel reduce, and yeah we'll start with that..
@@ -469,7 +423,7 @@ Note: Same throughput and latency, but now we drastically reduced size
 
 ![succinct data structures](img/succinct.png)
 
-Note: "Implicit Heap"; I'll post a link to wikipedia at the end
+Note: Explain child/parent computable from just the index into the array "Implicit Heap"; I'll post a link to wikipedia at the end
 
 !!!
 
@@ -478,7 +432,7 @@ Note: "Implicit Heap"; I'll post a link to wikipedia at the end
 * Astronomical Data Processing
 * <!-- .element: class="fragment" data-fragment-index="1" --> Livestream Analysis <!-- .element: class="fragment" data-fragment-index="1" -->
 
-Note: More generally, any online-map-reduce type workloads
+Note: Square killometre array in australia.. non-parametric machine learning.. More generally, any online-map-reduce type workloads
 
 !!!
 

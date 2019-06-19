@@ -1,3 +1,39 @@
+* TINY LEAF DOESN"T MAKE SESNE
+* Blockchain snark discussion confusing and (uneccesary maybe)
+* People don't know what a witness means
+* Signature of knowledge bit is confusing
+* Too Fast on the overlay of the data (and moving stuff around on the tree)
+* Pick a specific telescope (...)
+
+
+* Entire motivation section (everything before sequences of transactions)
+  * What is the blockchain?
+  * And what is snarks?
+  * Only one sentence on argument of knowledge
+* Metaphor of recursive composition is too fast
+* Put all information of latex on one slide, animation introducing the bits
+  * Not enough information to piece everything together and how it composes
+* Show an example of the notation in the tree...
+
+* The assumption of this is available distributed work pool that scales with R
+* ...
+* So cut out signature of knowledge
+
+* Mention the performance 
+
+* Name dropped the implicit heap.
+* Explain the diagram, which shows child and parent computable from the just the index into the array
+
+* Just use Haskell not ocaml
+* Don't say alpha and beta
+
+
+
+
+
+
+
+
 WHAT IS THIS TALK:
 
 On one hand, a case study in jumping between the concrete and the generalized to solve a problem
