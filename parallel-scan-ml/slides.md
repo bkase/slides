@@ -466,7 +466,7 @@ Note: Square killometre array in australia.. non-parametric machine learning.. M
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
-Slide Deck: [https://is.gd/E69TRA](https://is.gd/6shi8b)
+Slide Deck: [https://is.gd/MRwvys](https://is.gd/MRwvys)
 
 Coda: [https://codaprotocol.com](https://codaprotocol.com)
 
