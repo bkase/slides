@@ -10,6 +10,7 @@
 \usepackage{mathtools}
 \usepackage{forest}
 \usepackage{xcolor}
+\usepackage[margin=0.5in]{geometry}
 \usetikzlibrary{arrows,arrows.meta,chains, decorations.pathreplacing, shapes.multipart}
 
 \begin{document}
@@ -82,6 +83,26 @@
  {(oldest.north)}{(locked.south)}{(.south)+(0,-3mm)}{below}
 \end{forest}
 
+\vspace{30px}
+
+\begin{forest}
+  for tree={grow=east,s sep=8pt,l=0.5pt,inner sep=2pt}
+    [,circle,draw,for tree={edge={Latex-}}
+      [,circle,draw
+            [,circle,draw
+              [,circle,draw
+                [,circle,draw
+                  [,circle,draw]]]
+              [,circle,draw
+                [,circle,draw
+                  [,circle,draw
+                    [,circle,draw,name=best]]]]
+              [,circle,draw]]
+            [,circle,draw]]]
+\end{forest}
+
+
+
 
 \vspace{30px}
 
@@ -94,6 +115,10 @@
 \vspace{30px}
 
 \[ \Sigma \]
+
+\vspace{30px}
+
+\[ \sigma_0 \]
 
 \vspace{30px}
 
@@ -231,23 +256,15 @@ B (left/right paren)
 
 \vspace{30px}
 
-\[ D_1 \coloneqq \; \; \sigma_0 T_0^1 \sigma_1 \]
+\[ A_0^1 \coloneqq \; \; \sigma_0 T_0^1 \sigma_1 \]
 
 \vspace{30px}
 
-\[ M_{02} \coloneqq \; \; \sigma_0 \implies \sigma_2 \]
+\[ B_0^2 \coloneqq \; \; \sigma_0 \implies \sigma_2 \]
 
 \vspace{30px}
 
-\[ B_1 \coloneqq \; \; \sigma_0 \implies \sigma_1 \]
-
-\vspace{30px}
-
-\[ A_1 \coloneqq \; \; \sigma_0 \implies \sigma_R \]
-
-\vspace{30px}
-
-\[ ((((A + D_1) + D_2) + D_3) + D_4) \]
+\[ ((((A + A_1) + A_2) + A_3) + A_4) \]
 
 \vspace{30px}
 
@@ -263,22 +280,22 @@ Data
  [,phantom
    [,phantom
      [,phantom
-       [,phantom [$D_1$] ]
-       [,phantom [$D_2$] ]
+       [,phantom [$A_0^1$] ]
+       [,phantom [$A_1^2$] ]
      ]
      [,phantom
-       [,phantom [$D_3$] ]
-       [,phantom [$D_4$] ]
+       [,phantom [$A_2^3$] ]
+       [,phantom [$A_3^4$] ]
      ]
    ]
    [,phantom
      [,phantom
-       [,phantom [$D_5$] ]
-       [,phantom [$D_6$] ]
+       [,phantom [$A_4^5$] ]
+       [,phantom [$A_5^6$] ]
      ]
      [,phantom
-       [,phantom [$D_7$] ]
-       [,phantom [$D_8$] ]
+       [,phantom [$A_6^7$] ]
+       [,phantom [$A_7^8$] ]
      ]
    ]
  ]
@@ -294,22 +311,22 @@ Base proofs
  [,phantom
    [,phantom
      [,phantom
-       [$B_1$ [$D_1$] ]
-       [$B_2$ [$D_2$] ]
+       [$B_0^1$ [$A_0^1$] ]
+       [$B_1^2$ [$A_1^2$] ]
      ]
      [,phantom
-       [$B_3$ [$D_3$] ]
-       [$B_4$ [$D_4$] ]
+       [$B_2^3$ [$A_2^3$] ]
+       [$B_3^4$ [$A_3^4$] ]
      ]
    ]
    [,phantom
      [,phantom
-       [$B_5$ [$D_5$] ]
-       [$B_6$ [$D_6$] ]
+       [$B_4^5$ [$A_4^5$] ]
+       [$B_5^6$ [$A_5^6$] ]
      ]
      [,phantom
-       [$B_7$ [$D_7$] ]
-       [$B_8$ [$D_8$] ]
+       [$B_6^7$ [$A_6^7$] ]
+       [$B_7^8$ [$A_7^8$] ]
      ]
    ]
  ]
@@ -324,23 +341,23 @@ Merge proofs
 \begin{forest}
  [,phantom
    [,phantom
-     [$M_{12}$
-       [$B_1$ [$D_1$] ]
-       [$B_2$ [$D_2$] ]
+     [$B_0^2$
+       [$B_0^1$ [$A_0^1$] ]
+       [$B_1^2$ [$A_1^2$] ]
      ]
-     [$M_{34}$
-       [$B_3$ [$D_3$] ]
-       [$B_4$ [$D_4$] ]
+     [$B_2^4$
+       [$B_2^3$ [$A_2^3$] ]
+       [$B_3^4$ [$A_3^4$] ]
      ]
    ]
    [,phantom
-     [$M_{56}$
-       [$B_5$ [$D_5$] ]
-       [$B_6$ [$D_6$] ]
+     [$B_4^6$
+       [$B_4^5$ [$A_4^5$] ]
+       [$B_5^6$ [$A_5^6$] ]
      ]
-     [$M_{78}$
-       [$B_7$ [$D_7$] ]
-       [$B_8$ [$D_8$] ]
+     [$B_6^8$
+       [$B_6^7$ [$A_6^7$] ]
+       [$B_7^8$ [$A_7^8$] ]
      ]
    ]
  ]
@@ -354,24 +371,24 @@ All the way
 
 \begin{forest}
  [,phantom
-   [$M_{1-4}$
-     [$M_{12}$
-       [$B_1$ [$D_1$] ]
-       [$B_2$ [$D_2$] ]
+   [$B_0^4$
+     [$B_0^2$
+       [$B_0^1$ [$A_0^1$] ]
+       [$B_1^2$ [$A_1^2$] ]
      ]
-     [$M_{34}$
-       [$B_3$ [$D_3$] ]
-       [$B_4$ [$D_4$] ]
+     [$B_2^4$
+       [$B_2^3$ [$A_2^3$] ]
+       [$B_3^4$ [$A_3^4$] ]
      ]
    ]
-   [$M_{5-8}$
-     [$M_{56}$
-       [$B_5$ [$D_5$] ]
-       [$B_6$ [$D_6$] ]
+   [$B_4^8$
+     [$B_4^6$
+       [$B_4^5$ [$A_4^5$] ]
+       [$B_5^6$ [$A_5^6$] ]
      ]
-     [$M_{78}$
-       [$B_7$ [$D_7$] ]
-       [$B_8$ [$D_8$] ]
+     [$B_6^8$
+       [$B_6^7$ [$A_6^7$] ]
+       [$B_7^8$ [$A_7^8$] ]
      ]
    ]
  ]
@@ -381,33 +398,32 @@ All the way
 
 \begin{forest}
   [,phantom
-    [$A_0$,tier=top,name=b0,calign=first]
-    [$A_1$,tier=top,name=b1,fit=rectangle
-     [$M_{1-8}$,edge=dotted
-       [$M_{1-4}$
-         [$M_{12}$
-           [$B_1$ [$D_1$] ]
-           [$B_2$ [$D_2$] ]
+    [$B_0^0$,tier=top,name=b0,calign=first]
+    [$B_0^8$,tier=top,name=b1,fit=rectangle
+     [$B_0^8$,edge=dotted
+       [$B_0^4$
+         [$B_0^2$
+           [$B_0^1$ [$A_0^1$] ]
+           [$B_1^2$ [$A_1^2$] ]
          ]
-         [$M_{34}$
-           [$B_3$ [$D_3$] ]
-           [$B_4$ [$D_4$] ]
+         [$B_2^4$
+           [$B_2^3$ [$A_2^3$] ]
+           [$B_3^4$ [$A_3^4$] ]
          ]
        ]
-       [$M_{5-8}$
-         [$M_{56}$
-           [$B_5$ [$D_5$] ]
-           [$B_6$ [$D_6$] ]
+       [$B_4^8$
+         [$B_4^6$
+           [$B_4^5$ [$A_4^5$] ]
+           [$B_5^6$ [$A_5^6$] ]
          ]
-         [$M_{78}$
-           [$B_7$ [$D_7$] ]
-           [$B_8$ [$D_8$] ]
+         [$B_6^8$
+           [$B_6^7$ [$A_6^7$] ]
+           [$B_7^8$ [$A_7^8$] ]
          ]
        ]
      ]
     ]
   ]
-  \draw[->] (b0) to[out=east,in=west] (b1);
 \end{forest}
 
 \vspace{30px}
@@ -424,13 +440,21 @@ A
 
 \begin{forest}
    [,phantom
-     [,phantom
-       [,phantom [$D_1$,scyan] ]
-       [,phantom [$D_2$,scyan] ]
+     [,phantom, for tree={scyan}
+       [,phantom
+         [,phantom [$A_0^1$] ]
+         [,phantom [$A_1^2$] ]
+       ]
+       [,phantom
+         [,phantom [$A_2^3$] ]
+         [,phantom [$A_3^4$] ]
+       ]
      ]
-     [,phantom
-       [,phantom [,phantom] ]
-       [,phantom [,phantom] ]
+     [,phantom, for tree={sviolet}
+       [,phantom
+         [,phantom [,phantom ] ] ]
+       [,phantom 
+         [,phantom [,phantom ] ] ]
      ]
    ]
 \end{forest}
@@ -444,13 +468,126 @@ A.5
 \begin{forest}
    [,phantom
      [,phantom, for tree={scyan}
-       [$B_1$ [$D_1$] ]
-       [$B_2$ [$D_2$] ]
+       [,phantom
+         [$B_0^1$ [$A_0^1$] ]
+         [$B_1^2$ [$A_1^2$] ]
+       ]
+       [,phantom
+         [$B_2^3$ [$A_2^3$] ]
+         [$B_3^4$ [$A_3^4$] ]
+       ]
      ]
      [,phantom, for tree={sviolet}
-       [,phantom [$D_3$] ]
-       [,phantom [$D_4$] ]
+       [,phantom
+         [,phantom [$A_4^5$] ]
+         [,phantom [$A_5^6$] ]
+       ]
+       [,phantom
+         [,phantom [$A_6^7$] ]
+         [,phantom [$A_7^8$] ]
+       ]
      ]
+   ]
+\end{forest}
+
+\vspace{30px}
+
+A.5
+
+\vspace{30px}
+
+\begin{forest}
+   [,phantom
+     [,phantom, for tree={scyan}
+       [$B_0^2$
+         [$B_0^1$ [$A_0^1$] ]
+         [$B_1^2$ [$A_1^2$] ]
+       ]
+       [$B_2^4$
+         [$B_2^3$ [$A_2^3$] ]
+         [$B_3^4$ [$A_3^4$] ]
+       ]
+     ]
+     [,phantom, for tree={sviolet}
+       [,phantom
+         [$B_4^5$ [$A_4^5$] ]
+         [$B_5^6$ [$A_5^6$] ]
+       ]
+       [,phantom
+         [$B_6^7$ [$A_6^7$] ]
+         [$B_7^8$ [$A_7^8$] ]
+       ]
+     ]
+     [,phantom, for tree={sorange}
+       [,phantom
+         [,phantom [$A_8^9$] ]
+         [,phantom [$A_9^{10}$] ]
+       ]
+       [,phantom
+         [,phantom [$A_{10}^{11}$] ]
+         [,phantom [$A_{11}^{12}$] ]
+       ]
+     ]
+   ]
+\end{forest}
+
+\vspace{30px}
+
+A.5
+
+\vspace{30px}
+
+\begin{forest}
+  [,phantom
+   [$B_0^0$,tier=top,name=b0,calign=first]
+   [$B_0^4$,tier=top,name=b1,fit=rectangle
+     [$B_0^4$,edge=dotted, for tree={scyan}
+       [$B_0^2$
+         [$B_0^1$ [$A_0^1$] ]
+         [$B_1^2$ [$A_1^2$] ]
+       ]
+       [$B_2^4$
+         [$B_2^3$ [$A_2^3$] ]
+         [$B_3^4$ [$A_3^4$] ]
+       ]
+     ]
+   ]
+   [,phantom,tier=top
+     [,phantom, for tree={sviolet}
+       [$B_4^6$
+         [$B_4^5$ [$A_4^5$] ]
+         [$B_5^6$ [$A_5^6$] ]
+       ]
+       [$B_6^8$
+         [$B_6^7$ [$A_6^7$] ]
+         [$B_7^8$ [$A_7^8$] ]
+       ]
+     ]
+   ]
+   [,phantom,tier=top
+     [,phantom, for tree={sorange}
+       [,phantom
+         [$B_8^9$ [$A_8^9$] ]
+         [$B_9^{10}$ [$A_9^{10}$] ]
+       ]
+       [,phantom
+         [$B_{10}^{11}$ [$A_{10}^{11}$] ]
+         [$B_{11}^{12}$ [$A_{11}^{12}$] ]
+       ]
+     ]
+   ]
+   [,phantom,tier=top
+     [,phantom, for tree={scyan}
+       [,phantom
+         [,phantom [$A_{12}^{13}$] ]
+         [,phantom [$A_{13}^{14}$] ]
+       ]
+       [,phantom
+         [,phantom [$A_{14}^{15}$] ]
+         [,phantom [$A_{15}^{16}$] ]
+       ]
+     ]
+   ]
    ]
 \end{forest}
 
@@ -462,27 +599,56 @@ B
 
 \begin{forest}
   [,phantom
-   [$A_0$,tier=top,name=b0,calign=first]
-   [$A_1$,tier=top,name=b1,fit=rectangle
-     [$M_{12}$,edge=dotted, for tree={scyan}
-       [$B_1$ [$D_1$] ]
-       [$B_2$ [$D_2$] ]
+   [$B_0^0$,tier=top,name=b0,calign=first]
+   [$B_0^4$,tier=top,name=b1,fit=rectangle
+     [$B_0^4$,edge=dotted, for tree={scyan}
+       [$B_0^2$
+         [$B_0^1$ [$A_0^1$] ]
+         [$B_1^2$ [$A_1^2$] ]
+       ]
+       [$B_2^4$
+         [$B_2^3$ [$A_2^3$] ]
+         [$B_3^4$ [$A_3^4$] ]
+       ]
      ]
    ]
-   [,phantom
-     [,phantom, for tree={sviolet}
-       [$B_3$ [$D_3$] ]
-       [$B_4$ [$D_4$] ]
+   [$B_4^8$,tier=top
+     [$B_4^8$, for tree={sviolet}
+       [$B_4^6$
+         [$B_4^5$ [$A_4^5$] ]
+         [$B_5^6$ [$A_5^6$] ]
+       ]
+       [$B_6^8$
+         [$B_6^7$ [$A_6^7$] ]
+         [$B_7^8$ [$A_7^8$] ]
+       ]
      ]
    ]
-   [,phantom,tier=top,name=b2
-    [,phantom, for tree={sorange}
-     [,phantom [$D_5$] ]
-     [,phantom [$D_6$] ]
-    ]
+   [,phantom,tier=top
+     [,phantom, for tree={sorange}
+       [$B_8^{10}$
+         [$B_8^9$ [$A_8^9$] ]
+         [$B_9^{10}$ [$A_9^{10}$] ]
+       ]
+       [$B_{10}^{12}$
+         [$B_{10}^{11}$ [$A_{10}^{11}$] ]
+         [$B_{11}^{12}$ [$A_{11}^{12}$] ]
+       ]
+     ]
    ]
-  ]
-  \draw[->] (b0) to[out=east,in=west] (b1);
+   [,phantom,tier=top
+     [,phantom, for tree={scyan}
+       [,phantom
+         [$B_{12}^{13}$ [$A_{12}^{13}$] ]
+         [$B_{13}^{14}$ [$A_{13}^{14}$] ]
+       ]
+       [,phantom
+         [$B_{14}^{15}$ [$A_{14}^{15}$] ]
+         [$B_{15}^{16}$ [$A_{15}^{16}$] ]
+       ]
+     ]
+   ]
+   ]
 \end{forest}
 
 \vspace{30px}
@@ -493,72 +659,56 @@ C
 
 \begin{forest}
   [,phantom
-   [$A_0$,tier=top,name=b0,calign=first]
-   [$A_1$,tier=top,name=b1,fit=rectangle
-     [$M_{12}$,edge=dotted, for tree={scyan}
-       [$B_1$ [$D_1$] ]
-       [$B_2$ [$D_2$] ]
+   [$B_0^4$,tier=top,name=b0,calign=first]
+   [$B_4^8$,tier=top,name=b1,fit=rectangle
+     [$B_4^8$, for tree={sviolet}
+       [$B_4^6$
+         [$B_4^5$ [$A_4^5$] ]
+         [$B_5^6$ [$A_5^6$] ]
+       ]
+       [$B_6^8$
+         [$B_6^7$ [$A_6^7$] ]
+         [$B_7^8$ [$A_7^8$] ]
+       ]
+     ]
+     ]
+   [$B_8^{12}$,tier=top
+     [$B_8^{12}$, for tree={sorange}
+       [$B_8^{10}$
+         [$B_8^9$ [$A_8^9$] ]
+         [$B_9^{10}$ [$A_9^{10}$] ]
+       ]
+       [$B_{10}^{12}$
+         [$B_{10}^{11}$ [$A_{10}^{11}$] ]
+         [$B_{11}^{12}$ [$A_{11}^{12}$] ]
+       ]
      ]
    ]
-   [$A_2$,tier=top,name=b2,fit=rectangle
-     [$M_{34}$,edge=dotted, for tree={sviolet}
-       [$B_3$ [$D_3$] ]
-       [$B_4$ [$D_4$] ]
+   [,phantom,tier=top
+     [,phantom, for tree={scyan}
+       [$B_{12}^{14}$
+         [$B_{12}^{13}$ [$A_{12}^{13}$] ]
+         [$B_{13}^{14}$ [$A_{13}^{14}$] ]
+       ]
+       [$B_{14}^{16}$
+         [$B_{14}^{15}$ [$A_{14}^{15}$] ]
+         [$B_{15}^{16}$ [$A_{15}^{16}$] ]
+       ]
      ]
    ]
-   [,phantom,tier=top,name=b3
-    [,phantom, for tree={sorange}
-     [$B_5$ [$D_5$] ]
-     [$B_6$ [$D_6$] ]
-    ]
-   ]
-   [,phantom,tier=top,name=b4
-    [,phantom, for tree={sblue}
-     [,phantom [$D_7$] ]
-     [,phantom [$D_8$] ]
-    ]
-   ]
-  ]
-  \draw[->] (b0) to[out=east,in=west] (b1);
-  \draw[->] (b1) to[out=east,in=west] (b2);
-\end{forest}
-
-\vspace{30px}
-
-D
-
-\vspace{30px}
-
-\begin{forest}
-  [,phantom
-   [$A_1$,tier=top,name=b0,calign=first]
-   [$A_2$,tier=top,name=b1,fit=rectangle
-     [$M_{34}$,edge=dotted, for tree={sviolet}
-       [$B_3$ [$D_3$] ]
-       [$B_4$ [$D_4$] ]
+   [,phantom,tier=top
+     [,phantom, for tree={sviolet}
+       [,phantom
+         [$B_{16}^{17}$ [$A_{16}^{17}$] ]
+         [$B_{17}^{18}$ [$A_{17}^{18}$] ]
+       ]
+       [,phantom
+         [$B_{18}^{19}$ [$A_{18}^{19}$] ]
+         [$B_{19}^{20}$ [$A_{19}^{20}$] ]
+       ]
      ]
    ]
-   [$A_3$,tier=top,name=b2,fit=rectangle
-    [$M_{56}$,edge=dotted, for tree={sorange}
-     [$B_5$ [$D_5$] ]
-     [$B_6$ [$D_6$] ]
-    ]
    ]
-   [,phantom,tier=top,name=b3
-    [,phantom, for tree={sblue}
-     [$B_7$ [$D_7$] ]
-     [$B_8$ [$D_8$] ]
-    ]
-   ]
-   [,phantom,tier=top,name=b4
-    [,phantom, for tree={smagenta}
-     [,phantom [$D_8$] ]
-     [,phantom [$D_9$] ]
-    ]
-   ]
-  ]
-  \draw[->] (b0) to[out=east,in=west] (b1);
-  \draw[->] (b1) to[out=east,in=west] (b2);
 \end{forest}
 
 \vspace{30px}
@@ -569,27 +719,56 @@ D
 
 \begin{forest}
   [,phantom
-   [$A_2$,tier=top,name=b0,calign=first]
-   [$A_3$,tier=top,name=b1,fit=rectangle
-    [$M_{56}$,edge=dotted, for descendants={sred}
-     [$B_5$ [$D_5$] ]
-     [$B_6$ [$D_6$] ]
-    ]
+   [$B_0^0$,tier=top,name=b0,calign=first]
+   [$B_0^4$,tier=top,name=b1,fit=rectangle
+     [$B_0^4$,edge=dotted, for descendants={sred}
+       [$B_0^2$
+         [$B_0^1$ [$A_0^1$] ]
+         [$B_1^2$ [$A_1^2$] ]
+       ]
+       [$B_2^4$
+         [$B_2^3$ [$A_2^3$] ]
+         [$B_3^4$ [$A_3^4$] ]
+       ]
+     ]
    ]
-   [,phantom,tier=top,name=b2
-    [,phantom
-     [$B_7$ [$D_7$,sred] ]
-     [$B_8$ [$D_8$,sred] ]
-    ]
+   [,phantom,tier=top
+     [,phantom
+       [$B_4^6$, for descendants={sred}
+         [$B_4^5$ [$A_4^5$] ]
+         [$B_5^6$ [$A_5^6$] ]
+       ]
+       [$B_6^8$, for descendants={sred}
+         [$B_6^7$ [$A_6^7$] ]
+         [$B_7^8$ [$A_7^8$] ]
+       ]
+     ]
    ]
-   [,phantom,tier=top,name=b3
-    [,phantom
-     [,phantom [$D_9$] ]
-     [,phantom [$D_{10}$] ]
-    ]
+   [,phantom,tier=top
+     [,phantom
+       [,phantom
+         [$B_8^9$, for descendants={sred} [$A_8^9$] ]
+         [$B_9^{10}$, for descendants={sred} [$A_9^{10}$] ]
+       ]
+       [,phantom
+         [$B_{10}^{11}$, for descendants={sred} [$A_{10}^{11}$] ]
+         [$B_{11}^{12}$, for descendants={sred} [$A_{11}^{12}$] ]
+       ]
+     ]
    ]
-  ]
-  \draw[->] (b0) to[out=east,in=west] (b1);
+   [,phantom,tier=top
+     [,phantom
+       [,phantom
+         [,phantom [$A_{12}^{13}$] ]
+         [,phantom [$A_{13}^{14}$] ]
+       ]
+       [,phantom
+         [,phantom [$A_{14}^{15}$] ]
+         [,phantom [$A_{15}^{16}$] ]
+       ]
+     ]
+   ]
+   ]
 \end{forest}
 
 \vspace{30px}
@@ -599,28 +778,42 @@ Compress it
 \vspace{30px}
 
 \begin{forest}
-  [,phantom,s sep=40pt
-    [,phantom
-      [$A_2$,tier=top,name=b0,calign=first]
-      [$A_3$,tier=top,name=b1,fit=rectangle
-       [$M_{56}$,sorange,edge=dotted
-         [$B_7$,sblue [$D_9$,smagenta]]
-         [$B_8$,sblue [$D_{10}$,smagenta]]
+
+  [,phantom
+   [$B_0^0$,tier=top,name=b0,calign=first]
+   [$B_0^4$,tier=top,name=b1,fit=rectangle,scyan
+     [$B_0^4$,edge=dotted,scyan
+       [$B_4^6$,sviolet
+         [$B_8^9$,sorange [$A_{12}^{13}$,scyan] ]
+         [$B_9^{10}$,sorange [$A_{13}^{14}$,scyan] ]
        ]
-      ]
-    ]
-    [,phantom
-      [$A_3$,tier=top,name=b3,fit=rectangle]
-      [$A_4$,tier=top,name=b4,fit=rectangle
-       [$M_{78}$,sblue,edge=dotted
-         [$B_9$,smagenta [$D_{11}$,scyan]]
-         [$B_{10}$,smagenta [$D_{12}$,scyan]]
+       [$B_6^8$,sviolet
+         [$B_{10}^{11}$,sorange [$A_{14}^{15}$,scyan] ]
+         [$B_{11}^{12}$,sorange [$A_{15}^{16}$,scyan] ]
        ]
-      ]
-    ]
+     ]
+   ]
   ]
-  \draw[->] (b0) to[out=east,in=west] (b1);
-  \draw[->] (b3) to[out=east,in=west] (b4);
+\end{forest}
+
+Part 2
+
+\begin{forest}
+  [,phantom
+   [$B_0^4$,tier=top,name=b0,calign=first,scyan]
+   [$B_4^8$,tier=top,name=b1,fit=rectangle,sviolet
+     [$B_4^8$,edge=dotted,sviolet
+       [$B_8^{10}$,sorange
+         [$B_{12}^{13}$,scyan [$A_{16}^{17}$,sviolet] ]
+         [$B_{13}^{14}$,scyan [$A_{17}^{18}$,sviolet] ]
+       ]
+       [$B_{10}^{12}$,sorange
+         [$B_{14}^{15}$,scyan [$A_{18}^{19}$,sviolet] ]
+         [$B_{15}^{16}$,scyan [$A_{19}^{20}$,sviolet] ]
+       ]
+     ]
+   ]
+  ]
 \end{forest}
 
 \section{Instantiation}
@@ -649,14 +842,14 @@ Compress it
 \vspace{30px}
 
 \begin{forest}
-   [$M(M_{13-14}; M_{15-16})$
-     [$M(B_{17}; B_{18})$
-       [$B(D_{21})$ ]
-       [$B(D_{22})$ ]
+  [$B(B_{12}^{14}; B_{14}^{16})$
+     [$B(B_{16}^{17}; B_{17}^{18})$
+       [$B(A_{20}^{21})$ ]
+       [$B(A_{21}^{22})$ ]
      ]
-     [$M(B_{19}; B_{20})$
-       [$B(D_{23})$ ]
-       [$B(D_{24})$ ]
+     [$B(B_{18}^{19}; B_{19}^{20})$
+       [$B(A_{22}^{23})$ ]
+       [$B(A_{23}^{24})$ ]
      ]
    ]
 \end{forest}
@@ -675,13 +868,13 @@ Compress it
 MyStyle/.style={draw, minimum width=2em, minimum height=2em, 
                 outer sep=0pt, on chain},
   ]
-\node [MyStyle] (1) {$M(M_{13-14},M_{15-16})$};
-\node [MyStyle] (2) {$M(B_{17},B_{18})$};
-  \node [MyStyle] (3) {$M(B_{19},B_{20})$};
-  \node [MyStyle] (4) {$B(D_{21})$};
-\node [MyStyle] (5) {$B(D_{22})$};
-\node [MyStyle] (6) {$B(D_{23})$};
-\node [MyStyle] (7) {$B(D_{24})$};
+\node [MyStyle] (1) {$B(B_{12}^{14}; B_{14}^{16})$};
+  \node [MyStyle] (2) {$B(B_{16}^{17}; B_{17}^{18})$};
+  \node [MyStyle] (3) {$B(A_{20}^{21})$};
+  \node [MyStyle] (4) {$B(A_{21}^{22})$};
+  \node [MyStyle] (5) {$B(B_{18}^{19}; B_{19}^{20})$};
+  \node [MyStyle] (6) {$B(A_{22}^{23})$};
+  \node [MyStyle] (7) {$B(A_{23}^{24})$};
 \begin{scope}[-{Stealth[length = 2.5pt]}]
   \draw[arrows={-Triangle[angle=90:4pt]}] (2.north) [out=155, in=25] to (1.north);
   \draw[arrows={-Triangle[angle=90:4pt]}] (3.north) [out=155, in=30] to (1.north);

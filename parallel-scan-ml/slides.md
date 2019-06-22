@@ -11,19 +11,19 @@ Note: Motivated by a concrete problem
 
 ### Coda
 
-<img src="img/coda-logo.svg"></img>
+<img src="img/CodaLogo.svg" width="200%" height="200%"></img>
 
 !!!
 
 ### Blockchain
 
-PICTURE OF A GIT REPO
+<img src="img/blockchain.png"></img>
 
 !!!
 
 ### Succinct blockchain
 
-![tiny leaf](img/tiny-leaf.jpg)
+<img src="img/tiny-leaf.jpg" width="70%" height="70%"></img>
 
 > https://www.flickr.com/photos/75001512@N00/4450040533
 
@@ -60,13 +60,21 @@ Note: And the fact that I am able to construct this means I KNOW such a PDF file
 
 ### Recursive composition
 
+_There exists_ a proof of this statement _such that_ that proof verifies
+
+Note: Recursion!
+
+!!!
+
+### Recursive composition
+
 <img src="img/zksnark.svg" style="height:60%;width:60%"></img>
 
 !!!
 
 ### SNARKs are slow to construct
 
-![snail](img/snail.jpg)
+<img src="img/snail.jpg" width="70%" height="70%"></img>
 
 > https://pixabay.com/en/snail-slow-shell-mollusk-close-up-1844618/
 
@@ -224,16 +232,10 @@ Note: There are just too many sigmas
 
 ### Data
 
-![D = s1 T1 s2](img/define-data.png)
+![A_1^2 = s1 T1 s2](img/define-a.png)
 
-![B = s0 -> s1](img/define-proof.png)
+![B_0^1 = s0 -> s1](img/define-b.png)
 <!-- .element: class="fragment" data-fragment-index="1" -->
-
-![M02 = s0 -> s2](img/merge-definition.png)
-<!-- .element: class="fragment" data-fragment-index="2" -->
-
-![A = proof 0 -> R](img/acc-definition.png)
-<!-- .element: class="fragment" data-fragment-index="3" -->
 
 Note: You'll see how the notation fits together after our first example
 
@@ -257,39 +259,31 @@ Note: You'll see how the notation fits together after our first example
 
 ### Naive Solution
 
-![naive data](img/naive-data.png)
+![naive data](img/naive-1.png)
 
 !!!
 
 ### Naive Solution
 
-![naive base](img/naive-base.png)
+![naive base](img/naive-2.png)
 
 !!!
 
 ### Naive Solution
 
-![naive merge](img/naive-merge.png)
+![naive merge](img/naive-3.png)
 
 !!!
 
 ### Naive Solution
 
-![naive almost all](img/naive-almost-all.png)
+![naive almost all](img/naive-4.png)
 
 !!!
 
 ### Naive Solution
 
-![naive all](img/naive-all.png)
-
-!!!
-
-### Naive Solution
-
-![naive with scan](img/naive-with-scan.png)
-
-Note: Discuss throughput / latency
+<img src="img/naive-5.png" width="70%" height="70%"></img>
 
 !!!
 
@@ -311,6 +305,14 @@ Note: Some of you may be thinking oh this is like a parallel reduce, and yeah we
 
 !!!
 
+### Naive Solution
+
+<img src="img/naive-5.png" width="70%" height="70%"></img>
+
+Note: Discuss throughput / latency
+
+!!!
+
 ### Analysis
 
 * Throughput increased
@@ -321,9 +323,9 @@ Note: Some of you may be thinking oh this is like a parallel reduce, and yeah we
 
 ### Problem?
 
-<img alt="thinking face" src="img/thinking-face2.jpg" width="75%" height="75%"/>
+<img src="img/traffic_jam.jpeg" width="70%" height="70%"></img>
 
-> http://maxpixel.freegreatpicture.com/Face-Female-Girl-Looking-Adult-Isolated-Cute-15814
+> https://upload.wikimedia.org/wikipedia/commons/a/a4/Moscow_traffic_congestion.JPG
 
 Note: Parallelism is halved every layer!
 
@@ -331,7 +333,7 @@ Note: Parallelism is halved every layer!
 
 ### More trees
 
-![better data](img/better-aprime.png)
+![better data](img/more-1.png)
 
 Note: Let's take the R data pieces that are available at every step
 
@@ -339,7 +341,7 @@ Note: Let's take the R data pieces that are available at every step
 
 ### More trees
 
-![better base](img/better-a5.png)
+![better base](img/more-2.png)
 
 Note: Trace a run through
 
@@ -347,19 +349,25 @@ Note: Trace a run through
 
 ### More trees
 
-![better merge1](img/better-b.png)
+![better merge1](img/more-3.png)
 
 !!!
 
 ### More trees
 
-![better merge2](img/better-c.png)
+![better merge2](img/more-4.png)
 
 !!!
 
 ### More trees
 
-![better merge3](img/better-d.png)
+![better merge3](img/more-5.png)
+
+!!!
+
+### More trees
+
+![better merge4](img/more-6.png)
 
 !!!
 
@@ -381,7 +389,7 @@ Note: Trace a run through
 
 ### Waste of space
 
-![waste of space](img/space-waste.png)
+<img src="img/waste.png" width="150%" height="50%"></img>
 
 Note: Once we process some layer of the tree, it becomes useless, higher layers are useless. Let's just not store that.
 
@@ -389,7 +397,15 @@ Note: Once we process some layer of the tree, it becomes useless, higher layers 
 
 ### Overlay the trees
 
-![overlay the trees](img/compress.png)
+<img src="img/compressed.png" width="70%" height="70%"></img>
+
+Note: We have the "frontiers" of the log n trees at each layer
+
+!!!
+
+### Overlay the trees
+
+<img src="img/compressed-2.png" width="70%" height="70%"></img>
 
 Note: We have the "frontiers" of the log n trees at each layer
 
@@ -415,7 +431,7 @@ Note: Same throughput and latency, but now we drastically reduced size
 
 ### Packing information
 
-<img src="img/job-view.png" style="height:60%;width:60%"></img>
+<img src="img/rearranged.png" style="height:60%;width:60%"></img>
 
 !!!
 
@@ -450,7 +466,9 @@ Note: Square killometre array in australia.. non-parametric machine learning.. M
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
-Slide Deck: [https://is.gd/E69TRA](https://is.gd/E69TRA)
+Slide Deck: [https://is.gd/E69TRA](https://is.gd/6shi8b)
+
+Coda: [https://codaprotocol.com](https://codaprotocol.com)
 
 Succinct Datastructures: [https://is.gd/1q22MX](https://is.gd/1q22MX)
 
