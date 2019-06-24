@@ -5,7 +5,7 @@
 
 By <a href="http://bkase.com">Brandon Kase</a> / <a href="http://twitter.com/bkase_">@bkase_</a>
 
-Note: Motivated by a concrete problem
+Note: I want to structure the talk by first giving context around where I came across this and then going into the story of getting to the solution
 
 !!!
 
@@ -13,25 +13,11 @@ Note: Motivated by a concrete problem
 
 <img src="img/CodaLogo.svg" width="200%" height="200%"></img>
 
-!!!
-
-### Blockchain
-
-<img src="img/blockchain.png"></img>
+Note: Rather than having all the nodes do the work in processing blocks containing transactions, most of the nodes verify a small cryptographic proof of that work being done instead of doing it themselves. These proofs are called...
 
 !!!
 
-### Succinct blockchain
-
-<img src="img/tiny-leaf.jpg" width="70%" height="70%"></img>
-
-> https://www.flickr.com/photos/75001512@N00/4450040533
-
-Note: .. powered zksnarks
-
-!!!
-
-### ZkSnark Acronym
+### Zk-Snark Acronym
 
 * Zero
 * Knowledge
@@ -106,10 +92,15 @@ Note: Squint
 
 ### Fold
 
-```haskell
--- foldl (+) 0 [1,2,3,4] => 10
+```ocaml
+(* let foldLeft [1,2,3,4]
+        ~init:0 ~f:(+) => 10 *)
 
-foldl :: (b -> a -> b) -> b -> [a] -> b
+val foldLeft :
+  'a list ->
+  ~init:'b ->
+  ~f:('b -> 'a -> 'b) ->
+  'b
 ```
 
 Note: This is likely review for most of this audience
@@ -118,10 +109,15 @@ Note: This is likely review for most of this audience
 
 ### Scan
 
-```haskell
--- scanl (+) 0 [1,2,3,4] => [1,3,6,10]
+```ocaml
+(* let scanLeft [1,2,3,4]
+        ~init:0 ~f:(+) => [1,3,6,10] *)
 
-scanl :: (b -> a -> b) -> b -> [a] -> [b]
+val scanLeft :
+  'a list ->
+  ~init:'b ->
+  ~f:('b -> 'a -> 'b) ->
+  'b list
 ```
 
 Note: It's almost like reduce, but you get the intermediate results
@@ -130,8 +126,13 @@ Note: It's almost like reduce, but you get the intermediate results
 
 ### Scan on a stream
 
-```haskell
-scan :: (b -> a -> b) -> b -> Stream a -> Stream b
+```ocaml
+val scan :
+  'a list ->
+  ~init:'b ->
+  ~f:('b -> 'a -> 'b) ->
+  'a Stream.t ->
+  'b Stream.t
 ```
 
 Note: A push-based async stream
@@ -182,6 +183,8 @@ Note: In order to derive requirements
 
 ### Transactions arrive at some rate R
 
+Note: Constant rate\*: For the purposes of our analysis and that this talk is short,
+
 !!!
 
 ### Exists a distributed work pool
@@ -200,6 +203,19 @@ Note: That scales with R
 
 ![merge proofs associative](img/merging-associative.png)
 
+Note: Associativity implies parallelism available for exploitation
+
+!!!
+
+### Properties to exploit
+
+* Expensive accumulation function
+* <!-- .element: class="fragment" data-fragment-index="1" --> Input arrives asynchronously over time\* <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Plenty of parallel compute available <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Associative merge operation <!-- .element: class="fragment" data-fragment-index="3" -->
+
+Note: (\*) for the purposes of this talk, constant ;;; you can also read this as a set of properties that if your accumulation task exhibits it, you can take advantage of the approach we're about to get to...
+
 !!!
 
 ### Requirements
@@ -216,7 +232,7 @@ Note: That scales with R
 * <!-- .element: class="fragment" data-fragment-index="1" --> Minimize latency <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Minimize state size <!-- .element: class="fragment" data-fragment-index="2" -->
 
-Note: In this order
+Note: Maybe more like priorities, In this order
 
 !!!
 
@@ -289,16 +305,20 @@ Note: You'll see how the notation fits together after our first example
 
 ### Periodic Scan
 
-```haskell
--- periodicScan (+) id 0 1,2,3,4,5,6,7,8
---    => 10,36
+```ocaml
+(* val periodicScan
+    ~merge:(+)
+    ~f:id
+    ~init:0
+    [1,2,3,4,5,6,7,8]
+  => 10,36 *)
 
-periodicScan ::
-  (b -> b -> b) ->
-  (a -> b) ->
-  b ->
-  Stream a ->
-  Stream b
+let periodicScan
+  'a Stream.t ->
+  ~merge:('b -> 'b -> 'b) ->
+  ~lift:('a -> 'b) ->
+  ~init:'b ->
+  'b Stream.t
 ```
 
 Note: Some of you may be thinking oh this is like a parallel reduce, and yeah we'll start with that..
