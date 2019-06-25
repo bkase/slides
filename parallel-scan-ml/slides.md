@@ -128,10 +128,9 @@ Note: It's almost like reduce, but you get the intermediate results
 
 ```ocaml
 val scan :
-  'a list ->
+  'a Stream.t ->
   ~init:'b ->
   ~f:('b -> 'a -> 'b) ->
-  'a Stream.t ->
   'b Stream.t
 ```
 
@@ -308,7 +307,7 @@ Note: You'll see how the notation fits together after our first example
 ```ocaml
 (* val periodicScan
     ~merge:(+)
-    ~f:id
+    ~lift:id
     ~init:0
     [1,2,3,4,5,6,7,8]
   => 10,36 *)
