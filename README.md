@@ -27,3 +27,5 @@ https://bkase.github.io/slides/strings-are-evil
 Animations Semirings:
 https://bkase.github.io/slides/animations-semirings
 
+ZK DSL Usability Challenges:
+https://bkase.github.io/slides/zk-dsl-challenges
