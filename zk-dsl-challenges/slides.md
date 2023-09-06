@@ -227,14 +227,14 @@ Note: sorry
 
 * ZK DSL authors immediately put themselves _years behind_ by choosing a standalone DSL 
 * <!-- .element: class="fragment" data-fragment-index="1" --> The language itself is limited in scope. That's the "domain-specific" part, but that limits usages! Loops don't quite work, I can't quite assign this to a variable, etc. <!-- .element: class="fragment" data-fragment-index="1" -->
-* <!-- .element: class="fragment" data-fragment-index="2" --> The tools around the langauge need to be rebuilt! Editor support, package management, build, etc <!-- .element: class="fragment" data-fragment-index="2" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> The tools around the language need to be rebuilt! Editor support, package management, build, etc <!-- .element: class="fragment" data-fragment-index="2" -->
 
 !!!
 
 ### Rant part3
 
 
-* Application developers _in general_ don't want to learn new languages, especialy if they're trying to build and ship a product, and they sure as hell don't want to be stuck with something half-broken and with poor tools
+* Application developers _in general_ don't want to learn new languages, especially if they're trying to build and ship a product, and they sure as hell don't want to be stuck with something half-broken and with poor tools
 * <!-- .element: class="fragment" data-fragment-index="1" --> And for what benefit even!? making if-statements slightly cleaner? Not worth it! <!-- .element: class="fragment" data-fragment-index="1" -->
 
 !!!

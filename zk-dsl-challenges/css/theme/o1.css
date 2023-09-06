@@ -9,7 +9,7 @@ body {
   font-family: "Avenir Next", "Helvetica Neue", Helvetica, sans-serif;
   font-size: 31px;
   font-weight: normal;
-  color: #73788c; }
+  color: #2e3038; }
 
 ::selection {
   color: #fff;
@@ -216,7 +216,7 @@ body {
 .reveal section img {
   margin: 15px 0px;
   background: rgba(255, 255, 255, 0.12);
-  border: 4px solid #73788c;
+  border: 4px solid #2e3038;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
 
 .reveal section img.plain {
@@ -361,7 +361,7 @@ body {
 .hljs {
   display: block;
   padding: 0.5em;
-  color: #73788c;
+  color: #2e3038;
   -webkit-text-size-adjust: none; }
 
 .hljs-keyword,
