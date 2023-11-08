@@ -70,22 +70,22 @@ Note: I went through protocol engineering, ramping up other folks, product engin
 
 !!!
 
-### CTO what do
-
-<img src="img/cto-what-do.png" width="55%" height="55%"></img>
-
-Note: What do I do? CTO is a funny role because it takes different shapes at different organizations. And I'm sure the shape here will continue to evolve. The form that I inhabit is similar to the kind of ways I showed up in other spaces at the company: filling in different gaps and carefully I try to listen to those that I feel are better than me at some specific area and appreciate ideas from everyone.
-
-!!!
-
 ### CTO Responsibilities
 
 * Defining and communicating technical vision and stories; to vendors, to the media, to ourselves; thought-leadering
 * <!-- .element: class="fragment" data-fragment-index="1" --> Keeping up with competitors/market trends/eng and technology trends <!-- .element: class="fragment" data-fragment-index="1" -->
 * <!-- .element: class="fragment" data-fragment-index="2" --> Contributing to the high-level strategy/roadmap <!-- .element: class="fragment" data-fragment-index="2" -->
-* <!-- .element: class="fragment" data-fragment-index="3" --> Ensuring our team is building maintainable software (to the best of acceptable constraints) <!-- .element: class="fragment" data-fragment-index="3" -->
+* <!-- .element: class="fragment" data-fragment-index="3" --> Ensuring our team is building maintainable software <!-- .element: class="fragment" data-fragment-index="3" -->
 
-Note: And I try hard to do so without being in a vaccuum. I want you to give me your ideas and your feedback and tell me if you disagree with something. Let's argue about it (constructively). I work a lot with Aneesha. and Emre and Steve and many engineers. I come up with ideas and then try to get folks' feedback and convince myself and then others that it makes sense. Then we do it. My day-to-day varies a lot depending on whats going on. ... Enough about me...
+Note: And I try hard to do so without being in a vaccuum. I want you to give me your ideas and your feedback and tell me if you disagree with something. Let's argue about it (constructively). I work a lot with Aneesha. and Emre and Steve and many engineers. I come up with ideas and then try to get folks' feedback and convince myself and then others that it makes sense. Then we do it.
+
+!!!
+
+### Brandon CTO what do
+
+<img src="img/multitool.png" width="55%" height="55%"></img>
+
+Note: In practice, since I've become CTO -- at first I had a lot of random x-organizational work + little things, but then I had a streak of offsites: eng leads offsite, architect offsite, MF+juraj join offsite, zksummit, sdk team offsite, platform eng offsite, now this LT offsite+company offsite. The point really getting into strategy conversations with different teams, digging into issues that different folks are seeing. Plus at the same time, I'm working closely enough with zeko team, viable systems, and lambdaclass that I can observe how different folks work and the pros and cons of those styles. Now I want to act on some of these learnings over the next few months.
 
 !!!
 
@@ -95,17 +95,11 @@ Note: And I try hard to do so without being in a vaccuum. I want you to give me 
 * ~~Background on the CTO role~~
 * <!-- .element: class="fragment" data-fragment-index="1" --> Reflections on what we've built <!-- .element: class="fragment" data-fragment-index="1" -->
 
-!!!
-
-### Mina Ecosystem
-
-<img src="img/mina-ecosystem.png" width="55%" height="55%"></img>
-
-Note: It all started with O(1) Labs, but we've grown beyond one company. Mina Foundation, Zeko, Lambdaclass, Viable Systems, Protokit. We currently need to support others, and we'll work on helping soon.
+Note: But before we go into that, let's reflect!
 
 !!!
 
-### And we've built a lot of cool stuff
+### We've built a lot of cool stuff
 
 <img src="img/o1-collage.png" width="55%" height="55%"></img>
 
@@ -113,7 +107,7 @@ Note: It all started with O(1) Labs, but we've grown beyond one company. Mina Fo
 
 ### Snarky v1
 
-<img src="img/snarkyv1.png" width="55%" height="55%"></img>
+<img src="img/snarkyv1.png" width="85%" height="85%"></img>
 
 Note: Custom embedded DSL in OCaml for building zero knowledge proofs. Used exentensively within Mina Protocol codebase. Function abstraction and types.
 
@@ -145,7 +139,7 @@ Note: A data structure that tracks transaction applications. Instantiates a para
 
 ### o1js
 
-<img src="img/o1js.png" width="55%" height="55%"></img>
+<img src="img/o1js.png" width="85%" height="85%"></img>
 
 Note: o1js the most usable zk sdk (don't ask me, the community says so). Also the most powerful! Now with custom gates! Not just for zkApp smart contracts but for circuits too. Comes with a standard library with merklized structures, nullifiers. As Steve shared, it's faster now too.
 
@@ -161,11 +155,17 @@ Note: zkApp CLI to makes it easy to get started and deploy and work with zkApps.
 
 ### Testing tooling
 
-Note: Integration testing framework for the protocol, 
+<img src="img/precision.png" width="55%" height="55%"></img>
+
+Note: Integration testing framework for the protocol, nightly CI, lightnet (for o1js local testing)
 
 !!!
 
 ### Cost-efficient testing substrate
+
+<img src="img/cost-saving.png" width="55%" height="55%"></img>
+
+Note: Cloud infra that can run testnets cheap
 
 !!!
 
@@ -173,7 +173,7 @@ Note: Integration testing framework for the protocol,
 
 <img src="img/8bit-team.png" width="55%" height="55%"></img>
 
-Note: Our team is top class and we've built such great stuff! Juraj told me the other day: "Literally every idea we have of something that can go wrong or a bug, we always find an open GitHub issue for it."
+Note: Our team is top class and we've built such great stuff! Juraj told me the other day: "Literally every idea we have of something that can go wrong or a bug, we always find an open GitHub issue for it." Clap for yourselves
 
 !!!
 
@@ -188,7 +188,7 @@ Note: Our team is top class and we've built such great stuff! Juraj told me the 
 
 ### Engineering Values
 
-<img src="img/engineering-values.png" width="55%" height="55%"></img>
+<img src="img/engineering-values.png" width="75%" height="75%"></img>
 
 Note: Engineering values
 
@@ -201,7 +201,7 @@ Note: Engineering values
 * <!-- .element: class="fragment" data-fragment-index="2" --> We strive for excellence over perfection <!-- .element: class="fragment" data-fragment-index="2" -->
 * <!-- .element: class="fragment" data-fragment-index="3" --> We are humans first <!-- .element: class="fragment" data-fragment-index="3" -->
 
-Note: 1. Keep work well-defined, visible, using evidence, and sharing work quickly, keeping in mind the end-user as well as developers reading the code. 2. scope goes first, then speed, quality never suffers. High architecture and coding standards. Make sure we have a design and approach through RFCs first! Aggressively favor simplicity. Not easy. Simple. There's a difference. Easy leads to lazy complexity. We finish things. Really finish. Ship them. It's not done until it's in a usable product 3. It's okay to ask for help, to fail, and to take calculated risks given constraints on time. Growth mindset. Always be open to learning. Help your teammates. 4. Make spaces for voices, culture of execution and delivery AND HAVING FUN. ... So this is our ideal, how have we gotten closer to this...
+Note: 1. Keep work well-defined, visible, using evidence, and sharing work quickly, keeping in mind the end-user as well as developers reading the code. 2. scope goes first, then speed, quality never suffers. High architecture and coding standards. Make sure we have a design and approach through RFCs first! Aggressively favor simplicity. Not easy. Simple. There's a difference. We finish things. Really finish. Ship them. It's not done until it's in a usable product 3. It's okay to ask for help, to fail, and to take calculated risks given constraints on time. Growth mindset. Always be open to learning. Help your teammates. 4. Make spaces for voices, culture of execution and delivery AND HAVING FUN. ... So this is our ideal, how have we gotten closer to this...
 
 !!!
 
@@ -216,13 +216,31 @@ Note: 1. Keep work well-defined, visible, using evidence, and sharing work quick
 7. <!-- .element: class="fragment" data-fragment-index="6" --> Architects more mentoring <!-- .element: class="fragment" data-fragment-index="6" -->
 8. <!-- .element: class="fragment" data-fragment-index="7" --> Empowered to put things in place to do our job well <!-- .element: class="fragment" data-fragment-index="7" -->
 
-Note: (1) shoutout to crypto team, (3) shoutout to Deepthi with capturing data on berkeley discussions, (4) shoutout to the sdk team, (5) itn testing / sdk team / established a qa team ; reformated velocity to platform eng team, (6) retro/reflect often; ecdsa is a great example, (7) shoutout Matthew in crypto space, (8) new lead roles and spaces for easier x-team collaboration at the eng level shoutout steven and gregor + devrel guardian rotation + tests to nightlies
+Note: (1) shoutout to crypto team, (3) shoutout to Deepthi with capturing data on berkeley discussions, (4) shoutout to the sdk team, (5) itn testing / sdk team / established a qa team ; reformated velocity to platform eng team, (6) retro/reflect often; ecdsa is a great example, (7) shoutout Matthew in crypto space, (8) new lead roles and spaces for easier x-team collaboration at the eng level shoutout steven and gregor + devrel guardian rotation + tests to nightlies 
 
 !!!
 
-### What we want to go closer to the ideal?
+### Wow so much!
 
-Note: How do we keep getting closer to the end state? We've made this great progress, but there's more to do! We'll keep iterating on the people process space led by Aneesha. I want to dig deeper into the hands-on-the-keyboard part of the process. The software we write and the systems in place to push us to write it better.
+Led by Aneesha's work on improving engineering culture and execution and the EMs!
+
+Note: Clap for Aneesha and the EMs
+
+!!!
+
+### And more
+
+<img src="img/engineering-values.png" width="55%" height="55%"></img>
+
+Note: We've made this great progress, but there's more to do! And Aneesha and our team will continue! I want to dig deeper into the hands-on-the-keyboard part of the process. And contribute myself especially through the software we write and the systems in place to push us to write it better.
+
+!!!
+
+### Acting on the learnings
+
+<img src="img/multitool.png" width="55%" height="55%"></img>
+
+Note: And lots of ideas came out of synthesis from observations of how we work + some of the conversations I've had remotely and in person with folks over the last few months. ...
 
 !!!
 
@@ -230,7 +248,7 @@ Note: How do we keep getting closer to the end state? We've made this great prog
 
 <img src="img/write-software-culture.png" width="55%" height="55%"></img>
 
-Note:
+Note: I'm going to share a few of the most clear and relevant for the full company syntheses
 
 !!!
 
@@ -238,7 +256,7 @@ Note:
 
 <img src="img/hats1.png" width="55%" height="55%"></img>
 
-Note: Problem: We have a lean team. Sometimes we'll have a little extra high priority work on teams with a little bit fewer staff that need help. Sometimes we'll have projects where work crosses teams. 
+Note: Problem: We have a lean organization. Sometimes we'll have a little extra high priority work on teams with a little bit fewer staff that need help. Sometimes we'll have projects where work crosses teams. 
 
 !!!
 
@@ -268,29 +286,46 @@ Note: Solution: Wear your hat! Continue being proactive, jumping in where you se
 
 ### Problem
 
-Note: You know when you've rushed to put something together and it struggles.
+<img src="img/house-fall.png" width="55%" height="55%"></img>
+
+Note: You know when you've rushed to put something together and it struggles to stay up. I'm using this metaphor so the non-engineers can follow along, but all of the software engineers know what I'm takling about.
 
 !!!
 
 ### Reality
 
-Note: In many places in our codebases across the different project domains, we've made this mistake in different ways. We've endured years worth of technical debt from tiny shortcuts and underinvested upfront thinking. Pushing this investment to the front improves our producitivity, readability of the code, interest in our work, happiness, ability to onboard our future selves and colleagues, etc.
+<img src="img/slide.png" width="55%" height="55%"></img>
+
+Note: It's no secret that in many places in our codebases across the different project domains, we've made this mistake. In fact, I can point to more than one example of where we've endured years worth of technical debt from tiny shortcuts and underinvested upfront thinking. Pushing this investment to the front improves our producitivity, readability of the code, interest in our work, happiness, ability to onboard our future selves and colleagues, etc.
 
 !!!
 
-### Developer Experience?
+### Is this at odds with being product-first?
 
-Note: I don't mean the DevX that Steve talked about -- we've been focused on that in our products. I mean our own developer experience. We are developers and we experience our own code and the code of our colleagues!
+<img src="img/no.png" width="55%" height="55%"></img>
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+!!!
+
+### This is product first
+
+<img src="img/product-first.png" width="55%" height="55%"></img>
+
+Note: You need this to be iterative and adapt to new information quickly. We need to build something that we can change. We can only change if we have something we understand, something broken into pieces, something that is well-tested.
 
 !!!
 
 ### RFCs help!
 
-Note: RFCs help push us to invest in upfront thinking, but as is, it doesn't really push us to write our software in any particular way. We're missing a mechanism for highlighting part of the developer experience, and a mechanism for realizing this in a unified way across our engineering organization.
+<img src="img/rfcs-help.png" width="55%" height="55%"></img>
+
+Note: RFCs help push us to invest in upfront thinking, but as is, it doesn't really push us to write our software in any particular way. We're missing a mechanism for highlighting part of the developer experience, and a mechanism for realizing this in a unified way across our engineering organization...
 
 !!!
 
 ### Language-driven design
+
+<img src="img/language-driven.png" width="55%" height="55%"></img>
 
 Note: Myself and the architects believe that the mechanism that is most core to our culture to realize a unified devx system is Language-driven design thinking. Because when done properly it emits clear, readable, maintainable, and consistent software that is easy to test. I'll illustrate through examples: There are a few examples of powerful little languages, or DSLs, we've built for ourselves over the years, but rather than focus on those existing ones: I want to highlight three places across three codebases across three languages that could dramatically improve from this kind of thinking
 
@@ -298,59 +333,84 @@ Note: Myself and the architects believe that the mechanism that is most core to 
 
 ### Blockchain Builder
 
-Note: Problem: We struggle to represent blocks in a blockchain everytime we want to write a test. We never built a system that can cleanly represent such states. As a consequence, we naturally push tests that should be unit tests to the integration test layer since we have a nice DSL to use there and thus miss many edge cases due to the expensive nature of integration tests. We never should have written even our first feature that depends on blockchain state without building this system from the start.
+<img src="img/blockchain-builder.png" width="55%" height="55%"></img>
+
+Note: Problem: We struggle to represent blocks in a blockchain everytime we want to write a test. We never built a system that can cleanly represent such states. As a consequence, we naturally push tests that should be unit tests to the integration test layer because in order to build a blockchain, we need to actually run the whole Mina. This means we also struggle to reach edge cases due to the expensive nature of creating these blocks in integration tests leading to testing few cases.
 
 !!!
 
 ### Blockchain Builder DSL
 
 ```ocaml
-let block1 = [ edge_case_txn1 ; payment2; zkapp3 ] in
-let block2 = [ edge_case_txn1 ; payment2; zkapp3 ] in
+let chain_shape =
+  ( exists_blocks 10 |> such_that any_txns
+  , exists_block |> such_that (*...*)
+  , ( exists_blocks 5
+    , exists_blocks 5 ) )
+in
 
-let chain = block1 + block2
+let generator = solve chain_shape in
+(* unit test with this blockchain generator *)
 ```
 
-Note: Now we can represent blocks, put them in a chain, reuse edge case blocks, and create scenarios in unit tests
+Note: Now we can represent shapes of chains with specific properties that we care about, and unit test with this generator.
 
 !!!
 
 ### Kimchi proving logic 
 
-Note: Problem: There are six distinct operations in the proving logic, but our implementation is just a wall of effectful code. This makes it hard to test and hard to reconfigure the system for example between pickles and non-pickles
+<img src="img/kimchi-prover.png" width="55%" height="55%"></img>
+
+Note: Problem: There are distinct operations in the proving logic which are the same for any kimchi, but our implementation is just inlines it all. This makes it hard to reconfigure the system for different bakcends (OP zkVM vs Mina for example). Plus our tests test both the bakcend and the proof logic simultaneously.
 
 !!!
 
 ### Kimchi proving logic
 
 ```rust
-fn challenge()
-fn witness()
-fn fft()
+trait Prover {
+  fn compute_and_absorb_commitment()
+  fn squeeze_challenge()
+  // ...
+  fn compute_evaluation_proof()
 
-fn prover1() { challenge(); fft(); fft() }
+  // Works for any instantiation of the prover!
+  fn prove() -> /*...*/ {
+    for (col in vk) { /*..*/ }
+    for (col in witness) { /*..*/ }
+    // ...
+  }
+}
 ```
 
-Note: Now testing is easier. We can consume this same DSL from pickles and inherit the security properties of kimchi.
+Note: Now we implement a trait where we can choose IPA vs kzg, poseidon vs keccak sponge, etc. This means our prover is implemented once and only once. We can test separately. We can trivially add new backends with assurance that our code holds.
 
 !!!
 
 ### Pickles -> ZkProgram
 
-Note: Problem: Pickles is one big ball of spaghetti, you can only call it from one place. Not only does this make understanding and testing the pieces of the system difficult, but it becomes hard and LIMITING in the ways that we can express our recursive proof API on the o1js side. o1js suffers because Pickles wasn't language-driven.
+<img src="img/pickle-to-program.png" width="55%" height="55%"></img>
+
+Note: Problem: Pickles is one big ball of spaghetti, you can only call it all at once. It keeps track of its own keys and constraints and proving. Not only does this make understanding and testing the pieces of the system difficult, but it becomes hard and LIMITING in the ways that we can express our recursive proof API on the o1js side. All because we can't decouple laying out the constraints from proving them.
 
 !!!
 
 ### Pickles -> ZkProgram
 
 ```typescript
-const addOne = (x: Field) => x.add(1)
-const multiplyTwo = (x: Field) => x.add(x)
+// program for any backend!
+const program = ZkProgram(/*...*/);
 
-const proof = recur("calculator", addOne, multiplyTwo)
+const [pk, vk] = program.compile();
+
+return WasmKimchi.prove(
+  program.sell(secretCode)
+);
+// or NativeKimchi.prove
+// or O1cloud.prove
 ```
 
-Note: we can reuse branches of proofs easily. we can test pieces. We can assemble them safely on the o1js side to make a more powerful and reusable interface for our end-developers. We can TODO gregor
+Note: By breaking pickles into specific clear steps on the backend, we empower the o1js sdk with new capabilities. We don't need to reach into the pickles code to add features. We can cache proving/verification keys by touching them here. We can call kimchi to prove for us either through wasm in the browser, native if we're running this o1js code from nodejs or o1cloud if in the cloud.
 
 !!!
 
@@ -370,11 +430,15 @@ Note: we can reuse branches of proofs easily. we can test pieces. We can assembl
 
 ### Brandon Actions
 
+<img src="img/buttons1.png" width="55%" height="55%"></img>
+
 Note: We'll continue experimenting on different teams, RFCing things and asking the right questions in the RFC template, and automating the shit out of everything possible. Over the next few months, I intend on making time to personally push this. That means lots of collaboration with Aneesha + working with teams, iterating on the RFCs, and helping build some automations wearing my platform engineering team hat!
 
 !!!
 
 ### Brandon Actions
+
+<img src="img/buttons2.png" width="55%" height="55%"></img>
 
 Note: I want to help guide us to making software better. I know a lot of you have ideas of what you want to change. Please send me ideas. And the best way is to talk to me. And the best way to talk to me, is to talk to me this week or next week in person (but we can also chat remote if we don't find time). What can make your time building more "fun". Tell me!
 
