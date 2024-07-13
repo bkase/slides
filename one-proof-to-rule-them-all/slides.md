@@ -146,7 +146,7 @@ Note: We had a successful L1. No downtime. No emergencies. Totally working. Stro
 
 !!!
 
-## Mainnet Berkeley upgrade!
+### Mainnet Berkeley upgrade!
 
 <img src="img/graduate.png" width="60%" height="60%" />
 
@@ -194,8 +194,7 @@ Note: I'm not good at tooting my horn, but this is something that we're really p
 
 ```typescript
 const AddOne = ZkProgram({
-  name: "add-one",
-  publicInput: Field,
+  publicOutput: Field,
   //...
 ```
 
@@ -208,8 +207,8 @@ const AddOne = ZkProgram({
     baseCase: {
       privateInputs: [],
 
-      async method(publicInput: Field) {
-        publicInput.assertEquals(Field(0));
+      method() {
+        return Field(0);
       },
     },
 ```
@@ -222,13 +221,11 @@ const AddOne = ZkProgram({
     step: {
       privateInputs: [SelfProof],
 
-      async method(
-        publicInput: Field,
-        pi: SelfProof<Field, void>
+      method(
+        pi: SelfProof<undefined, Field>
       ) {
         pi.verify();
-        pi.publicInput.add(1)
-          .assertEquals(publicInput);
+        return pi.publicInput.add(1);
       },
     },
   },
