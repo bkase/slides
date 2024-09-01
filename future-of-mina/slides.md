@@ -13,7 +13,7 @@ Note: I'm brandon founding engineer & ceo at o1labs
 
 <img src="img/prelude.png" width="60%" height="60%" />
 
-Note: SNEAK PREVIEW. This thinking actively being developed. Our story is told in the style of a childrens story book illustration of stranger things -- not lord of rings, sorry
+Note: SNEAK PREVIEW. This thinking actively being developed. Our story is told in the style of a childrens story book illustration of stranger things
 
 !!!
 
@@ -68,16 +68,27 @@ Note: By leveraging zkps, we can create applications that ensure data authentici
 
 ### Program with cryptography
 
+<img src="img/mina.png" width="60%" height="60%" />
+
 Note: Mina pioneered the application of zk proofs in its protocol but also in an easy to use SDK. But there are a lot of ways to work with programmable cryptography these days. They all contribute to this new httpz internet.
 
 !!!
 
 ### Just-in-time internet
 
-TODO: Screenshot of 0xparc article
-TODO: More explanation of JIT internet
+<img src="img/article.png" width="60%" height="60%" />
 
-Note: Independantly of our work exploring httpz, 0xPARC recently published an article on using programmable cryptography in a new just-in-time internet thatis ephemerally powered by zk
+Note: Independantly of our work exploring httpz, 0xPARC recently published an article on using programmable cryptography in a new just-in-time internet thatis ephemerally powered by zk.
+
+!!!
+
+### Just-in-time internet (0xPARC)
+
+* Hallucinate servers for running computation offchain
+* <!-- .element: class="fragment" data-fragment-index="1" --> Adapt to any cryptographic data <!-- .element: class="fragment" data-fragment-index="1" -->
+* <!-- .element: class="fragment" data-fragment-index="2" --> Examples: Recommendations, Social networks, Notifications of diseases <!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note: Essentially, you can hallucinated. Discover personalized recommendations for a product, a movie, a job, or even a date with a personalized cryptographic agent that is constantly searching on your behalf, without your data ever leaving your computer. Spin up a new, virtual social media platform "on the fly" for a community you're in, that hooks into all of your data from other social media platforms, without needing to run a server yourself or rely on any centralized intermediary to do so. Automatically get notified that you are at risk of some disease / medical outcome, without needing to share your medical data with anyone.
 
 !!!
 
@@ -88,6 +99,8 @@ Note: But, there's something missing here!
 !!!
 
 ### Mina -- The Protocol
+
+<img src="img/mina.png" width="60%" height="60%" />
 
 Note: the actual protocol. A decentralized censorship-resistant platform by which these proofs can be accessed and built-up-upon. We still have some work to do, but Mina Protocol is the way to get there. Mina is on track to be the purest form of such an internet. 
 
